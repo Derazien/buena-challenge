@@ -1,0 +1,142 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type CashFlow {
+  amount: Float!
+  category: String!
+  createdAt: DateTime!
+  date: DateTime!
+  id: Int!
+  note: String
+  property: Property!
+  propertyId: Int!
+  type: String!
+  updatedAt: DateTime!
+}
+
+input CreatePropertyInput {
+  address: String!
+  city: String!
+  state: String!
+  zipCode: String!
+}
+
+type DashboardStats {
+  leaseStats: LeaseStats!
+  monthlyIncome: MonthlyIncomeStats!
+  ticketStats: TicketStats!
+  totalProperties: Int!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Lease {
+  createdAt: DateTime!
+  endDate: DateTime!
+  id: Int!
+  isActive: Boolean!
+  monthlyRent: Float!
+  property: Property!
+  propertyId: Int!
+  startDate: DateTime!
+  tenantEmail: String
+  tenantName: String!
+  tenantPhone: String
+  updatedAt: DateTime!
+}
+
+type LeaseStats {
+  totalCount: Int!
+  upcomingRenewals: [UpcomingRenewal!]!
+}
+
+type MonthlyIncome {
+  expenses: Float!
+  income: Float!
+  month: String!
+  net: Float!
+}
+
+type MonthlyIncomeStats {
+  currentExpenses: Float!
+  currentIncome: Float!
+  currentNet: Float!
+  monthlyChange: Float!
+  monthlyData: [MonthlyIncome!]!
+}
+
+type Mutation {
+  createProperty(createPropertyInput: CreatePropertyInput!): Property!
+  removeProperty(id: Int!): Property!
+  updateProperty(updatePropertyInput: UpdatePropertyInput!): Property!
+}
+
+type OpenTicket {
+  createdAt: String!
+  description: String!
+  id: Int!
+  priority: String!
+  propertyAddress: String!
+  propertyId: Int!
+  status: String!
+  title: String!
+}
+
+type Property {
+  address: String!
+  cashFlows: [CashFlow!]
+  city: String!
+  createdAt: DateTime!
+  id: Int!
+  leases: [Lease!]
+  state: String!
+  tickets: [Ticket!]
+  updatedAt: DateTime!
+  zipCode: String!
+}
+
+type Query {
+  dashboardStats: DashboardStats!
+  properties: [Property!]!
+  property(id: Int!): Property!
+}
+
+type Ticket {
+  createdAt: DateTime!
+  description: String!
+  id: Int!
+  priority: String!
+  property: Property!
+  propertyId: Int!
+  status: String!
+  title: String!
+  updatedAt: DateTime!
+}
+
+type TicketStats {
+  openTickets: [OpenTicket!]!
+  totalCount: Int!
+}
+
+type UpcomingRenewal {
+  endDate: String!
+  id: Int!
+  isActive: Boolean!
+  monthlyRent: Float!
+  propertyAddress: String!
+  propertyId: Int!
+  startDate: String!
+  tenantName: String!
+}
+
+input UpdatePropertyInput {
+  address: String
+  city: String
+  id: Int!
+  state: String
+  zipCode: String
+}
