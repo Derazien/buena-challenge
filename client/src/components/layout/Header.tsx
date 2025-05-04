@@ -19,16 +19,17 @@ const Header = () => {
                             <Image
                                 src={theme === 'dark' ? "/logo-dark.svg" : "/logo.svg"}
                                 alt="Buena Logo"
-                                width={32}
-                                height={32}
-                                className="mr-2"
+                                width={40}
+                                height={40}
+                                className="mr-3"
+                                priority
                                 onError={(e) => {
                                     const target = e.target as HTMLImageElement;
                                     target.onerror = null;
                                     target.style.display = 'none';
                                 }}
                             />
-                            <span className="font-bold inline-block text-foreground">Buena</span>
+                            <span className="font-bold text-xl inline-block text-foreground">Buena</span>
                         </div>
                     </Link>
                     <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">

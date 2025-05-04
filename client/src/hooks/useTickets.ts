@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { useQuery, useMutation, ApolloError } from '@apollo/client';
-import { GET_TICKETS, CREATE_TICKET, UPDATE_TICKET, DELETE_TICKET } from '@/graphql/queries';
+import { useQuery, useMutation, useSubscription, ApolloError } from '@apollo/client';
+import { GET_TICKETS, CREATE_TICKET, UPDATE_TICKET, DELETE_TICKET, TICKET_UPDATED_SUBSCRIPTION } from '@/graphql/queries';
 import { Ticket, TicketFormInput, TicketFilterOptions, TicketStatus } from '@/types/api/tickets.types';
 import { useConfetti } from './useConfetti';
 
@@ -26,6 +26,24 @@ export function useTickets() {
         },
         fetchPolicy: 'cache-and-network',
         errorPolicy: 'all'
+    });
+
+    // Subscribe to ticket updates
+    const { data: subscriptionData } = useSubscription(TICKET_UPDATED_SUBSCRIPTION, {
+        onData: ({ data }) => {
+            if (data?.data?.ticketUpdated) {
+                console.log('Subscription received updated ticket:', data.data.ticketUpdated);
+                // The Apollo cache will be automatically updated thanks to our typePolicies in apollo-client.ts
+
+                // Trigger confetti if the updated ticket was marked as resolved
+                if (data.data.ticketUpdated.status.toLowerCase() === 'resolved') {
+                    triggerConfetti();
+                }
+            }
+        },
+        onError: (error) => {
+            console.error('Subscription error:', error);
+        }
     });
 
     const [createTicketMutation] = useMutation(CREATE_TICKET, {
@@ -157,6 +175,7 @@ export function useTickets() {
         updateTicket,
         deleteTicket,
         updateTicketStatus,
-        isSubmitting
+        isSubmitting,
+        lastUpdatedTicket: subscriptionData?.ticketUpdated
     };
 }

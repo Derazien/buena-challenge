@@ -9,9 +9,9 @@ import AnimatedText from '@/components/common/AnimatedText';
 
 interface TicketDetailProps {
     ticket: Ticket;
-    onEdit: () => void;
+    onEdit?: () => void;
     onStatusChange: (status: TicketStatus) => void;
-    onBack: () => void;
+    onClose: () => void;
 }
 
 /**
@@ -36,14 +36,13 @@ const getPriorityVariant = (priority: string) => {
  */
 const getStatusVariant = (status: string) => {
     switch (status.toLowerCase()) {
-        case 'open':
-            return 'danger';
-        case 'in_progress':
-            return 'warning';
-        case 'pending':
+        case 'in_progress_by_ai':
+            return 'destructive';
+        case 'under_review':
             return 'info';
-        case 'resolved':
-        case 'closed':
+        case 'pending_approval':
+            return 'secondary';
+        case 'completed':
             return 'success';
         default:
             return 'default';
@@ -57,7 +56,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
     ticket,
     onEdit,
     onStatusChange,
-    onBack
+    onClose
 }) => {
     const dateOptions: Intl.DateTimeFormatOptions = {
         year: 'numeric',
@@ -79,7 +78,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
         <Card className="overflow-hidden pb-6">
             <div className="bg-gradient-to-r from-primary/10 to-background p-6 border-b border-border mb-6">
                 <div className="mb-4 flex justify-between items-center">
-                    <button onClick={onBack} className="text-primary hover:text-primary/80 transition-colors flex items-center">
+                    <button onClick={onClose} className="text-primary hover:text-primary/80 transition-colors flex items-center">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-5 w-5 mr-1"
@@ -285,10 +284,10 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
                                     value={ticket.status}
                                     onChange={(e) => onStatusChange(e.target.value as TicketStatus)}
                                 >
-                                    <option value="open">Open</option>
-                                    <option value="in_progress">In Progress</option>
-                                    <option value="pending">Pending</option>
-                                    <option value="resolved">Resolved</option>
+                                    <option value="in_progress_by_ai">In Progress by AI</option>
+                                    <option value="under_review">Under Review</option>
+                                    <option value="pending_approval">Pending Approval</option>
+                                    <option value="completed">Completed</option>
                                 </select>
                             </Button>
                         </div>

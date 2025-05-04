@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import Providers from "./providers";
 import NotificationContainer from "@/components/notifications/NotificationContainer";
 
@@ -15,6 +14,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Buena",
   description: "A powerful platform for property owners to manage and invest in their properties without middle-men.",
+  icons: {
+    icon: '/favicon.svg',
+  }
 };
 
 export default function RootLayout({
@@ -24,6 +26,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} h-full`} suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+      </head>
       <body className="min-h-screen bg-background font-sans antialiased" suppressHydrationWarning>
         <Providers>
           <div className="relative flex min-h-screen flex-col">
@@ -33,7 +38,6 @@ export default function RootLayout({
                 {children}
               </div>
             </main>
-            <Footer />
           </div>
           <NotificationContainer />
         </Providers>

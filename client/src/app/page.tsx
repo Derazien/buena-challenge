@@ -13,6 +13,7 @@ import Input from "@/components/ui/Input";
 import ParallaxBackground from '@/components/common/ParallaxBackground';
 import ScrollAnimation from '@/components/common/ScrollAnimation';
 import AnimatedText from '@/components/common/AnimatedText';
+import Image from 'next/image';
 
 // Dynamically import the revenue chart to avoid SSR issues
 const RevenueLineChart = dynamic(() => import('@/components/charts/RevenueLineChart'), {
@@ -88,6 +89,28 @@ export default function Dashboard() {
             <RevenueLineChart />
           </Card>
         </ScrollAnimation>
+      </div>
+
+      <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-16">
+        <div className="mb-6 flex items-center">
+          <Image
+            src="/logo.svg"
+            alt="Buena Logo"
+            width={60}
+            height={60}
+            className="mr-4"
+            priority
+          />
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
+              Buena
+            </span>
+          </h1>
+        </div>
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">Property Management Simplified</h2>
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+          A powerful platform for property owners to manage and invest in their properties without middle-men.
+        </p>
       </div>
     </div>
   );

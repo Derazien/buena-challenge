@@ -235,3 +235,19 @@ export const DELETE_TICKET = gql`
     }
   }
 `;
+
+export const TICKET_UPDATED_SUBSCRIPTION = gql`
+  subscription TicketUpdated {
+    ticketUpdated {
+      id
+      title
+      description
+      priority
+      status
+      createdAt
+      updatedAt
+      propertyId
+      propertyAddress
+    }
+  }
+`;

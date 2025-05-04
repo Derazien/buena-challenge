@@ -14,7 +14,7 @@ import {
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import KanbanColumn from './KanbanColumn';
 import { useTickets } from '@/hooks/useTickets';
-import { Ticket, TicketPriority, TicketStatus } from '@/types/api/tickets.types';
+import { Ticket, TicketStatus } from '@/types/api/tickets.types';
 import { useNotification } from '@/components/notifications/NotificationContext';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ErrorDisplay from '@/components/common/ErrorDisplay';
@@ -27,33 +27,25 @@ import Button from '@/components/ui/Button';
 
 type KanbanBoardProps = {
   onViewTicket: (ticket: Ticket) => void;
-  onEditTicket: (ticket: Ticket) => void;
 };
 
 // Sort function for tickets based on criteria
 const sortTickets = (tickets: Ticket[]) => {
   return [...tickets].sort((a, b) => {
-    // First sort by status (OPEN first, then IN_PROGRESS, then RESOLVED)
-    const statusOrder = { OPEN: 0, IN_PROGRESS: 1, RESOLVED: 2 };
-    const aStatus = statusOrder[a.status as keyof typeof statusOrder] || 3;
-    const bStatus = statusOrder[b.status as keyof typeof statusOrder] || 3;
-
-    if (aStatus !== bStatus) {
-      return aStatus - bStatus;
-    }
-
-    // Then sort by createdAt date (newest first)
+    // Sort by createdAt date (newest first)
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 };
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, onEditTicket }) => {
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket }) => {
   const { tickets, loading, error, updateTicket } = useTickets();
   const { addNotification } = useNotification();
 
-  const [urgentTickets, setUrgentTickets] = useState<Ticket[]>([]);
-  const [highTickets, setHighTickets] = useState<Ticket[]>([]);
-  const [normalTickets, setNormalTickets] = useState<Ticket[]>([]);
+  const [inProgressByAiTickets, setInProgressByAiTickets] = useState<Ticket[]>([]);
+  const [underReviewTickets, setUnderReviewTickets] = useState<Ticket[]>([]);
+  const [pendingApprovalTickets, setPendingApprovalTickets] = useState<Ticket[]>([]);
+  const [completedTickets, setCompletedTickets] = useState<Ticket[]>([]);
+
   const [activeId, setActiveId] = useState<string | null>(null);
   const [activeColumn, setActiveColumn] = useState<string | null>(null);
   const [draggedOverColumn, setDraggedOverColumn] = useState<string | null>(null);
@@ -68,15 +60,13 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, onEditTicket })
     })
   );
 
-  // Organize tickets by priority
+  // Organize tickets by status
   useEffect(() => {
     if (tickets) {
-      setUrgentTickets(tickets.filter(ticket => ticket.priority.toLowerCase() === 'urgent'));
-      setHighTickets(tickets.filter(ticket => ticket.priority.toLowerCase() === 'high'));
-      setNormalTickets(tickets.filter(ticket =>
-        ticket.priority.toLowerCase() !== 'urgent' &&
-        ticket.priority.toLowerCase() !== 'high'
-      ));
+      setInProgressByAiTickets(tickets.filter(ticket => ticket.status.toLowerCase() === 'in_progress_by_ai'));
+      setUnderReviewTickets(tickets.filter(ticket => ticket.status.toLowerCase() === 'under_review'));
+      setPendingApprovalTickets(tickets.filter(ticket => ticket.status.toLowerCase() === 'pending_approval'));
+      setCompletedTickets(tickets.filter(ticket => ticket.status.toLowerCase() === 'completed'));
     }
   }, [tickets]);
 
@@ -87,14 +77,16 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, onEditTicket })
     if (tickets) {
       try {
         // Sort tickets in each column
-        const sortedUrgent = sortTickets(urgentTickets);
-        const sortedHigh = sortTickets(highTickets);
-        const sortedNormal = sortTickets(normalTickets);
+        const sortedInProgressByAi = sortTickets(inProgressByAiTickets);
+        const sortedUnderReview = sortTickets(underReviewTickets);
+        const sortedPendingApproval = sortTickets(pendingApprovalTickets);
+        const sortedCompleted = sortTickets(completedTickets);
 
         // Update state
-        setUrgentTickets(sortedUrgent);
-        setHighTickets(sortedHigh);
-        setNormalTickets(sortedNormal);
+        setInProgressByAiTickets(sortedInProgressByAi);
+        setUnderReviewTickets(sortedUnderReview);
+        setPendingApprovalTickets(sortedPendingApproval);
+        setCompletedTickets(sortedCompleted);
 
         addNotification({
           type: 'success',
@@ -120,12 +112,15 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, onEditTicket })
     const ticket = tickets.find(t => t.id.toString() === active.id.toString());
     if (ticket) {
       setActiveTicket(ticket);
-      if (ticket.priority.toLowerCase() === 'urgent') {
-        setActiveColumn('urgent');
-      } else if (ticket.priority.toLowerCase() === 'high') {
-        setActiveColumn('high');
-      } else {
-        setActiveColumn('normal');
+      // Determine which column the ticket belongs to based on status
+      if (ticket.status.toLowerCase() === 'in_progress_by_ai') {
+        setActiveColumn('in_progress_by_ai');
+      } else if (ticket.status.toLowerCase() === 'under_review') {
+        setActiveColumn('under_review');
+      } else if (ticket.status.toLowerCase() === 'pending_approval') {
+        setActiveColumn('pending_approval');
+      } else if (ticket.status.toLowerCase() === 'completed') {
+        setActiveColumn('completed');
       }
     }
   };
@@ -139,7 +134,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, onEditTicket })
 
     // Check if over.id is a column identifier directly
     if (typeof over.id === 'string' && over.id.startsWith('droppable-')) {
-      // Extract the column name from over.id (e.g., "droppable-urgent" -> "urgent")
+      // Extract the column name from over.id (e.g., "droppable-in_progress" -> "in_progress")
       const column = over.id.replace('droppable-', '');
       setDraggedOverColumn(column);
       return;
@@ -183,113 +178,127 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, onEditTicket })
       }
     }
 
-    let newPriority: TicketPriority;
+    let newStatus: TicketStatus;
 
     switch (targetColumn) {
-      case 'urgent':
-        newPriority = 'URGENT' as TicketPriority;
+      case 'in_progress_by_ai':
+        newStatus = 'in_progress_by_ai' as TicketStatus;
         break;
-      case 'high':
-        newPriority = 'HIGH' as TicketPriority;
+      case 'under_review':
+        newStatus = 'under_review' as TicketStatus;
         break;
-      case 'normal':
-        newPriority = 'MEDIUM' as TicketPriority;
+      case 'pending_approval':
+        newStatus = 'pending_approval' as TicketStatus;
+        break;
+      case 'completed':
+        newStatus = 'completed' as TicketStatus;
         break;
       default:
         return;
     }
 
     // Optimistic UI update
-    updateLocalTickets(finalActiveTicket.id, newPriority);
+    updateLocalTickets(finalActiveTicket.id, newStatus);
 
     try {
       await updateTicket({
         id: finalActiveTicket.id,
-        priority: newPriority
+        status: newStatus
       });
 
       addNotification({
         type: 'success',
-        message: `Ticket priority updated to ${newPriority}`
+        message: `Ticket status updated to ${newStatus.replace(/_/g, ' ')}`
       });
     } catch (error) {
-      console.error('Error updating ticket priority:', error);
+      console.error('Error updating ticket status:', error);
       addNotification({
         type: 'error',
-        message: 'Failed to update ticket priority'
+        message: 'Failed to update ticket status'
       });
 
       // Revert the local state if the API call fails
       if (tickets) {
-        setUrgentTickets(tickets.filter(ticket => ticket.priority.toLowerCase() === 'urgent'));
-        setHighTickets(tickets.filter(ticket => ticket.priority.toLowerCase() === 'high'));
-        setNormalTickets(tickets.filter(ticket =>
-          ticket.priority.toLowerCase() !== 'urgent' &&
-          ticket.priority.toLowerCase() !== 'high'
-        ));
+        refreshTicketsByStatus();
       }
     }
   };
 
+  // Refresh the tickets in each status column
+  const refreshTicketsByStatus = () => {
+    if (!tickets) return;
+
+    setInProgressByAiTickets(tickets.filter(ticket => ticket.status.toLowerCase() === 'in_progress_by_ai'));
+    setUnderReviewTickets(tickets.filter(ticket => ticket.status.toLowerCase() === 'under_review'));
+    setPendingApprovalTickets(tickets.filter(ticket => ticket.status.toLowerCase() === 'pending_approval'));
+    setCompletedTickets(tickets.filter(ticket => ticket.status.toLowerCase() === 'completed'));
+  };
+
   // Update local state before API call for immediate UI feedback
-  const updateLocalTickets = (ticketId: number, newPriority: TicketPriority) => {
+  const updateLocalTickets = (ticketId: number, newStatus: TicketStatus) => {
     // Find the ticket in all columns
-    const ticket = [...urgentTickets, ...highTickets, ...normalTickets].find(t => t.id === ticketId);
+    const ticket = [...inProgressByAiTickets, ...underReviewTickets, ...pendingApprovalTickets, ...completedTickets]
+      .find(t => t.id === ticketId);
+
     if (!ticket) return;
 
-    // Create a copy with updated priority
-    const updatedTicket = { ...ticket, priority: newPriority };
+    // Create a copy with updated status
+    const updatedTicket = { ...ticket, status: newStatus };
 
     // Remove from all columns
-    setUrgentTickets(prev => prev.filter(t => t.id !== ticketId));
-    setHighTickets(prev => prev.filter(t => t.id !== ticketId));
-    setNormalTickets(prev => prev.filter(t => t.id !== ticketId));
+    setInProgressByAiTickets(prev => prev.filter(t => t.id !== ticketId));
+    setUnderReviewTickets(prev => prev.filter(t => t.id !== ticketId));
+    setPendingApprovalTickets(prev => prev.filter(t => t.id !== ticketId));
+    setCompletedTickets(prev => prev.filter(t => t.id !== ticketId));
 
     // Add to the correct column
-    if (newPriority === 'URGENT') {
-      setUrgentTickets(prev => [...prev, updatedTicket]);
-    } else if (newPriority === 'HIGH') {
-      setHighTickets(prev => [...prev, updatedTicket]);
-    } else if (newPriority === 'MEDIUM') {
-      setNormalTickets(prev => [...prev, updatedTicket]);
+    switch (newStatus) {
+      case 'in_progress_by_ai':
+        setInProgressByAiTickets(prev => [...prev, updatedTicket]);
+        break;
+      case 'under_review':
+        setUnderReviewTickets(prev => [...prev, updatedTicket]);
+        break;
+      case 'pending_approval':
+        setPendingApprovalTickets(prev => [...prev, updatedTicket]);
+        break;
+      case 'completed':
+        setCompletedTickets(prev => [...prev, updatedTicket]);
+        break;
     }
   };
 
   const findAncestorWithDataColumn = (id: string | number): HTMLElement | null => {
-    // Try to get element by ID first
-    let element = document.getElementById(id.toString());
-
-    // If not found by ID, try querySelector on data-column attribute
-    if (!element && typeof id === 'string' && id.startsWith('droppable-')) {
-      const columnId = id.replace('droppable-', '');
-      element = document.querySelector(`[data-column="${columnId}"]`);
-      return element as HTMLElement;
-    }
-
+    const element = document.getElementById(`sortable-${id}`);
     if (!element) return null;
 
-    // Traverse up the DOM tree
-    let current: HTMLElement | null = element;
-    while (current) {
-      if (current.hasAttribute('data-column')) {
-        return current;
-      }
-      current = current.parentElement;
+    let current = element;
+    while (current && !current.getAttribute('data-column')) {
+      const parent = current.parentElement;
+      if (!parent) break;
+      current = parent;
     }
 
-    return null;
+    return current.getAttribute('data-column') ? current : null;
   };
 
+  // Handle status change function
   const handleStatusChange = async (ticketId: number, newStatus: string) => {
+    const ticket = tickets.find(t => t.id === ticketId);
+    if (!ticket) return;
+
     try {
       await updateTicket({
         id: ticketId,
         status: newStatus as TicketStatus
       });
 
+      // Update the local state
+      refreshTicketsByStatus();
+
       addNotification({
         type: 'success',
-        message: `Ticket status updated to ${newStatus}`
+        message: `Ticket status updated to ${newStatus.replace(/_/g, ' ')}`
       });
     } catch (error) {
       console.error('Error updating ticket status:', error);
@@ -308,6 +317,28 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, onEditTicket })
     return <ErrorDisplay error={error} onRetry={() => window.location.reload()} />;
   }
 
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'in_progress_by_ai':
+        return 'bg-indigo-500';
+      case 'under_review':
+        return 'bg-purple-500';
+      case 'pending_approval':
+        return 'bg-red-500';
+      case 'completed':
+        return 'bg-green-500';
+      default:
+        return 'bg-gray-500';
+    }
+  };
+
+  const formatStatusName = (status: string) => {
+    return status
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
   return (
     <div className="h-full">
       <Card className="p-4 mb-5">
@@ -316,7 +347,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, onEditTicket })
             <h2 className="text-xl font-semibold mb-1">Kanban Board</h2>
             <p className="text-sm text-muted-foreground">
               <AnimatedText
-                text="Drag tickets between columns to change priority"
+                text="Drag tickets between columns to change status"
                 className="text-sm"
                 animation="fade"
                 once={false}
@@ -325,24 +356,32 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, onEditTicket })
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="danger" className="flex items-center gap-1 py-1 px-3">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03z" clipRule="evenodd" />
-              </svg>
-              Urgent
-            </Badge>
-            <Badge variant="warning" className="flex items-center gap-1 py-1 px-3">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-              </svg>
-              High
-            </Badge>
-            <Badge variant="info" className="flex items-center gap-1 py-1 px-3">
+            <Badge variant="destructive" className="flex items-center gap-1 py-1 px-3">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                 <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
               </svg>
-              Normal
+              In Progress by AI
+            </Badge>
+            <Badge variant="purple" className="flex items-center gap-1 py-1 px-3">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+              </svg>
+              Under Review
+            </Badge>
+            <Badge variant="danger" className="flex items-center gap-1 py-1 px-3">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+              </svg>
+              Pending Approval
+            </Badge>
+            <Badge variant="success" className="flex items-center gap-1 py-1 px-3">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03z" clipRule="evenodd" />
+              </svg>
+              Completed
             </Badge>
           </div>
         </div>
@@ -397,60 +436,65 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, onEditTicket })
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[calc(100vh-240px)] min-h-[500px]">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 h-[calc(100vh-240px)] min-h-[500px]">
           <KanbanColumn
-            title="Urgent"
-            tickets={urgentTickets}
+            title="In Progress by AI"
+            columnId="in_progress_by_ai"
+            tickets={inProgressByAiTickets}
             onViewTicket={onViewTicket}
-            onEditTicket={onEditTicket}
-            onStatusChange={handleStatusChange}
-            columnId="urgent"
-            color="bg-destructive/10 border-destructive/30"
-            titleColor="text-destructive"
-            iconClass="text-destructive"
-            isActive={activeColumn !== null && activeColumn !== 'urgent'}
-            isDraggedOver={draggedOverColumn === 'urgent'}
+            icon={
+              <div className="w-3 h-3 rounded-full bg-indigo-500 mr-2"></div>
+            }
           />
 
           <KanbanColumn
-            title="High"
-            tickets={highTickets}
+            title="Under Review"
+            columnId="under_review"
+            tickets={underReviewTickets}
             onViewTicket={onViewTicket}
-            onEditTicket={onEditTicket}
-            onStatusChange={handleStatusChange}
-            columnId="high"
-            color="bg-amber-500/10 border-amber-500/30"
-            titleColor="text-amber-600"
-            iconClass="text-amber-500"
-            isActive={activeColumn !== null && activeColumn !== 'high'}
-            isDraggedOver={draggedOverColumn === 'high'}
+            icon={
+              <div className="w-3 h-3 rounded-full bg-purple-500 mr-2"></div>
+            }
           />
 
           <KanbanColumn
-            title="Normal"
-            tickets={normalTickets}
+            title="Pending Approval"
+            columnId="pending_approval"
+            tickets={pendingApprovalTickets}
             onViewTicket={onViewTicket}
-            onEditTicket={onEditTicket}
-            onStatusChange={handleStatusChange}
-            columnId="normal"
-            color="bg-primary/10 border-primary/30"
-            titleColor="text-primary"
-            iconClass="text-primary"
-            isActive={activeColumn !== null && activeColumn !== 'normal'}
-            isDraggedOver={draggedOverColumn === 'normal'}
+            icon={
+              <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+            }
+          />
+
+          <KanbanColumn
+            title="Completed"
+            columnId="completed"
+            tickets={completedTickets}
+            onViewTicket={onViewTicket}
+            icon={
+              <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+            }
           />
         </div>
 
         {/* Add drag overlay for better visual feedback */}
         <DragOverlay>
           {activeId && activeTicket ? (
-            <div className="opacity-80 w-64 transform rotate-1 scale-105">
-              <KanbanItem
-                ticket={activeTicket}
-                onViewTicket={() => { }}
-                onEditTicket={() => { }}
-                onStatusChange={() => { }}
-              />
+            <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-md border border-primary max-w-sm">
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="text-sm font-medium line-clamp-1">{activeTicket.title}</h3>
+                <div className={`w-2 h-2 rounded-full ${getStatusColor(activeTicket.status)}`}></div>
+              </div>
+              <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{activeTicket.description}</p>
+              <div className="flex justify-between items-center">
+                <span className="text-xs">
+                  #{activeTicket.id}
+                </span>
+                <Badge variant="outline" className="text-xs">
+                  {formatStatusName(activeTicket.status)}
+                </Badge>
+              </div>
             </div>
           ) : null}
         </DragOverlay>

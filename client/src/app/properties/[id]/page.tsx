@@ -327,7 +327,7 @@ export default function PropertyDetailPage() {
                                 <div>
                                     <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Monthly Rent</h3>
                                     <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">
-                                        ${property.monthlyRent.toLocaleString()}
+                                        €{property.monthlyRent.toLocaleString()}
                                     </p>
                                 </div>
                                 <div>
@@ -401,11 +401,11 @@ export default function PropertyDetailPage() {
                             <div>
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-gray-600 dark:text-gray-400">Monthly Rent</span>
-                                    <span className="font-semibold text-blue-600 dark:text-blue-400">${property.monthlyRent.toLocaleString()}</span>
+                                    <span className="font-semibold text-blue-600 dark:text-blue-400">€{property.monthlyRent.toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-gray-600 dark:text-gray-400">Annual Income</span>
-                                    <span className="font-semibold text-blue-600 dark:text-blue-400">${(property.monthlyRent * 12).toLocaleString()}</span>
+                                    <span className="font-semibold text-blue-600 dark:text-blue-400">€{(property.monthlyRent * 12).toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-gray-600 dark:text-gray-400">ROI</span>
@@ -422,30 +422,30 @@ export default function PropertyDetailPage() {
                                 <div className="space-y-2">
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-600 dark:text-gray-400">Property Tax</span>
-                                        <span className="font-medium">$350</span>
+                                        <span className="font-medium">€350</span>
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-600 dark:text-gray-400">Insurance</span>
-                                        <span className="font-medium">$120</span>
+                                        <span className="font-medium">€120</span>
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-600 dark:text-gray-400">Maintenance</span>
-                                        <span className="font-medium">$200</span>
+                                        <span className="font-medium">€200</span>
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-600 dark:text-gray-400">Property Management</span>
-                                        <span className="font-medium">$280</span>
+                                        <span className="font-medium">€280</span>
                                     </div>
                                     <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
                                         <div className="flex justify-between items-center font-semibold">
                                             <span>Total Monthly Expenses</span>
-                                            <span>$950</span>
+                                            <span>€950</span>
                                         </div>
                                     </div>
                                     <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
                                         <div className="flex justify-between items-center font-semibold text-green-600 dark:text-green-400">
                                             <span>Net Monthly Income</span>
-                                            <span>${property.monthlyRent - 950}</span>
+                                            <span>€{property.monthlyRent - 950}</span>
                                         </div>
                                     </div>
                                 </div>

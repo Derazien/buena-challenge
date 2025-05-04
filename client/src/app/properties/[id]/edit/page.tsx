@@ -447,7 +447,7 @@ export default function PropertyEditPage() {
                         </div>
 
                         <div>
-                            <label htmlFor="monthlyRent" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Monthly Rent ($)*</label>
+                            <label htmlFor="monthlyRent" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Monthly Rent (€)*</label>
                             <input
                                 type="number"
                                 id="monthlyRent"
