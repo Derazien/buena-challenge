@@ -1,3 +1,5 @@
+'use client';
+
 import React, { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 
@@ -53,10 +55,10 @@ const ScrollRevealCard: React.FC<ScrollRevealCardProps> = ({
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-100px" }}
-      transition={{ 
-        duration: 0.5, 
-        delay, 
-        ease: [0.22, 1, 0.36, 1] 
+      transition={{
+        duration: 0.5,
+        delay,
+        ease: [0.22, 1, 0.36, 1]
       }}
       variants={variants}
     >
@@ -65,4 +67,4 @@ const ScrollRevealCard: React.FC<ScrollRevealCardProps> = ({
   );
 };
 
-export default ScrollRevealCard; 
+export default ScrollRevealCard;

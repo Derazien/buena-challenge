@@ -1,15 +1,25 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { useSuspenseQuery } from '@apollo/client';
 import { GET_PORTFOLIO_SUMMARY } from '@/graphql/portfolio.operations';
 import Card from '@/components/ui/Card';
-import RentGauge3D from '@/components/portfolio/RentGauge3D';
-import ScrollRevealCard from '@/components/portfolio/ScrollRevealCard';
-import ParallaxBalanceTicker from '@/components/portfolio/ParallaxBalanceTicker';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ErrorDisplay from '@/components/common/ErrorDisplay';
 import { motion } from 'framer-motion';
+import ScrollRevealCard from '@/components/portfolio/ScrollRevealCard';
+
+// Dynamically import components that use browser APIs to avoid hydration errors
+const RentGauge3D = dynamic(() => import('@/components/portfolio/RentGauge3D'), {
+  ssr: false,
+  loading: () => <div className="h-[400px] bg-muted/30 rounded-md flex items-center justify-center">Loading 3D visualization...</div>
+});
+
+const ParallaxBalanceTicker = dynamic(() => import('@/components/portfolio/ParallaxBalanceTicker'), {
+  ssr: false,
+  loading: () => <div className="h-[200px] bg-muted/30 rounded-md flex items-center justify-center">Loading ticker...</div>
+});
 
 type PortfolioSummary = {
   monthlyRentIn: number;
@@ -29,6 +39,12 @@ export default function PortfolioPage() {
   const [portfolioData, setPortfolioData] = useState<PortfolioSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Ensure the component is mounted before rendering client-side components
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Mock data while we wait for the backend
   useEffect(() => {
@@ -47,10 +63,12 @@ export default function PortfolioPage() {
     };
 
     // Simulate loading and then setting the data
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setPortfolioData(mockData);
       setLoading(false);
     }, 1500);
+
+    return () => clearTimeout(timer);
   }, []);
 
   // Track scroll position for animations
@@ -79,10 +97,10 @@ export default function PortfolioPage() {
     );
   }
 
-  if (!portfolioData) {
+  if (!portfolioData || !isMounted) {
     return (
       <div className="container mx-auto px-4 py-16">
-        <p>No portfolio data found.</p>
+        <LoadingSpinner text="Preparing dashboard..." />
       </div>
     );
   }
@@ -165,7 +183,7 @@ export default function PortfolioPage() {
         <ScrollRevealCard direction="left">
           <Card className="h-full p-4">
             <h2 className="text-xl font-bold mb-4">Rent Collection Status</h2>
-            <RentGauge3D 
+            <RentGauge3D
               monthlyRent={portfolioData.monthlyRentIn * 0.93} // 93% collected for demo
               targetAmount={portfolioData.monthlyRentIn}
               height={400}
@@ -178,7 +196,7 @@ export default function PortfolioPage() {
             <h2 className="text-xl font-bold mb-6">3-Year Projection</h2>
             <div className="space-y-6">
               {portfolioData.threeYearProjection.map((projection, index) => (
-                <motion.div 
+                <motion.div
                   key={projection.year}
                   className="bg-gray-50 p-4 rounded-lg"
                   initial={{ opacity: 0, x: 20 }}
@@ -238,4 +256,4 @@ export default function PortfolioPage() {
       </div>
     </div>
   );
-} 
+}

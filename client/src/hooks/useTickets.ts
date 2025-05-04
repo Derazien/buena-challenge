@@ -4,10 +4,12 @@ import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, ApolloError } from '@apollo/client';
 import { GET_TICKETS, CREATE_TICKET, UPDATE_TICKET, DELETE_TICKET } from '@/graphql/queries';
 import { Ticket, TicketFormInput, TicketFilterOptions, TicketStatus } from '@/types/api/tickets.types';
+import { useConfetti } from './useConfetti';
 
 export function useTickets() {
     const [filters, setFilters] = useState<TicketFilterOptions>({});
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const { triggerConfetti } = useConfetti();
 
     // Use the GET_TICKETS query directly with filters
     const { data, loading, error, refetch } = useQuery(GET_TICKETS, {
@@ -112,6 +114,11 @@ export function useTickets() {
                 }
             });
 
+            // Trigger confetti when a ticket is marked as resolved
+            if (data.status === 'resolved') {
+                triggerConfetti();
+            }
+
             console.log('Update ticket response:', response);
             return response?.updateTicket;
         } catch (err) {
@@ -120,7 +127,7 @@ export function useTickets() {
         } finally {
             setIsSubmitting(false);
         }
-    }, [updateTicketMutation]);
+    }, [updateTicketMutation, triggerConfetti]);
 
     const deleteTicket = useCallback(async (id: number) => {
         try {

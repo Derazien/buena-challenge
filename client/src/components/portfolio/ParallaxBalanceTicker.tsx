@@ -1,6 +1,8 @@
+'use client';
+
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { useSpring, animated } from 'react-spring';
+import { useSpring, animated } from '@react-spring/web';
 
 type ParallaxBalanceTickerProps = {
   balance: number;
@@ -19,7 +21,7 @@ const AnimatedNumber = ({ value }: { value: number }) => {
 
   return (
     <animated.span>
-      {number.to((n) => `$${n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`)}
+      {number.to((n: number) => `$${n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`)}
     </animated.span>
   );
 };
@@ -75,4 +77,4 @@ const ParallaxBalanceTicker: React.FC<ParallaxBalanceTickerProps> = ({
   );
 };
 
-export default ParallaxBalanceTicker; 
+export default ParallaxBalanceTicker;

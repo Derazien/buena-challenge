@@ -24,6 +24,9 @@ const Header = () => {
                         <Link href="/tickets" className="transition-colors hover:text-foreground/80 text-foreground">
                             Tickets
                         </Link>
+                        <Link href="/portfolio" className="transition-colors hover:text-foreground/80 text-foreground">
+                            Re-Investment
+                        </Link>
                         <Link href="/reinvest" className="transition-colors hover:text-foreground/80 text-foreground">
                             Invest
                         </Link>
@@ -64,6 +67,9 @@ const Header = () => {
                         </Link>
                         <Link href="/tickets" className="block py-2 text-sm font-medium transition-colors hover:text-foreground/80 text-foreground">
                             Tickets
+                        </Link>
+                        <Link href="/portfolio" className="block py-2 text-sm font-medium transition-colors hover:text-foreground/80 text-foreground">
+                            Re-Investment
                         </Link>
                         <Link href="/reinvest" className="block py-2 text-sm font-medium transition-colors hover:text-foreground/80 text-foreground">
                             Invest
