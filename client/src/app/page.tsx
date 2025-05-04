@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import MonthlyIncomeCard from "@/components/dashboard/MonthlyIncomeCard";
 import OpenTicketsCard from "@/components/dashboard/OpenTicketsCard";
 import UpcomingLeasesCard from "@/components/dashboard/UpcomingLeasesCard";
@@ -9,11 +9,12 @@ import Card from "@/components/ui/Card";
 import Link from "next/link";
 import dynamic from 'next/dynamic';
 import { useProperties } from '@/hooks/useProperties';
+import Input from "@/components/ui/Input";
 
 // Dynamically import the revenue chart to avoid SSR issues
 const RevenueLineChart = dynamic(() => import('@/components/charts/RevenueLineChart'), {
   ssr: false,
-  loading: () => <div className="h-80 flex items-center justify-center bg-white rounded-card p-6 shadow-card"><div className="animate-pulse bg-buena-border/30 h-full w-full rounded-md"></div></div>
+  loading: () => <div className="h-80 flex items-center justify-center bg-buena-background/50 rounded-card p-6 shadow-card"><div className="animate-pulse bg-buena-border/30 h-full w-full rounded-md"></div></div>
 });
 
 export default function Dashboard() {

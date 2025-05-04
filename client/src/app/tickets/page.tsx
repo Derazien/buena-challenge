@@ -1,299 +1,317 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
+import { useTickets } from '@/hooks/useTickets';
+import { useNotification } from '@/components/notifications/NotificationContext';
+import { TicketFormInput, Ticket, TicketStatus } from '@/types/api/tickets.types';
+import TicketForm from '@/components/tickets/TicketForm';
+import { useProperties } from '@/hooks/useProperties';
+import TicketFilterTabs from '@/components/tickets/TicketFilterTabs';
+import TicketSearchBar from '@/components/tickets/TicketSearchBar';
+import TicketList from '@/components/tickets/TicketList';
+import TicketDetail from '@/components/tickets/TicketDetail';
+import ErrorDisplay from '@/components/common/ErrorDisplay';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import KanbanBoard from '@/components/tickets/KanbanBoard';
 
-// Define the type for tickets
-type Ticket = {
-    id: number;
-    title: string;
-    description: string;
-    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-    status: 'OPEN' | 'IN_PROGRESS' | 'PENDING' | 'RESOLVED';
-    propertyAddress: string;
-    createdAt: string;
+const getPriorityVariant = (priority: string) => {
+    switch (priority.toLowerCase()) {
+        case 'high':
+        case 'urgent':
+            return 'danger';
+        case 'medium':
+            return 'warning';
+        case 'low':
+            return 'info';
+        default:
+            return 'default';
+    }
 };
 
-// Mock data for tickets
-const MOCK_TICKETS: Ticket[] = [
-    {
-        id: 1,
-        title: 'Leaky Faucet',
-        description: 'The kitchen faucet is leaking and needs to be fixed.',
-        priority: 'MEDIUM',
-        status: 'OPEN',
-        propertyAddress: '123 Main St',
-        createdAt: '2024-04-15T10:30:00Z',
-    },
-    {
-        id: 2,
-        title: 'Broken Heater',
-        description: 'The heating system is not working properly.',
-        priority: 'HIGH',
-        status: 'IN_PROGRESS',
-        propertyAddress: '123 Main St',
-        createdAt: '2024-04-10T08:15:00Z',
-    },
-    {
-        id: 3,
-        title: 'Ceiling Light Replacement',
-        description: 'The ceiling light in the living room needs to be replaced.',
-        priority: 'LOW',
-        status: 'RESOLVED',
-        propertyAddress: '123 Main St',
-        createdAt: '2024-04-05T14:45:00Z',
-    },
-];
+const getStatusVariant = (status: string) => {
+    switch (status.toLowerCase()) {
+        case 'open':
+            return 'danger';
+        case 'in_progress':
+            return 'warning';
+        case 'pending':
+            return 'info';
+        case 'resolved':
+        case 'closed':
+            return 'success';
+        default:
+            return 'default';
+    }
+};
 
 export default function TicketsPage() {
-    const [tickets, setTickets] = useState<Ticket[]>(MOCK_TICKETS);
-    const [showNewTicketForm, setShowNewTicketForm] = useState(false);
-    const [newTicket, setNewTicket] = useState({
-        description: '',
-    });
-    const [filter, setFilter] = useState('all');
+    const { tickets, loading, error, filters, setFilters, createTicket, updateTicket, isSubmitting } = useTickets();
+    const { addNotification } = useNotification();
+    const { properties } = useProperties();
+
+    const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+    const [isCreating, setIsCreating] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isViewing, setIsViewing] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [viewMode, setViewMode] = useState<'list' | 'kanban'>('kanban');
 
     // Check URL parameters for showing the new ticket form
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('new') === 'true') {
-            setShowNewTicketForm(true);
+            setIsCreating(true);
+        }
+        
+        // Get view mode from URL or localStorage
+        const savedViewMode = localStorage.getItem('ticketsViewMode');
+        if (urlParams.get('view') === 'list') {
+            setViewMode('list');
+        } else if (urlParams.get('view') === 'kanban') {
+            setViewMode('kanban');
+        } else if (savedViewMode === 'list' || savedViewMode === 'kanban') {
+            setViewMode(savedViewMode as 'list' | 'kanban');
         }
     }, []);
+    
+    // Save view mode preference
+    useEffect(() => {
+        localStorage.setItem('ticketsViewMode', viewMode);
+    }, [viewMode]);
 
-    const handleCreateTicket = () => {
-        if (!newTicket.description.trim()) return;
+    // Update filters when search query changes
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setFilters({ ...filters, searchQuery });
+        }, 300);
 
-        // In a real application, this would call the API to classify the ticket using AI
-        const aiClassifiedTicket: Ticket = {
-            id: tickets.length + 1,
-            title: 'New Issue', // This would be generated by AI in a real app
-            description: newTicket.description,
-            priority: 'MEDIUM', // This would be determined by AI
-            status: 'OPEN',
-            propertyAddress: '123 Main St',
-            createdAt: new Date().toISOString(),
+        return () => clearTimeout(timer);
+    }, [searchQuery, setFilters, filters]);
+
+    const handleCreateTicket = async (data: TicketFormInput) => {
+        try {
+            await createTicket({
+                title: data.title || data.description.substring(0, 50),
+                description: data.description,
+                priority: data.priority || 'medium',
+                status: 'open',
+                propertyId: data.propertyId || 0
+            });
+
+            setIsCreating(false);
+            addNotification({
+                type: 'success',
+                message: 'Ticket created successfully'
+            });
+        } catch (error) {
+            console.error('Error creating ticket:', error);
+            addNotification({
+                type: 'error',
+                message: 'Failed to create ticket. Please try again.'
+            });
+        }
+    };
+
+    const handleUpdateTicket = async (data: TicketFormInput) => {
+        if (!selectedTicket) return;
+
+        try {
+            await updateTicket({
+                id: selectedTicket.id,
+                title: data.title,
+                description: data.description,
+                priority: data.priority,
+                status: data.status
+            });
+
+            setIsEditing(false);
+            setSelectedTicket(null);
+            addNotification({
+                type: 'success',
+                message: 'Ticket updated successfully'
+            });
+        } catch (error) {
+            console.error('Error updating ticket:', error);
+            addNotification({
+                type: 'error',
+                message: 'Failed to update ticket. Please try again.'
+            });
+        }
+    };
+
+    const handleStatusChange = async (ticketId: number, newStatus: TicketStatus) => {
+        try {
+            await updateTicket({
+                id: ticketId,
+                status: newStatus
+            });
+
+            addNotification({
+                type: 'success',
+                message: `Ticket status updated to ${newStatus}`
+            });
+        } catch (error) {
+            console.error('Error updating ticket status:', error);
+            addNotification({
+                type: 'error',
+                message: 'Failed to update ticket status. Please try again.'
+            });
+        }
+    };
+
+    const handleFilterChange = (status: string) => {
+        const newFilters = {
+            ...filters,
+            status: status === 'all' ? undefined : status.toLowerCase() as TicketStatus
         };
-
-        setTickets([aiClassifiedTicket, ...tickets]);
-        setNewTicket({ description: '' });
-        setShowNewTicketForm(false);
+        setFilters(newFilters);
     };
 
-    // Filter tickets based on status and search query
-    const filteredTickets = tickets.filter(ticket => {
-        const matchesStatus = filter === 'all' || ticket.status === filter;
-        const matchesSearch = searchQuery === '' ||
-            ticket.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            ticket.description.toLowerCase().includes(searchQuery.toLowerCase());
-
-        return matchesStatus && matchesSearch;
-    });
-
-    const getPriorityVariant = (priority: Ticket['priority']) => {
-        switch (priority) {
-            case 'LOW': return 'default';
-            case 'MEDIUM': return 'warning';
-            case 'HIGH': return 'danger';
-            case 'URGENT': return 'danger';
-            default: return 'default';
-        }
+    // Function to get property name
+    const getPropertyAddress = (propertyId: number) => {
+        const property = properties.find(p => p.id === propertyId);
+        return property ? property.address : 'Unknown property';
     };
 
-    const getStatusVariant = (status: Ticket['status']) => {
-        switch (status) {
-            case 'OPEN': return 'info';
-            case 'IN_PROGRESS': return 'warning';
-            case 'PENDING': return 'warning';
-            case 'RESOLVED': return 'success';
-            default: return 'default';
-        }
-    };
+    // Handle error state
+    if (error) {
+        return <ErrorDisplay error={error} onRetry={() => window.location.reload()} />;
+    }
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    };
+    // Handle loading state
+    if (loading) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <Card>
+                    <LoadingSpinner text="Loading tickets..." />
+                </Card>
+            </div>
+        );
+    }
 
+    // Ticket form modal (create or edit)
+    if (isCreating) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <TicketForm
+                    mode="create"
+                    onSubmit={handleCreateTicket}
+                    onCancel={() => setIsCreating(false)}
+                    isSubmitting={isSubmitting}
+                />
+            </div>
+        );
+    }
+
+    if (isEditing && selectedTicket) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <TicketForm
+                    mode="edit"
+                    initialData={selectedTicket}
+                    onSubmit={handleUpdateTicket}
+                    onCancel={() => {
+                        setIsEditing(false);
+                        setSelectedTicket(null);
+                    }}
+                    isSubmitting={isSubmitting}
+                />
+            </div>
+        );
+    }
+
+    // Ticket details view
+    if (isViewing && selectedTicket) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <TicketDetail
+                    ticket={selectedTicket}
+                    onEdit={() => {
+                        setIsViewing(false);
+                        setIsEditing(true);
+                    }}
+                    onStatusChange={(status) => handleStatusChange(selectedTicket.id, status)}
+                    onBack={() => {
+                        setIsViewing(false);
+                        setSelectedTicket(null);
+                    }}
+                />
+            </div>
+        );
+    }
+
+    // Main tickets list view
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <Link href="/" className="text-buena-primary hover:underline flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-                        </svg>
-                        Back to Dashboard
-                    </Link>
-                    <h1 className="text-2xl font-bold text-buena-dark mt-2">Maintenance Tickets</h1>
-                </div>
-
-                <div className="flex space-x-3 w-full md:w-auto">
-                    <div className="relative flex-grow md:flex-grow-0 md:w-64">
-                        <input
-                            type="text"
-                            placeholder="Search tickets..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 border border-buena-border rounded-md focus:outline-none focus:ring-2 focus:ring-buena-primary"
-                        />
-                        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-buena-muted">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                    </div>
-
-                    <Button
-                        onClick={() => setShowNewTicketForm(true)}
-                        className="whitespace-nowrap"
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-800">Tickets</h1>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setViewMode('list')}
+                        className={`px-3 py-1 rounded-md ${
+                            viewMode === 'list' 
+                                ? 'bg-blue-500 text-white' 
+                                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                        }`}
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                        </svg>
-                        New Ticket
-                    </Button>
+                        List
+                    </button>
+                    <button
+                        onClick={() => setViewMode('kanban')}
+                        className={`px-3 py-1 rounded-md ${
+                            viewMode === 'kanban' 
+                                ? 'bg-blue-500 text-white' 
+                                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                        }`}
+                    >
+                        Kanban
+                    </button>
                 </div>
             </div>
 
-            {/* New Ticket Form Modal */}
-            {showNewTicketForm && (
-                <div className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
-                    <Card className="w-full max-w-md mx-auto">
-                        <h2 className="text-xl font-semibold text-buena-dark mb-4">Create New Ticket</h2>
-                        <p className="text-buena-muted mb-4">
-                            Describe the issue in your own words and our AI will automatically classify and prioritize it.
-                        </p>
-                        <div className="mb-4">
-                            <label htmlFor="description" className="block text-sm font-medium text-buena-dark mb-1">
-                                Issue Description
-                            </label>
-                            <textarea
-                                id="description"
-                                rows={4}
-                                value={newTicket.description}
-                                onChange={(e) => setNewTicket({ ...newTicket, description: e.target.value })}
-                                className="w-full border border-buena-border rounded-md p-2 focus:ring-buena-primary focus:border-buena-primary"
-                                placeholder="Describe the maintenance issue..."
-                            ></textarea>
-                        </div>
-                        <div className="flex justify-end space-x-3">
-                            <Button
-                                variant="outline"
-                                onClick={() => setShowNewTicketForm(false)}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                onClick={handleCreateTicket}
-                                disabled={!newTicket.description.trim()}
-                            >
-                                Create Ticket
-                            </Button>
-                        </div>
+            <TicketSearchBar
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onCreateClick={() => setIsCreating(true)}
+            />
+
+            {viewMode === 'list' && (
+                <>
+                    <TicketFilterTabs
+                        activeStatus={filters.status}
+                        onFilterChange={handleFilterChange}
+                    />
+                    <TicketList
+                        tickets={tickets}
+                        onViewTicket={(ticket) => {
+                            setSelectedTicket(ticket);
+                            setIsViewing(true);
+                        }}
+                        onEditTicket={(ticket) => {
+                            setSelectedTicket(ticket);
+                            setIsEditing(true);
+                        }}
+                    />
+                </>
+            )}
+
+            {viewMode === 'kanban' && (
+                <div className="mt-6">
+                    <Card>
+                        <KanbanBoard
+                            onViewTicket={(ticket) => {
+                                setSelectedTicket(ticket);
+                                setIsViewing(true);
+                            }}
+                            onEditTicket={(ticket) => {
+                                setSelectedTicket(ticket);
+                                setIsEditing(true);
+                            }}
+                        />
                     </Card>
                 </div>
             )}
-
-            {/* Filter Tabs */}
-            <div className="mb-6 border-b border-buena-border">
-                <nav className="-mb-px flex space-x-6 overflow-x-auto">
-                    <button
-                        className={`py-2 px-1 whitespace-nowrap ${filter === 'all' ? 'border-b-2 border-buena-primary text-buena-primary font-medium' : 'text-buena-muted hover:text-buena-dark'}`}
-                        onClick={() => setFilter('all')}
-                    >
-                        All Tickets
-                    </button>
-                    <button
-                        className={`py-2 px-1 whitespace-nowrap ${filter === 'OPEN' ? 'border-b-2 border-buena-primary text-buena-primary font-medium' : 'text-buena-muted hover:text-buena-dark'}`}
-                        onClick={() => setFilter('OPEN')}
-                    >
-                        Open
-                    </button>
-                    <button
-                        className={`py-2 px-1 whitespace-nowrap ${filter === 'IN_PROGRESS' ? 'border-b-2 border-buena-primary text-buena-primary font-medium' : 'text-buena-muted hover:text-buena-dark'}`}
-                        onClick={() => setFilter('IN_PROGRESS')}
-                    >
-                        In Progress
-                    </button>
-                    <button
-                        className={`py-2 px-1 whitespace-nowrap ${filter === 'RESOLVED' ? 'border-b-2 border-buena-primary text-buena-primary font-medium' : 'text-buena-muted hover:text-buena-dark'}`}
-                        onClick={() => setFilter('RESOLVED')}
-                    >
-                        Resolved
-                    </button>
-                </nav>
-            </div>
-
-            {/* Tickets Table */}
-            <Card>
-                {filteredTickets.length > 0 ? (
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-buena-border">
-                            <thead>
-                                <tr className="text-left text-xs font-medium text-buena-muted uppercase tracking-wider">
-                                    <th className="px-6 py-3">Ticket</th>
-                                    <th className="px-6 py-3">Property</th>
-                                    <th className="px-6 py-3">Priority</th>
-                                    <th className="px-6 py-3">Status</th>
-                                    <th className="px-6 py-3">Date</th>
-                                    <th className="px-6 py-3 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-buena-border">
-                                {filteredTickets.map((ticket) => (
-                                    <tr key={ticket.id} className="hover:bg-buena-light transition-colors">
-                                        <td className="px-6 py-4">
-                                            <div className="font-medium text-buena-dark">{ticket.title}</div>
-                                            <div className="text-sm text-buena-muted truncate max-w-xs">{ticket.description}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-buena-muted">
-                                            {ticket.propertyAddress}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <Badge variant={getPriorityVariant(ticket.priority)}>
-                                                {ticket.priority}
-                                            </Badge>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <Badge variant={getStatusVariant(ticket.status)}>
-                                                {ticket.status.replace('_', ' ')}
-                                            </Badge>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-buena-muted">
-                                            {formatDate(ticket.createdAt)}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                            <Button variant="ghost" className="mr-2 text-buena-primary py-1">View</Button>
-                                            <Button variant="ghost" className="text-buena-primary py-1">Edit</Button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                ) : (
-                    <div className="text-center py-12">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-buena-muted mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <h3 className="text-lg font-medium text-buena-dark mb-1">No tickets found</h3>
-                        <p className="text-buena-muted">
-                            {searchQuery ? 'Try adjusting your search query' : 'Create your first ticket to get started'}
-                        </p>
-                        <Button
-                            onClick={() => setShowNewTicketForm(true)}
-                            className="mt-4"
-                        >
-                            Create New Ticket
-                        </Button>
-                    </div>
-                )}
-            </Card>
         </div>
     );
 }

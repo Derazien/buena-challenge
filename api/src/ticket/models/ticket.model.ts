@@ -24,6 +24,9 @@ export class Ticket {
     @Field(() => Property)
     property: Property;
 
+    @Field()
+    propertyAddress: string;
+
     @Field(() => Date)
     createdAt: Date;
 

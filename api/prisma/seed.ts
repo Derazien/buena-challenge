@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client';
-import { addDays, subMonths, subDays, format } from 'date-fns';
+import { add, subMonths, subDays, format } from 'date-fns';
 
 const prisma = new PrismaClient();
 
 async function main() {
-    console.log('Starting seeding...');
+    console.log('Starting seed process...');
 
     // Clear existing data
     await prisma.ticket.deleteMany();
@@ -16,15 +16,15 @@ async function main() {
     const properties = await Promise.all([
         prisma.property.create({
             data: {
-                address: '123 Main Street',
-                city: 'San Francisco',
-                state: 'CA',
-                zipCode: '94105',
+                address: '123 Main St',
+                city: 'New York',
+                state: 'NY',
+                zipCode: '10001',
             },
         }),
         prisma.property.create({
             data: {
-                address: '456 Oak Avenue',
+                address: '456 Park Ave',
                 city: 'Los Angeles',
                 state: 'CA',
                 zipCode: '90001',
@@ -32,10 +32,10 @@ async function main() {
         }),
         prisma.property.create({
             data: {
-                address: '789 Pine Boulevard',
-                city: 'San Diego',
-                state: 'CA',
-                zipCode: '92101',
+                address: '789 Oak Dr',
+                city: 'Chicago',
+                state: 'IL',
+                zipCode: '60007',
             },
         }),
         prisma.property.create({
@@ -48,9 +48,10 @@ async function main() {
         }),
     ]);
 
-    console.log(`Created ${properties.length} properties`);
+    console.log('Created properties');
 
     // Create leases
+    const now = new Date();
     const leases = [];
 
     // Active leases with different end dates for visualization
@@ -58,12 +59,12 @@ async function main() {
         await prisma.lease.create({
             data: {
                 propertyId: properties[0].id,
-                startDate: subMonths(new Date(), 9),
-                endDate: addDays(new Date(), 45), // Soon to expire
+                startDate: add(now, { months: -6 }),
+                endDate: add(now, { months: 6 }),
                 monthlyRent: 2500,
                 tenantName: 'John Smith',
-                tenantEmail: 'john.smith@example.com',
-                tenantPhone: '(415) 555-1234',
+                tenantEmail: 'john@example.com',
+                tenantPhone: '555-123-4567',
                 isActive: true,
             },
         })
@@ -73,12 +74,12 @@ async function main() {
         await prisma.lease.create({
             data: {
                 propertyId: properties[1].id,
-                startDate: subMonths(new Date(), 6),
-                endDate: addDays(new Date(), 90), // Expiring in 3 months
-                monthlyRent: 1800,
-                tenantName: 'Jane Doe',
-                tenantEmail: 'jane.doe@example.com',
-                tenantPhone: '(213) 555-5678',
+                startDate: add(now, { months: -3 }),
+                endDate: add(now, { months: 9 }),
+                monthlyRent: 3200,
+                tenantName: 'Sarah Johnson',
+                tenantEmail: 'sarah@example.com',
+                tenantPhone: '555-987-6543',
                 isActive: true,
             },
         })
@@ -88,12 +89,12 @@ async function main() {
         await prisma.lease.create({
             data: {
                 propertyId: properties[2].id,
-                startDate: subMonths(new Date(), 2),
-                endDate: addDays(new Date(), 300), // Expiring in 10 months
-                monthlyRent: 2200,
-                tenantName: 'Robert Johnson',
-                tenantEmail: 'robert.johnson@example.com',
-                tenantPhone: '(619) 555-9012',
+                startDate: add(now, { months: -12 }),
+                endDate: add(now, { days: 15 }),
+                monthlyRent: 1800,
+                tenantName: 'Michael Brown',
+                tenantEmail: 'michael@example.com',
+                tenantPhone: '555-567-8901',
                 isActive: true,
             },
         })
@@ -103,8 +104,8 @@ async function main() {
         await prisma.lease.create({
             data: {
                 propertyId: properties[3].id,
-                startDate: subMonths(new Date(), 11),
-                endDate: addDays(new Date(), 15), // Very soon to expire
+                startDate: add(now, { months: -11 }),
+                endDate: add(now, { days: 15 }), // Very soon to expire
                 monthlyRent: 3000,
                 tenantName: 'Emily Wilson',
                 tenantEmail: 'emily.wilson@example.com',
@@ -114,10 +115,9 @@ async function main() {
         })
     );
 
-    console.log(`Created ${leases.length} leases`);
+    console.log('Created leases');
 
     // Create cash flows - 6 months of history
-    const today = new Date();
     const cashFlows = [];
 
     // Generate cash flows for each property
@@ -128,7 +128,7 @@ async function main() {
 
         // Generate 6 months of cash flows
         for (let i = 0; i < 6; i++) {
-            const month = subMonths(today, 5 - i);
+            const month = subMonths(now, 5 - i);
 
             // Generate rent income for each month
             cashFlows.push(
@@ -266,12 +266,12 @@ async function main() {
 
     console.log(`Created ${tickets.length} tickets`);
 
-    console.log('Seeding finished.');
+    console.log('Seed completed successfully!');
 }
 
 main()
     .catch((e) => {
-        console.error(e);
+        console.error('Error during seeding:', e);
         process.exit(1);
     })
     .finally(async () => {

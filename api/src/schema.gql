@@ -2,6 +2,12 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AllocateFundsInput {
+  amount: Float!
+  investmentId: String!
+  riskProfile: String!
+}
+
 type CashFlow {
   amount: Float!
   category: String!
@@ -22,6 +28,14 @@ input CreatePropertyInput {
   zipCode: String!
 }
 
+input CreateTicketInput {
+  description: String!
+  priority: String!
+  propertyId: Int!
+  status: String!
+  title: String!
+}
+
 type DashboardStats {
   leaseStats: LeaseStats!
   monthlyIncome: MonthlyIncomeStats!
@@ -33,6 +47,27 @@ type DashboardStats {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type DeleteTicketResponse {
+  id: Int!
+  success: Boolean!
+}
+
+type InvestmentOption {
+  description: String!
+  expectedReturn: String!
+  id: String!
+  minimumInvestment: String!
+  name: String!
+  risk: String!
+  type: String!
+}
+
+type InvestmentResult {
+  investmentId: String
+  message: String!
+  success: Boolean!
+}
 
 type Lease {
   createdAt: DateTime!
@@ -70,9 +105,13 @@ type MonthlyIncomeStats {
 }
 
 type Mutation {
+  allocateFunds(input: AllocateFundsInput!): InvestmentResult!
   createProperty(createPropertyInput: CreatePropertyInput!): Property!
+  createTicket(input: CreateTicketInput!): Ticket!
+  deleteTicket(id: Int!): DeleteTicketResponse!
   removeProperty(id: Int!): Property!
   updateProperty(updatePropertyInput: UpdatePropertyInput!): Property!
+  updateTicket(input: UpdateTicketInput!): Ticket!
 }
 
 type OpenTicket {
@@ -84,6 +123,16 @@ type OpenTicket {
   propertyId: Int!
   status: String!
   title: String!
+}
+
+type PortfolioSummary {
+  allocatedReservePercentage: Float!
+  cagrProjection: Float!
+  euribor3M: Float!
+  forecastedYield: Float!
+  germanCPI: Float!
+  monthlyRentIn: Float!
+  threeYearProjection: [YearlyProjection!]!
 }
 
 type Property {
@@ -101,8 +150,12 @@ type Property {
 
 type Query {
   dashboardStats: DashboardStats!
+  investmentOptions(riskProfile: String!, surplusCash: Float!): [InvestmentOption!]!
+  portfolioSummary: PortfolioSummary!
   properties: [Property!]!
   property(id: Int!): Property!
+  ticket(id: Int!): Ticket!
+  tickets(filters: TicketFiltersInput): [Ticket!]!
 }
 
 type Ticket {
@@ -111,10 +164,18 @@ type Ticket {
   id: Int!
   priority: String!
   property: Property!
+  propertyAddress: String!
   propertyId: Int!
   status: String!
   title: String!
   updatedAt: DateTime!
+}
+
+input TicketFiltersInput {
+  priority: String
+  propertyId: Int
+  searchQuery: String
+  status: String
 }
 
 type TicketStats {
@@ -139,4 +200,18 @@ input UpdatePropertyInput {
   id: Int!
   state: String
   zipCode: String
+}
+
+input UpdateTicketInput {
+  description: String
+  id: Int!
+  priority: String
+  propertyId: Int
+  status: String
+  title: String
+}
+
+type YearlyProjection {
+  amount: Float!
+  year: Int!
 }

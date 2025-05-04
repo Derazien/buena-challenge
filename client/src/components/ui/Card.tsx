@@ -9,22 +9,20 @@ interface CardProps {
 
 const Card = ({ children, className = '', borderColor = 'default' }: CardProps) => {
     const borderStyles = {
-        primary: 'border-t-[#2563EB]', // buena-primary
-        success: 'border-t-[#10B981]', // buena-success
-        warning: 'border-t-[#F59E0B]', // buena-warning
-        danger: 'border-t-[#EF4444]', // buena-danger
-        info: 'border-t-[#3B82F6]', // buena-info
-        default: 'border-t-transparent'
+        primary: 'border-l-primary', 
+        success: 'border-l-green-500',
+        warning: 'border-l-yellow-500',
+        danger: 'border-l-red-500',
+        info: 'border-l-blue-500',
+        default: 'border-l-transparent'
     };
 
     return (
         <div
             className={cn(
-                "bg-white rounded-lg shadow-md p-6",
-                "border border-gray-200/30",
-                "border-t-2",
+                "dark:border-neutral-700 border-stone-200 border rounded-xl dark:bg-neutral-800 bg-background",
+                borderColor !== 'default' && 'border-l-4',
                 borderStyles[borderColor],
-                "hover:shadow-lg transition-shadow duration-300",
                 className
             )}
         >

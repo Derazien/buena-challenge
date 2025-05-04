@@ -6,7 +6,7 @@ import Badge from '@/components/ui/Badge';
 import Link from 'next/link';
 import { useOpenTickets } from '@/hooks/useDashboardData';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { Ticket } from '@/hooks/useProperties';
+import { Ticket } from '@/types/api/tickets.types';
 
 interface ExtendedTicket extends Ticket {
     propertyAddress: string;

@@ -218,55 +218,6 @@ export class CashFlowCountOrderByAggregateInput {
 }
 
 @InputType()
-export class CashFlowCreateManyPropertyInputEnvelope {
-    @Field(() => [CashFlowCreateManyPropertyInput], {nullable:false})
-    @Type(() => CashFlowCreateManyPropertyInput)
-    data!: Array<CashFlowCreateManyPropertyInput>;
-}
-
-@InputType()
-export class CashFlowCreateManyPropertyInput {
-    @Field(() => Int, {nullable:true})
-    id?: number;
-    @Field(() => Float, {nullable:false})
-    amount!: number;
-    @Field(() => String, {nullable:false})
-    type!: string;
-    @Field(() => String, {nullable:false})
-    category!: string;
-    @Field(() => Date, {nullable:false})
-    date!: Date | string;
-    @Field(() => String, {nullable:true})
-    note?: string;
-    @Field(() => Date, {nullable:true})
-    createdAt?: Date | string;
-    @Field(() => Date, {nullable:true})
-    updatedAt?: Date | string;
-}
-
-@InputType()
-export class CashFlowCreateManyInput {
-    @Field(() => Int, {nullable:true})
-    id?: number;
-    @Field(() => Float, {nullable:false})
-    amount!: number;
-    @Field(() => String, {nullable:false})
-    type!: string;
-    @Field(() => String, {nullable:false})
-    category!: string;
-    @Field(() => Date, {nullable:false})
-    date!: Date | string;
-    @Field(() => String, {nullable:true})
-    note?: string;
-    @Field(() => Int, {nullable:false})
-    propertyId!: number;
-    @Field(() => Date, {nullable:true})
-    createdAt?: Date | string;
-    @Field(() => Date, {nullable:true})
-    updatedAt?: Date | string;
-}
-
-@InputType()
 export class CashFlowCreateNestedManyWithoutPropertyInput {
     @Field(() => [CashFlowCreateWithoutPropertyInput], {nullable:true})
     @Type(() => CashFlowCreateWithoutPropertyInput)
@@ -274,9 +225,6 @@ export class CashFlowCreateNestedManyWithoutPropertyInput {
     @Field(() => [CashFlowCreateOrConnectWithoutPropertyInput], {nullable:true})
     @Type(() => CashFlowCreateOrConnectWithoutPropertyInput)
     connectOrCreate?: Array<CashFlowCreateOrConnectWithoutPropertyInput>;
-    @Field(() => CashFlowCreateManyPropertyInputEnvelope, {nullable:true})
-    @Type(() => CashFlowCreateManyPropertyInputEnvelope)
-    createMany?: InstanceType<typeof CashFlowCreateManyPropertyInputEnvelope>;
     @Field(() => [CashFlowWhereUniqueInput], {nullable:true})
     @Type(() => CashFlowWhereUniqueInput)
     connect?: Array<Prisma.AtLeast<CashFlowWhereUniqueInput, 'id'>>;
@@ -687,9 +635,6 @@ export class CashFlowUncheckedCreateNestedManyWithoutPropertyInput {
     @Field(() => [CashFlowCreateOrConnectWithoutPropertyInput], {nullable:true})
     @Type(() => CashFlowCreateOrConnectWithoutPropertyInput)
     connectOrCreate?: Array<CashFlowCreateOrConnectWithoutPropertyInput>;
-    @Field(() => CashFlowCreateManyPropertyInputEnvelope, {nullable:true})
-    @Type(() => CashFlowCreateManyPropertyInputEnvelope)
-    createMany?: InstanceType<typeof CashFlowCreateManyPropertyInputEnvelope>;
     @Field(() => [CashFlowWhereUniqueInput], {nullable:true})
     @Type(() => CashFlowWhereUniqueInput)
     connect?: Array<Prisma.AtLeast<CashFlowWhereUniqueInput, 'id'>>;
@@ -748,9 +693,6 @@ export class CashFlowUncheckedUpdateManyWithoutPropertyNestedInput {
     @Field(() => [CashFlowUpsertWithWhereUniqueWithoutPropertyInput], {nullable:true})
     @Type(() => CashFlowUpsertWithWhereUniqueWithoutPropertyInput)
     upsert?: Array<CashFlowUpsertWithWhereUniqueWithoutPropertyInput>;
-    @Field(() => CashFlowCreateManyPropertyInputEnvelope, {nullable:true})
-    @Type(() => CashFlowCreateManyPropertyInputEnvelope)
-    createMany?: InstanceType<typeof CashFlowCreateManyPropertyInputEnvelope>;
     @Field(() => [CashFlowWhereUniqueInput], {nullable:true})
     @Type(() => CashFlowWhereUniqueInput)
     set?: Array<Prisma.AtLeast<CashFlowWhereUniqueInput, 'id'>>;
@@ -897,9 +839,6 @@ export class CashFlowUpdateManyWithoutPropertyNestedInput {
     @Field(() => [CashFlowUpsertWithWhereUniqueWithoutPropertyInput], {nullable:true})
     @Type(() => CashFlowUpsertWithWhereUniqueWithoutPropertyInput)
     upsert?: Array<CashFlowUpsertWithWhereUniqueWithoutPropertyInput>;
-    @Field(() => CashFlowCreateManyPropertyInputEnvelope, {nullable:true})
-    @Type(() => CashFlowCreateManyPropertyInputEnvelope)
-    createMany?: InstanceType<typeof CashFlowCreateManyPropertyInputEnvelope>;
     @Field(() => [CashFlowWhereUniqueInput], {nullable:true})
     @Type(() => CashFlowWhereUniqueInput)
     set?: Array<Prisma.AtLeast<CashFlowWhereUniqueInput, 'id'>>;
@@ -1010,8 +949,8 @@ export class CashFlowWhereUniqueInput {
     createdAt?: InstanceType<typeof DateTimeFilter>;
     @Field(() => DateTimeFilter, {nullable:true})
     updatedAt?: InstanceType<typeof DateTimeFilter>;
-    @Field(() => PropertyScalarRelationFilter, {nullable:true})
-    property?: InstanceType<typeof PropertyScalarRelationFilter>;
+    @Field(() => PropertyRelationFilter, {nullable:true})
+    property?: InstanceType<typeof PropertyRelationFilter>;
 }
 
 @InputType()
@@ -1040,8 +979,8 @@ export class CashFlowWhereInput {
     createdAt?: InstanceType<typeof DateTimeFilter>;
     @Field(() => DateTimeFilter, {nullable:true})
     updatedAt?: InstanceType<typeof DateTimeFilter>;
-    @Field(() => PropertyScalarRelationFilter, {nullable:true})
-    property?: InstanceType<typeof PropertyScalarRelationFilter>;
+    @Field(() => PropertyRelationFilter, {nullable:true})
+    property?: InstanceType<typeof PropertyRelationFilter>;
 }
 
 @ObjectType()
@@ -1069,13 +1008,6 @@ export class CashFlow {
 }
 
 @ArgsType()
-export class CreateManyCashFlowArgs {
-    @Field(() => [CashFlowCreateManyInput], {nullable:false})
-    @Type(() => CashFlowCreateManyInput)
-    data!: Array<CashFlowCreateManyInput>;
-}
-
-@ArgsType()
 export class CreateOneCashFlowArgs {
     @Field(() => CashFlowCreateInput, {nullable:false})
     @Type(() => CashFlowCreateInput)
@@ -1087,8 +1019,6 @@ export class DeleteManyCashFlowArgs {
     @Field(() => CashFlowWhereInput, {nullable:true})
     @Type(() => CashFlowWhereInput)
     where?: InstanceType<typeof CashFlowWhereInput>;
-    @Field(() => Int, {nullable:true})
-    limit?: number;
 }
 
 @ArgsType()
@@ -1171,8 +1101,6 @@ export class UpdateManyCashFlowArgs {
     @Field(() => CashFlowWhereInput, {nullable:true})
     @Type(() => CashFlowWhereInput)
     where?: InstanceType<typeof CashFlowWhereInput>;
-    @Field(() => Int, {nullable:true})
-    limit?: number;
 }
 
 @ArgsType()
@@ -1213,13 +1141,6 @@ export class AggregateLease {
 }
 
 @ArgsType()
-export class CreateManyLeaseArgs {
-    @Field(() => [LeaseCreateManyInput], {nullable:false})
-    @Type(() => LeaseCreateManyInput)
-    data!: Array<LeaseCreateManyInput>;
-}
-
-@ArgsType()
 export class CreateOneLeaseArgs {
     @Field(() => LeaseCreateInput, {nullable:false})
     @Type(() => LeaseCreateInput)
@@ -1231,8 +1152,6 @@ export class DeleteManyLeaseArgs {
     @Field(() => LeaseWhereInput, {nullable:true})
     @Type(() => LeaseWhereInput)
     where?: InstanceType<typeof LeaseWhereInput>;
-    @Field(() => Int, {nullable:true})
-    limit?: number;
 }
 
 @ArgsType()
@@ -1445,63 +1364,6 @@ export class LeaseCountOrderByAggregateInput {
 }
 
 @InputType()
-export class LeaseCreateManyPropertyInputEnvelope {
-    @Field(() => [LeaseCreateManyPropertyInput], {nullable:false})
-    @Type(() => LeaseCreateManyPropertyInput)
-    data!: Array<LeaseCreateManyPropertyInput>;
-}
-
-@InputType()
-export class LeaseCreateManyPropertyInput {
-    @Field(() => Int, {nullable:true})
-    id?: number;
-    @Field(() => Date, {nullable:false})
-    startDate!: Date | string;
-    @Field(() => Date, {nullable:false})
-    endDate!: Date | string;
-    @Field(() => Float, {nullable:false})
-    monthlyRent!: number;
-    @Field(() => String, {nullable:false})
-    tenantName!: string;
-    @Field(() => String, {nullable:true})
-    tenantEmail?: string;
-    @Field(() => String, {nullable:true})
-    tenantPhone?: string;
-    @Field(() => Boolean, {nullable:true})
-    isActive?: boolean;
-    @Field(() => Date, {nullable:true})
-    createdAt?: Date | string;
-    @Field(() => Date, {nullable:true})
-    updatedAt?: Date | string;
-}
-
-@InputType()
-export class LeaseCreateManyInput {
-    @Field(() => Int, {nullable:true})
-    id?: number;
-    @Field(() => Date, {nullable:false})
-    startDate!: Date | string;
-    @Field(() => Date, {nullable:false})
-    endDate!: Date | string;
-    @Field(() => Float, {nullable:false})
-    monthlyRent!: number;
-    @Field(() => String, {nullable:false})
-    tenantName!: string;
-    @Field(() => String, {nullable:true})
-    tenantEmail?: string;
-    @Field(() => String, {nullable:true})
-    tenantPhone?: string;
-    @Field(() => Boolean, {nullable:true})
-    isActive?: boolean;
-    @Field(() => Int, {nullable:false})
-    propertyId!: number;
-    @Field(() => Date, {nullable:true})
-    createdAt?: Date | string;
-    @Field(() => Date, {nullable:true})
-    updatedAt?: Date | string;
-}
-
-@InputType()
 export class LeaseCreateNestedManyWithoutPropertyInput {
     @Field(() => [LeaseCreateWithoutPropertyInput], {nullable:true})
     @Type(() => LeaseCreateWithoutPropertyInput)
@@ -1509,9 +1371,6 @@ export class LeaseCreateNestedManyWithoutPropertyInput {
     @Field(() => [LeaseCreateOrConnectWithoutPropertyInput], {nullable:true})
     @Type(() => LeaseCreateOrConnectWithoutPropertyInput)
     connectOrCreate?: Array<LeaseCreateOrConnectWithoutPropertyInput>;
-    @Field(() => LeaseCreateManyPropertyInputEnvelope, {nullable:true})
-    @Type(() => LeaseCreateManyPropertyInputEnvelope)
-    createMany?: InstanceType<typeof LeaseCreateManyPropertyInputEnvelope>;
     @Field(() => [LeaseWhereUniqueInput], {nullable:true})
     @Type(() => LeaseWhereUniqueInput)
     connect?: Array<Prisma.AtLeast<LeaseWhereUniqueInput, 'id'>>;
@@ -1974,9 +1833,6 @@ export class LeaseUncheckedCreateNestedManyWithoutPropertyInput {
     @Field(() => [LeaseCreateOrConnectWithoutPropertyInput], {nullable:true})
     @Type(() => LeaseCreateOrConnectWithoutPropertyInput)
     connectOrCreate?: Array<LeaseCreateOrConnectWithoutPropertyInput>;
-    @Field(() => LeaseCreateManyPropertyInputEnvelope, {nullable:true})
-    @Type(() => LeaseCreateManyPropertyInputEnvelope)
-    createMany?: InstanceType<typeof LeaseCreateManyPropertyInputEnvelope>;
     @Field(() => [LeaseWhereUniqueInput], {nullable:true})
     @Type(() => LeaseWhereUniqueInput)
     connect?: Array<Prisma.AtLeast<LeaseWhereUniqueInput, 'id'>>;
@@ -2043,9 +1899,6 @@ export class LeaseUncheckedUpdateManyWithoutPropertyNestedInput {
     @Field(() => [LeaseUpsertWithWhereUniqueWithoutPropertyInput], {nullable:true})
     @Type(() => LeaseUpsertWithWhereUniqueWithoutPropertyInput)
     upsert?: Array<LeaseUpsertWithWhereUniqueWithoutPropertyInput>;
-    @Field(() => LeaseCreateManyPropertyInputEnvelope, {nullable:true})
-    @Type(() => LeaseCreateManyPropertyInputEnvelope)
-    createMany?: InstanceType<typeof LeaseCreateManyPropertyInputEnvelope>;
     @Field(() => [LeaseWhereUniqueInput], {nullable:true})
     @Type(() => LeaseWhereUniqueInput)
     set?: Array<Prisma.AtLeast<LeaseWhereUniqueInput, 'id'>>;
@@ -2212,9 +2065,6 @@ export class LeaseUpdateManyWithoutPropertyNestedInput {
     @Field(() => [LeaseUpsertWithWhereUniqueWithoutPropertyInput], {nullable:true})
     @Type(() => LeaseUpsertWithWhereUniqueWithoutPropertyInput)
     upsert?: Array<LeaseUpsertWithWhereUniqueWithoutPropertyInput>;
-    @Field(() => LeaseCreateManyPropertyInputEnvelope, {nullable:true})
-    @Type(() => LeaseCreateManyPropertyInputEnvelope)
-    createMany?: InstanceType<typeof LeaseCreateManyPropertyInputEnvelope>;
     @Field(() => [LeaseWhereUniqueInput], {nullable:true})
     @Type(() => LeaseWhereUniqueInput)
     set?: Array<Prisma.AtLeast<LeaseWhereUniqueInput, 'id'>>;
@@ -2337,8 +2187,8 @@ export class LeaseWhereUniqueInput {
     createdAt?: InstanceType<typeof DateTimeFilter>;
     @Field(() => DateTimeFilter, {nullable:true})
     updatedAt?: InstanceType<typeof DateTimeFilter>;
-    @Field(() => PropertyScalarRelationFilter, {nullable:true})
-    property?: InstanceType<typeof PropertyScalarRelationFilter>;
+    @Field(() => PropertyRelationFilter, {nullable:true})
+    property?: InstanceType<typeof PropertyRelationFilter>;
 }
 
 @InputType()
@@ -2371,8 +2221,8 @@ export class LeaseWhereInput {
     createdAt?: InstanceType<typeof DateTimeFilter>;
     @Field(() => DateTimeFilter, {nullable:true})
     updatedAt?: InstanceType<typeof DateTimeFilter>;
-    @Field(() => PropertyScalarRelationFilter, {nullable:true})
-    property?: InstanceType<typeof PropertyScalarRelationFilter>;
+    @Field(() => PropertyRelationFilter, {nullable:true})
+    property?: InstanceType<typeof PropertyRelationFilter>;
 }
 
 @ObjectType()
@@ -2411,8 +2261,6 @@ export class UpdateManyLeaseArgs {
     @Field(() => LeaseWhereInput, {nullable:true})
     @Type(() => LeaseWhereInput)
     where?: InstanceType<typeof LeaseWhereInput>;
-    @Field(() => Int, {nullable:true})
-    limit?: number;
 }
 
 @ArgsType()
@@ -2693,13 +2541,6 @@ export class AggregateProperty {
 }
 
 @ArgsType()
-export class CreateManyPropertyArgs {
-    @Field(() => [PropertyCreateManyInput], {nullable:false})
-    @Type(() => PropertyCreateManyInput)
-    data!: Array<PropertyCreateManyInput>;
-}
-
-@ArgsType()
 export class CreateOnePropertyArgs {
     @Field(() => PropertyCreateInput, {nullable:false})
     @Type(() => PropertyCreateInput)
@@ -2711,8 +2552,6 @@ export class DeleteManyPropertyArgs {
     @Field(() => PropertyWhereInput, {nullable:true})
     @Type(() => PropertyWhereInput)
     where?: InstanceType<typeof PropertyWhereInput>;
-    @Field(() => Int, {nullable:true})
-    limit?: number;
 }
 
 @ArgsType()
@@ -2896,24 +2735,6 @@ export class PropertyCount {
     tickets?: number;
     @Field(() => Int, {nullable:false})
     leases?: number;
-}
-
-@InputType()
-export class PropertyCreateManyInput {
-    @Field(() => Int, {nullable:true})
-    id?: number;
-    @Field(() => String, {nullable:false})
-    address!: string;
-    @Field(() => String, {nullable:false})
-    city!: string;
-    @Field(() => String, {nullable:false})
-    state!: string;
-    @Field(() => String, {nullable:false})
-    zipCode!: string;
-    @Field(() => Date, {nullable:true})
-    createdAt?: Date | string;
-    @Field(() => Date, {nullable:true})
-    updatedAt?: Date | string;
 }
 
 @InputType()
@@ -3283,7 +3104,7 @@ export class PropertyOrderByWithRelationInput {
 }
 
 @InputType()
-export class PropertyScalarRelationFilter {
+export class PropertyRelationFilter {
     @Field(() => PropertyWhereInput, {nullable:true})
     is?: InstanceType<typeof PropertyWhereInput>;
     @Field(() => PropertyWhereInput, {nullable:true})
@@ -3848,8 +3669,6 @@ export class UpdateManyPropertyArgs {
     @Field(() => PropertyWhereInput, {nullable:true})
     @Type(() => PropertyWhereInput)
     where?: InstanceType<typeof PropertyWhereInput>;
-    @Field(() => Int, {nullable:true})
-    limit?: number;
 }
 
 @ArgsType()
@@ -3890,13 +3709,6 @@ export class AggregateTicket {
 }
 
 @ArgsType()
-export class CreateManyTicketArgs {
-    @Field(() => [TicketCreateManyInput], {nullable:false})
-    @Type(() => TicketCreateManyInput)
-    data!: Array<TicketCreateManyInput>;
-}
-
-@ArgsType()
 export class CreateOneTicketArgs {
     @Field(() => TicketCreateInput, {nullable:false})
     @Type(() => TicketCreateInput)
@@ -3908,8 +3720,6 @@ export class DeleteManyTicketArgs {
     @Field(() => TicketWhereInput, {nullable:true})
     @Type(() => TicketWhereInput)
     where?: InstanceType<typeof TicketWhereInput>;
-    @Field(() => Int, {nullable:true})
-    limit?: number;
 }
 
 @ArgsType()
@@ -4098,51 +3908,6 @@ export class TicketCountOrderByAggregateInput {
 }
 
 @InputType()
-export class TicketCreateManyPropertyInputEnvelope {
-    @Field(() => [TicketCreateManyPropertyInput], {nullable:false})
-    @Type(() => TicketCreateManyPropertyInput)
-    data!: Array<TicketCreateManyPropertyInput>;
-}
-
-@InputType()
-export class TicketCreateManyPropertyInput {
-    @Field(() => Int, {nullable:true})
-    id?: number;
-    @Field(() => String, {nullable:false})
-    title!: string;
-    @Field(() => String, {nullable:false})
-    description!: string;
-    @Field(() => String, {nullable:false})
-    priority!: string;
-    @Field(() => String, {nullable:false})
-    status!: string;
-    @Field(() => Date, {nullable:true})
-    createdAt?: Date | string;
-    @Field(() => Date, {nullable:true})
-    updatedAt?: Date | string;
-}
-
-@InputType()
-export class TicketCreateManyInput {
-    @Field(() => Int, {nullable:true})
-    id?: number;
-    @Field(() => String, {nullable:false})
-    title!: string;
-    @Field(() => String, {nullable:false})
-    description!: string;
-    @Field(() => String, {nullable:false})
-    priority!: string;
-    @Field(() => String, {nullable:false})
-    status!: string;
-    @Field(() => Int, {nullable:false})
-    propertyId!: number;
-    @Field(() => Date, {nullable:true})
-    createdAt?: Date | string;
-    @Field(() => Date, {nullable:true})
-    updatedAt?: Date | string;
-}
-
-@InputType()
 export class TicketCreateNestedManyWithoutPropertyInput {
     @Field(() => [TicketCreateWithoutPropertyInput], {nullable:true})
     @Type(() => TicketCreateWithoutPropertyInput)
@@ -4150,9 +3915,6 @@ export class TicketCreateNestedManyWithoutPropertyInput {
     @Field(() => [TicketCreateOrConnectWithoutPropertyInput], {nullable:true})
     @Type(() => TicketCreateOrConnectWithoutPropertyInput)
     connectOrCreate?: Array<TicketCreateOrConnectWithoutPropertyInput>;
-    @Field(() => TicketCreateManyPropertyInputEnvelope, {nullable:true})
-    @Type(() => TicketCreateManyPropertyInputEnvelope)
-    createMany?: InstanceType<typeof TicketCreateManyPropertyInputEnvelope>;
     @Field(() => [TicketWhereUniqueInput], {nullable:true})
     @Type(() => TicketWhereUniqueInput)
     connect?: Array<Prisma.AtLeast<TicketWhereUniqueInput, 'id'>>;
@@ -4531,9 +4293,6 @@ export class TicketUncheckedCreateNestedManyWithoutPropertyInput {
     @Field(() => [TicketCreateOrConnectWithoutPropertyInput], {nullable:true})
     @Type(() => TicketCreateOrConnectWithoutPropertyInput)
     connectOrCreate?: Array<TicketCreateOrConnectWithoutPropertyInput>;
-    @Field(() => TicketCreateManyPropertyInputEnvelope, {nullable:true})
-    @Type(() => TicketCreateManyPropertyInputEnvelope)
-    createMany?: InstanceType<typeof TicketCreateManyPropertyInputEnvelope>;
     @Field(() => [TicketWhereUniqueInput], {nullable:true})
     @Type(() => TicketWhereUniqueInput)
     connect?: Array<Prisma.AtLeast<TicketWhereUniqueInput, 'id'>>;
@@ -4588,9 +4347,6 @@ export class TicketUncheckedUpdateManyWithoutPropertyNestedInput {
     @Field(() => [TicketUpsertWithWhereUniqueWithoutPropertyInput], {nullable:true})
     @Type(() => TicketUpsertWithWhereUniqueWithoutPropertyInput)
     upsert?: Array<TicketUpsertWithWhereUniqueWithoutPropertyInput>;
-    @Field(() => TicketCreateManyPropertyInputEnvelope, {nullable:true})
-    @Type(() => TicketCreateManyPropertyInputEnvelope)
-    createMany?: InstanceType<typeof TicketCreateManyPropertyInputEnvelope>;
     @Field(() => [TicketWhereUniqueInput], {nullable:true})
     @Type(() => TicketWhereUniqueInput)
     set?: Array<Prisma.AtLeast<TicketWhereUniqueInput, 'id'>>;
@@ -4727,9 +4483,6 @@ export class TicketUpdateManyWithoutPropertyNestedInput {
     @Field(() => [TicketUpsertWithWhereUniqueWithoutPropertyInput], {nullable:true})
     @Type(() => TicketUpsertWithWhereUniqueWithoutPropertyInput)
     upsert?: Array<TicketUpsertWithWhereUniqueWithoutPropertyInput>;
-    @Field(() => TicketCreateManyPropertyInputEnvelope, {nullable:true})
-    @Type(() => TicketCreateManyPropertyInputEnvelope)
-    createMany?: InstanceType<typeof TicketCreateManyPropertyInputEnvelope>;
     @Field(() => [TicketWhereUniqueInput], {nullable:true})
     @Type(() => TicketWhereUniqueInput)
     set?: Array<Prisma.AtLeast<TicketWhereUniqueInput, 'id'>>;
@@ -4834,8 +4587,8 @@ export class TicketWhereUniqueInput {
     createdAt?: InstanceType<typeof DateTimeFilter>;
     @Field(() => DateTimeFilter, {nullable:true})
     updatedAt?: InstanceType<typeof DateTimeFilter>;
-    @Field(() => PropertyScalarRelationFilter, {nullable:true})
-    property?: InstanceType<typeof PropertyScalarRelationFilter>;
+    @Field(() => PropertyRelationFilter, {nullable:true})
+    property?: InstanceType<typeof PropertyRelationFilter>;
 }
 
 @InputType()
@@ -4862,8 +4615,8 @@ export class TicketWhereInput {
     createdAt?: InstanceType<typeof DateTimeFilter>;
     @Field(() => DateTimeFilter, {nullable:true})
     updatedAt?: InstanceType<typeof DateTimeFilter>;
-    @Field(() => PropertyScalarRelationFilter, {nullable:true})
-    property?: InstanceType<typeof PropertyScalarRelationFilter>;
+    @Field(() => PropertyRelationFilter, {nullable:true})
+    property?: InstanceType<typeof PropertyRelationFilter>;
 }
 
 @ObjectType()
@@ -4896,8 +4649,6 @@ export class UpdateManyTicketArgs {
     @Field(() => TicketWhereInput, {nullable:true})
     @Type(() => TicketWhereInput)
     where?: InstanceType<typeof TicketWhereInput>;
-    @Field(() => Int, {nullable:true})
-    limit?: number;
 }
 
 @ArgsType()

@@ -1,10 +1,13 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int, Subscription } from '@nestjs/graphql';
 import { PrismaService } from '../prisma.service';
 import { Ticket } from './models/ticket.model';
 import { TicketFiltersInput } from './dto/ticket-filters.input';
 import { CreateTicketInput } from './dto/create-ticket.input';
 import { UpdateTicketInput } from './dto/update-ticket.input';
 import { DeleteTicketResponse } from './dto/delete-ticket.response';
+import { PubSub } from 'graphql-subscriptions';
+
+const pubSub = new PubSub();
 
 @Resolver(() => Ticket)
 export class TicketResolver {
@@ -111,13 +114,18 @@ export class TicketResolver {
             }
         });
 
-        return {
+        const formattedTicket = {
             ...ticket,
             // Convert status and priority to lowercase for client consistency
             status: ticket.status.toLowerCase(),
             priority: ticket.priority.toLowerCase(),
             propertyAddress: ticket.property?.address || 'Unknown'
         };
+
+        // Publish the ticket created event
+        pubSub.publish('ticketUpdated', { ticketUpdated: formattedTicket });
+
+        return formattedTicket;
     }
 
     @Mutation(() => Ticket)
@@ -149,21 +157,42 @@ export class TicketResolver {
             }
         });
 
-        return {
+        const formattedTicket = {
             ...ticket,
             // Convert status and priority to lowercase for client consistency
             status: ticket.status.toLowerCase(),
             priority: ticket.priority.toLowerCase(),
             propertyAddress: ticket.property?.address || 'Unknown'
         };
+
+        // Publish the ticket updated event
+        pubSub.publish('ticketUpdated', { ticketUpdated: formattedTicket });
+
+        return formattedTicket;
     }
 
     @Mutation(() => DeleteTicketResponse)
     async deleteTicket(@Args('id', { type: () => Int }) id: number): Promise<DeleteTicketResponse> {
         try {
-            await this.prisma.ticket.delete({
-                where: { id }
+            const ticket = await this.prisma.ticket.findUnique({
+                where: { id },
+                include: { property: true }
             });
+
+            if (ticket) {
+                await this.prisma.ticket.delete({
+                    where: { id }
+                });
+
+                // Publish the ticket deleted event with the deleted ticket data
+                const formattedTicket = {
+                    ...ticket,
+                    status: ticket.status.toLowerCase(),
+                    priority: ticket.priority.toLowerCase(),
+                    propertyAddress: ticket.property?.address || 'Unknown'
+                };
+                pubSub.publish('ticketUpdated', { ticketUpdated: formattedTicket });
+            }
 
             return {
                 id,
@@ -175,5 +204,10 @@ export class TicketResolver {
                 success: false
             };
         }
+    }
+
+    @Subscription(() => Ticket)
+    ticketUpdated() {
+        return pubSub.asyncIterator('ticketUpdated');
     }
 }

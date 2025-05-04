@@ -118,7 +118,7 @@ export default function ReinvestPage() {
                                     id="surplus-cash"
                                     value={surplusCash}
                                     onChange={(e) => setSurplusCash(e.target.value)}
-                                    className="block w-full pl-7 pr-12 py-2 border border-buena-border rounded-md focus:ring-buena-primary focus:border-buena-primary"
+                                    className="block text-gray-800 w-full pl-7 pr-12 py-2 border border-buena-border rounded-md focus:ring-buena-primary focus:border-buena-primary"
                                     placeholder="0.00"
                                 />
                             </div>

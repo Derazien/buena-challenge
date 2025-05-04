@@ -10,6 +10,7 @@ import {
     Tooltip,
     Legend,
     ChartOptions,
+    Filler
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { useMonthlyIncome } from '@/hooks/useDashboardData';
@@ -22,22 +23,23 @@ ChartJS.register(
     LineElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
+    Filler
 );
 
 // Define the theme colors to match our Tailwind theme
 const chartColors = {
     income: {
-        border: '#10B981', // buena-success
+        border: '#10B981', // green-500
         background: 'rgba(16, 185, 129, 0.2)',
     },
     expenses: {
-        border: '#EF4444', // buena-danger
+        border: '#EF4444', // red-500
         background: 'rgba(239, 68, 68, 0.2)',
     },
     net: {
-        border: '#2563EB', // buena-primary
-        background: 'rgba(37, 99, 235, 0.2)',
+        border: '#3B82F6', // blue-500
+        background: 'rgba(59, 130, 246, 0.2)',
     }
 };
 
@@ -62,7 +64,7 @@ const RevenueLineChart = () => {
     if (error) {
         return (
             <div className="bg-white rounded-md p-4 h-80 flex items-center justify-center">
-                <span className="text-buena-danger">Error loading revenue data</span>
+                <span className="text-red-500">Error loading revenue data</span>
             </div>
         );
     }
@@ -119,21 +121,21 @@ const RevenueLineChart = () => {
             y: {
                 beginAtZero: true,
                 grid: {
-                    color: 'rgba(226, 232, 240, 0.5)', // buena-border with opacity
+                    color: 'rgba(226, 232, 240, 0.5)', // gray-200 with opacity
                 },
                 ticks: {
                     callback: function (value) {
                         return '$' + Number(value).toLocaleString();
                     },
-                    color: '#64748B', // buena-muted
+                    color: '#64748B', // gray-500
                 }
             },
             x: {
                 grid: {
-                    color: 'rgba(226, 232, 240, 0.5)', // buena-border with opacity
+                    color: 'rgba(226, 232, 240, 0.5)', // gray-200 with opacity
                 },
                 ticks: {
-                    color: '#64748B', // buena-muted
+                    color: '#64748B', // gray-500
                 }
             }
         },
@@ -144,7 +146,7 @@ const RevenueLineChart = () => {
                     usePointStyle: true,
                     pointStyle: 'circle',
                     padding: 15,
-                    color: '#1E293B', // buena-dark
+                    color: '#1E293B', // gray-800
                     font: {
                         family: "'Inter', sans-serif",
                     }
@@ -152,9 +154,9 @@ const RevenueLineChart = () => {
             },
             tooltip: {
                 backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                titleColor: '#1E293B', // buena-dark
-                bodyColor: '#64748B', // buena-muted
-                borderColor: 'rgba(226, 232, 240, 0.8)',
+                titleColor: '#1E293B', // gray-800
+                bodyColor: '#64748B', // gray-500
+                borderColor: 'rgba(226, 232, 240, 0.8)', // gray-200 with opacity
                 borderWidth: 1,
                 padding: 12,
                 boxPadding: 6,

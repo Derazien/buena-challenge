@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import Label from '@/components/ui/Label';
 import { Ticket, TicketPriority, TicketStatus } from '@/types/api/tickets.types';
 import { useProperties } from '@/hooks/useProperties';
 
@@ -22,12 +23,16 @@ interface TicketFormProps {
     isSubmitting?: boolean;
 }
 
+// Common input classes
+const inputClasses = "w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800";
+const optionClasses = "text-gray-800";
+
 export default function TicketForm({ mode, initialData, onSubmit, onCancel, isSubmitting = false }: TicketFormProps) {
     const [formData, setFormData] = useState<TicketFormInput>({
         title: initialData?.title || '',
         description: initialData?.description || '',
-        priority: initialData?.priority || 'MEDIUM',
-        status: initialData?.status || 'OPEN',
+        priority: initialData?.priority || 'medium',
+        status: initialData?.status || 'open',
         propertyId: initialData?.propertyId || undefined,
     });
 
@@ -62,25 +67,25 @@ export default function TicketForm({ mode, initialData, onSubmit, onCancel, isSu
                         onChange={() => setUseAI(!useAI)}
                         className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                     />
-                    <label htmlFor="use-ai" className="text-sm text-gray-600">
+                    <Label htmlFor="use-ai" className="!inline text-sm text-gray-600">
                         Use AI to classify this ticket automatically
-                    </label>
+                    </Label>
                 </div>
             )}
 
             <form onSubmit={handleSubmit}>
                 {(!useAI || mode === 'edit') && (
                     <div className="mb-4">
-                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                        <Label htmlFor="title">
                             Title
-                        </label>
+                        </Label>
                         <input
                             id="title"
                             name="title"
                             type="text"
                             value={formData.title}
                             onChange={handleChange}
-                            className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                            className={inputClasses}
                             placeholder="Enter a title for the ticket"
                             required={!useAI}
                         />
@@ -88,16 +93,16 @@ export default function TicketForm({ mode, initialData, onSubmit, onCancel, isSu
                 )}
 
                 <div className="mb-4">
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                    <Label htmlFor="description">
                         Description
-                    </label>
+                    </Label>
                     <textarea
                         id="description"
                         name="description"
                         rows={4}
                         value={formData.description}
                         onChange={handleChange}
-                        className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                        className={inputClasses}
                         placeholder={useAI ? "Describe the issue and we'll automatically classify it..." : "Describe the maintenance issue..."}
                         required
                     ></textarea>
@@ -105,20 +110,20 @@ export default function TicketForm({ mode, initialData, onSubmit, onCancel, isSu
 
                 {mode === 'create' && (
                     <div className="mb-4">
-                        <label htmlFor="propertyId" className="block text-sm font-medium text-gray-700 mb-1">
+                        <Label htmlFor="propertyId">
                             Property
-                        </label>
+                        </Label>
                         <select
                             id="propertyId"
                             name="propertyId"
                             value={formData.propertyId || ''}
                             onChange={handleChange}
-                            className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                            className={inputClasses}
                             required
                         >
-                            <option value="">Select a property</option>
+                            <option value="" className={optionClasses}>Select a property</option>
                             {properties.map((property) => (
-                                <option key={property.id} value={property.id}>
+                                <option key={property.id} value={property.id} className={optionClasses}>
                                     {property.address}, {property.city}, {property.state}
                                 </option>
                             ))}
@@ -129,41 +134,41 @@ export default function TicketForm({ mode, initialData, onSubmit, onCancel, isSu
                 {(!useAI || mode === 'edit') && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
+                            <Label htmlFor="priority">
                                 Priority
-                            </label>
+                            </Label>
                             <select
                                 id="priority"
                                 name="priority"
                                 value={formData.priority}
                                 onChange={handleChange}
-                                className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                className={inputClasses}
                                 required
                             >
-                                <option value="LOW">Low</option>
-                                <option value="MEDIUM">Medium</option>
-                                <option value="HIGH">High</option>
-                                <option value="URGENT">Urgent</option>
+                                <option value="low" className={optionClasses}>Low</option>
+                                <option value="medium" className={optionClasses}>Medium</option>
+                                <option value="high" className={optionClasses}>High</option>
+                                <option value="urgent" className={optionClasses}>Urgent</option>
                             </select>
                         </div>
 
                         {mode === 'edit' && (
                             <div>
-                                <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+                                <Label htmlFor="status">
                                     Status
-                                </label>
+                                </Label>
                                 <select
                                     id="status"
                                     name="status"
                                     value={formData.status}
                                     onChange={handleChange}
-                                    className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className={inputClasses}
                                     required
                                 >
-                                    <option value="OPEN">Open</option>
-                                    <option value="IN_PROGRESS">In Progress</option>
-                                    <option value="PENDING">Pending</option>
-                                    <option value="RESOLVED">Resolved</option>
+                                    <option value="open" className={optionClasses}>Open</option>
+                                    <option value="in_progress" className={optionClasses}>In Progress</option>
+                                    <option value="pending" className={optionClasses}>Pending</option>
+                                    <option value="resolved" className={optionClasses}>Resolved</option>
                                 </select>
                             </div>
                         )}

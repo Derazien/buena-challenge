@@ -1,20 +1,14 @@
 import { Controller, Post, Body } from '@nestjs/common';
-import { LlamaService } from './llama.service';
+import { AiService } from './ai.service';
 
 @Controller('ai')
 export class AiController {
-    constructor(private readonly llamaService: LlamaService) { }
+    constructor(private readonly aiService: AiService) { }
 
-    @Post('suggest-investment')
-    async suggestInvestment(
-        @Body('surplusCash') surplusCash: number,
-        @Body('riskProfile') riskProfile: string,
-    ) {
-        return this.llamaService.suggestInvestment(surplusCash, riskProfile);
-    }
-
-    @Post('classify-ticket')
-    async classifyTicket(@Body('description') description: string) {
-        return this.llamaService.classifyTicket(description);
+    @Post('analyze-ticket')
+    async analyzeTicket(@Body('text') text: string) {
+        return {
+            analysis: await this.aiService.analyzeTicket(text)
+        };
     }
 }
