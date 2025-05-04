@@ -7,11 +7,14 @@ import Link from 'next/link';
 import { useOpenTickets } from '@/hooks/useDashboardData';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Ticket } from '@/types/api/tickets.types';
+import AnimatedCard from '@/components/common/AnimatedCard';
+import AnimatedText from '@/components/common/AnimatedText';
 
-interface ExtendedTicket extends Ticket {
+// Define the type based on what actually comes from the hook
+type OpenTicket = Ticket & {
     propertyAddress: string;
     propertyId: number;
-}
+};
 
 const getPriorityVariant = (priority: string) => {
     switch (priority) {
@@ -54,7 +57,7 @@ const OpenTicketsCard = () => {
 
     if (loading) {
         return (
-            <Card borderColor="warning">
+            <AnimatedCard className="p-5">
                 <div className="flex flex-col space-y-4">
                     <div className="flex justify-between">
                         <Skeleton className="h-6 w-1/3" />
@@ -69,46 +72,53 @@ const OpenTicketsCard = () => {
                         <Skeleton className="h-10 w-full" />
                     </div>
                 </div>
-            </Card>
+            </AnimatedCard>
         );
     }
 
     if (error) {
         return (
-            <Card borderColor="danger">
-                <div className="text-red-500">Error loading ticket data</div>
-            </Card>
+            <AnimatedCard className="p-5" borderColor="danger">
+                <div className="text-destructive">Error loading ticket data</div>
+            </AnimatedCard>
         );
     }
 
     return (
-        <Card borderColor="warning">
+        <AnimatedCard className="p-5" hoverEffect="scale" delay={0.2} once={false} borderColor="warning">
             <div className="flex items-start justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-800">Open Tickets</h2>
+                <h2 className="text-lg font-medium text-foreground">
+                    <AnimatedText
+                        text="Open Tickets"
+                        animation="slide-up"
+                        type="word"
+                        once={false}
+                    />
+                </h2>
                 <Badge variant="info">{ticketCount}</Badge>
             </div>
 
-            <div className="text-3xl font-bold text-amber-500">{ticketCount}</div>
-            <div className="mt-1 text-gray-500 text-sm">Needs attention</div>
+            <div className="text-2xl font-bold text-amber-500/90">{ticketCount}</div>
+            <div className="mt-1 text-muted-foreground text-sm">Needs attention</div>
 
             <div className="mt-6 space-y-3">
                 {openTickets.length > 0 ? (
-                    openTickets.slice(0, 2).map((ticket: ExtendedTicket) => (
-                        <div key={ticket.id} className="p-4 rounded-lg border border-gray-200 bg-gradient-to-r from-white to-gray-50 hover:shadow-sm transition-shadow">
+                    openTickets.slice(0, 2).map((ticket) => (
+                        <div key={ticket.id} className="p-4 rounded-lg border border-border bg-gradient-to-r from-background to-muted hover:shadow-sm transition-shadow">
                             <div className="flex justify-between">
-                                <div className="font-medium text-gray-800">{ticket.title}</div>
+                                <div className="font-medium text-foreground">{ticket.title}</div>
                                 <Badge variant={getPriorityVariant(ticket.priority)} className="flex items-center">
                                     {getPriorityIcon(ticket.priority)}
                                     {ticket.priority}
                                 </Badge>
                             </div>
-                            <div className="text-sm text-gray-500 mt-2">{ticket.description}</div>
-                            <div className="text-xs text-gray-500 mt-2">{ticket.propertyAddress}</div>
+                            <div className="text-sm text-muted-foreground mt-2">{ticket.description}</div>
+                            <div className="text-xs text-muted-foreground mt-2">{ticket.propertyAddress}</div>
                         </div>
                     ))
                 ) : (
-                    <div className="text-center p-4 text-gray-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto mb-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="text-center p-4 text-muted-foreground">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto mb-2 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
                         </svg>
                         No open tickets at this time
@@ -116,7 +126,7 @@ const OpenTicketsCard = () => {
                 )}
 
                 {openTickets.length > 2 && (
-                    <div className="text-center text-sm text-gray-500 py-2 bg-gray-50 rounded-md">
+                    <div className="text-center text-sm text-muted-foreground py-2 bg-muted rounded-md">
                         +{openTickets.length - 2} more tickets
                     </div>
                 )}
@@ -134,7 +144,7 @@ const OpenTicketsCard = () => {
                     </Button>
                 </Link>
             </div>
-        </Card>
+        </AnimatedCard>
     );
 };
 

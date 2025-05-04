@@ -3,6 +3,23 @@ import { Property } from './property.types';
 export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
 
+export interface TicketAttachment {
+    filename: string;
+    size: number;
+    type: string;
+    url: string;
+}
+
+export interface TicketMetadata {
+    contactPhone?: string;
+    contactEmail?: string;
+    estimatedCost?: string;
+    dueDate?: string;
+    notes?: string;
+    useAI?: boolean;
+    attachments?: TicketAttachment[];
+}
+
 export interface Ticket {
     id: number;
     title: string;
@@ -15,6 +32,7 @@ export interface Ticket {
     createdBy?: number;
     createdAt: string;
     updatedAt: string;
+    metadata?: TicketMetadata;
 }
 
 export interface TicketFormInput {
@@ -24,6 +42,13 @@ export interface TicketFormInput {
     priority?: TicketPriority;
     propertyId?: number;
     useAI?: boolean;
+    contactPhone?: string;
+    contactEmail?: string;
+    estimatedCost?: string;
+    dueDate?: string;
+    notes?: string;
+    attachments?: File[];
+    existingAttachments?: TicketAttachment[];
 }
 
 export interface CreateTicketInput {
@@ -32,6 +57,7 @@ export interface CreateTicketInput {
     priority: TicketPriority;
     status: TicketStatus;
     propertyId: number;
+    metadata?: TicketMetadata;
 }
 
 export interface UpdateTicketInput {
@@ -40,6 +66,7 @@ export interface UpdateTicketInput {
     description?: string;
     priority?: TicketPriority;
     status?: TicketStatus;
+    metadata?: TicketMetadata;
 }
 
 export interface TicketFilterOptions {

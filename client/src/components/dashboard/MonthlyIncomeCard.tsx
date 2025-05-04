@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import AnimatedCard from '@/components/common/AnimatedCard';
+import AnimatedText from '@/components/common/AnimatedText';
 
 const MonthlyIncomeCard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('month');
@@ -25,27 +27,32 @@ const MonthlyIncomeCard = () => {
   ];
 
   return (
-    <Card className="dark:bg-neutral-800 bg-white p-5">
+    <AnimatedCard className="p-5" hoverEffect="lift" delay={0.1} once={false}>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium dark:text-white text-neutral-900">Monthly Income</h3>
+        <h2 className="text-lg font-medium text-foreground">
+          <AnimatedText
+            text="Monthly Income"
+            animation="slide-up"
+            type="word"
+            once={false}
+          />
+        </h2>
         <div className="flex space-x-2">
           <button
             onClick={() => setSelectedPeriod('month')}
-            className={`px-3 py-1 text-xs rounded-md ${
-              selectedPeriod === 'month'
-                ? 'bg-primary text-white'
-                : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300'
-            }`}
+            className={`px-3 py-1 text-xs rounded-md ${selectedPeriod === 'month'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted text-muted-foreground'
+              }`}
           >
             Month
           </button>
           <button
             onClick={() => setSelectedPeriod('year')}
-            className={`px-3 py-1 text-xs rounded-md ${
-              selectedPeriod === 'year'
-                ? 'bg-primary text-white'
-                : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300'
-            }`}
+            className={`px-3 py-1 text-xs rounded-md ${selectedPeriod === 'year'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted text-muted-foreground'
+              }`}
           >
             Year
           </button>
@@ -54,39 +61,51 @@ const MonthlyIncomeCard = () => {
 
       <div className="mb-4">
         <div className="flex items-end space-x-2">
-          <span className="text-2xl font-bold dark:text-white text-neutral-900">${monthlyIncome.current}</span>
-          <div className={`text-xs px-1.5 py-0.5 rounded-full ${monthlyIncome.percentageChange >= 0 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'}`}>
+          <AnimatedText
+            text={`$${monthlyIncome.current}`}
+            className="text-2xl font-bold text-foreground"
+            animation="bounce"
+            delay={0.2}
+            once={false}
+          />
+          <div className={`text-xs px-1.5 py-0.5 rounded-full ${monthlyIncome.percentageChange >= 0
+            ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+            : 'bg-destructive/15 text-destructive'}`}>
             {monthlyIncome.percentageChange >= 0 ? '+' : ''}{monthlyIncome.percentageChange}%
           </div>
         </div>
-        <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">Compared to ${monthlyIncome.previous} last period</p>
+        <p className="text-xs text-muted-foreground mt-1">Compared to ${monthlyIncome.previous} last period</p>
       </div>
 
-      {/* Simple bar chart */}
+      {/* Simple bar chart with animations */}
       <div className="h-32 mt-4 flex items-end space-x-1">
         {monthlyData.map((item, index) => {
           const maxValue = Math.max(...monthlyData.map(d => d.value));
           const height = `${(item.value / maxValue) * 100}%`;
           const isLatest = index === monthlyData.length - 1;
-          
+
           return (
             <div key={index} className="flex-1 flex flex-col items-center">
-              <div 
-                className={`w-full rounded-t-sm ${isLatest ? 'bg-primary' : 'bg-primary/40 dark:bg-primary/30'}`} 
-                style={{ height }}
+              <div
+                className={`w-full rounded-t-sm ${isLatest ? 'bg-primary' : 'bg-primary/40'}`}
+                style={{
+                  height,
+                  transition: 'height 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transitionDelay: `${index * 0.1}s`
+                }}
               />
-              <span className="text-xs mt-1 text-neutral-500 dark:text-neutral-400">
+              <span className="text-xs mt-1 text-muted-foreground">
                 {item.month}
               </span>
             </div>
           );
         })}
       </div>
-      
+
       <div className="mt-4">
         <Button className="w-full">Manage Income</Button>
       </div>
-    </Card>
+    </AnimatedCard>
   );
 };
 

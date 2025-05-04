@@ -1,105 +1,110 @@
 import type { Config } from "tailwindcss";
+import animatePlugin from "tailwindcss-animate";
 
-const config = {
+const config: Config = {
     content: [
         './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
         './src/components/**/*.{js,ts,jsx,tsx,mdx}',
         './src/app/**/*.{js,ts,jsx,tsx,mdx}',
     ],
-    darkMode: 'class', // Enable dark mode with class
+    darkMode: "selector",
     theme: {
+        container: {
+            center: true,
+            padding: "2rem",
+            screens: {
+                "2xl": "1400px",
+            },
+        },
         extend: {
             colors: {
-                white: '#ffffff',
-                transparent: 'transparent',
-                current: 'currentColor',
-                background: {
-                    DEFAULT: 'hsl(var(--background))',
-                },
-                foreground: {
-                    DEFAULT: 'hsl(var(--foreground))',
-                },
-                border: 'hsl(var(--border))',
-                stone: {
-                    50: '#FAFAF9',
-                    100: '#F5F5F4',
-                    200: '#E7E5E4',
-                    300: '#D6D3D1',
-                    400: '#A8A29E',
-                    500: '#78716C',
-                    600: '#57534E',
-                    700: '#44403C',
-                    800: '#292524',
-                    950: '#1C1917'
-                },
-                neutral: {
-                    50: '#FAFAFA',
-                    100: '#F5F5F5',
-                    200: '#E5E5E5',
-                    300: '#D4D4D4',
-                    400: '#A3A3A3',
-                    500: '#737373',
-                    600: '#525252',
-                    700: '#404040',
-                    800: '#262626',
-                    900: '#171717',
-                    950: '#0A0A0A'
-                },
-                gray: {
-                    300: '#D1D5DB',
-                    400: '#9CA3AF',
-                },
-                ring: 'hsl(var(--ring))',
-                input: 'hsl(var(--input))',
+                border: "hsl(var(--border))",
+                input: "hsl(var(--input))",
+                ring: "hsl(var(--ring))",
+                background: "hsl(var(--background))",
+                foreground: "hsl(var(--foreground))",
                 primary: {
-                    DEFAULT: 'hsl(var(--primary))',
-                    foreground: 'hsl(var(--primary-foreground))',
+                    DEFAULT: "hsl(var(--primary))",
+                    foreground: "hsl(var(--primary-foreground))",
                 },
                 secondary: {
-                    DEFAULT: 'hsl(var(--secondary))',
-                    foreground: 'hsl(var(--secondary-foreground))',
+                    DEFAULT: "hsl(var(--secondary))",
+                    foreground: "hsl(var(--secondary-foreground))",
                 },
                 destructive: {
-                    DEFAULT: 'hsl(var(--destructive))',
-                    foreground: 'hsl(var(--destructive-foreground))',
+                    DEFAULT: "hsl(var(--destructive))",
+                    foreground: "hsl(var(--destructive-foreground))",
                 },
                 muted: {
-                    DEFAULT: 'hsl(var(--muted))',
-                    foreground: 'hsl(var(--muted-foreground))',
+                    DEFAULT: "hsl(var(--muted))",
+                    foreground: "hsl(var(--muted-foreground))",
                 },
                 accent: {
-                    DEFAULT: 'hsl(var(--accent))',
-                    foreground: 'hsl(var(--accent-foreground))',
+                    DEFAULT: "hsl(var(--accent))",
+                    foreground: "hsl(var(--accent-foreground))",
                 },
                 popover: {
-                    DEFAULT: 'hsl(var(--popover))',
-                    foreground: 'hsl(var(--popover-foreground))',
+                    DEFAULT: "hsl(var(--popover))",
+                    foreground: "hsl(var(--popover-foreground))",
                 },
                 card: {
-                    DEFAULT: 'hsl(var(--card))',
-                    foreground: 'hsl(var(--card-foreground))',
+                    DEFAULT: "hsl(var(--card))",
+                    foreground: "hsl(var(--card-foreground))",
+                },
+                gray: {
+                    50: '#f9fafb',
+                    100: '#f3f4f6',
+                    200: '#e5e7eb',
+                    300: '#d1d5db',
+                    400: '#9ca3af',
+                    500: '#6b7280',
+                    600: '#4b5563',
+                    700: '#374151',
+                    800: '#1f2937',
+                    900: '#111827',
+                    950: '#030712',
+                },
+                slate: {
+                    50: '#f8fafc',
+                    100: '#f1f5f9',
+                    200: '#e2e8f0',
+                    300: '#cbd5e1',
+                    400: '#94a3b8',
+                    500: '#64748b',
+                    600: '#475569',
+                    700: '#334155',
+                    800: '#1e293b',
+                    900: '#0f172a',
+                    950: '#020617',
                 },
             },
-            boxShadow: {
-                level1: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                sm: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-                DEFAULT: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            },
             borderRadius: {
-                12: '0.75rem',
-                card: '0.75rem',
-                button: '0.75rem',
+                lg: "var(--radius)",
+                md: "calc(var(--radius) - 2px)",
+                sm: "calc(var(--radius) - 4px)",
             },
-            fontFamily: {
-                sans: ['var(--font-inter)', 'Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
+            keyframes: {
+                "caret-blink": {
+                    "0%,70%,100%": { opacity: "1" },
+                    "20%,50%": { opacity: "0" },
+                },
+                "accordion-down": {
+                    from: { height: "0" },
+                    to: { height: "var(--radix-accordion-content-height)" },
+                },
+                "accordion-up": {
+                    from: { height: "var(--radix-accordion-content-height)" },
+                    to: { height: "0" },
+                },
             },
-            fontSize: {
-                just16: '16px',
-            }
+            animation: {
+                "accordion-down": "accordion-down 0.2s ease-out",
+                "accordion-up": "accordion-up 0.2s ease-out",
+                "caret-blink": "caret-blink 1.25s ease-out infinite",
+            },
         },
     },
-    plugins: [],
-} satisfies Config;
+    plugins: [animatePlugin],
+};
 
 export default config;
