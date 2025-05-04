@@ -1,11 +1,28 @@
 'use client';
 
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useState, createContext, useContext } from 'react';
 import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink, from, HttpLink } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import { RetryLink } from '@apollo/client/link/retry';
 import { NotificationProvider } from '@/components/notifications/NotificationContext';
+
+// Create theme context
+type Theme = 'light' | 'dark';
+interface ThemeContextType {
+    theme: Theme;
+    toggleTheme: () => void;
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export const useTheme = () => {
+    const context = useContext(ThemeContext);
+    if (context === undefined) {
+        throw new Error('useTheme must be used within a ThemeProvider');
+    }
+    return context;
+};
 
 interface ProvidersProps {
     children: ReactNode;
@@ -16,6 +33,30 @@ export default function Providers({ children }: ProvidersProps) {
     const [client, setClient] = useState<ApolloClient<any> | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
+
+    // Theme state
+    const [theme, setTheme] = useState<Theme>('light');
+
+    useEffect(() => {
+        // Initialize theme from localStorage
+        const savedTheme = localStorage.getItem('theme') as Theme;
+        if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+            setTheme(savedTheme);
+            document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+        } else {
+            // Check user preference
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            setTheme(prefersDark ? 'dark' : 'light');
+            document.documentElement.classList.toggle('dark', prefersDark);
+        }
+    }, []);
+
+    const toggleTheme = () => {
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
+        localStorage.setItem('theme', newTheme);
+        document.documentElement.classList.toggle('dark', newTheme === 'dark');
+    };
 
     useEffect(() => {
         try {
@@ -156,9 +197,11 @@ export default function Providers({ children }: ProvidersProps) {
 
     return (
         <ApolloProvider client={client}>
-            <NotificationProvider>
-                {children}
-            </NotificationProvider>
+            <ThemeContext.Provider value={{ theme, toggleTheme }}>
+                <NotificationProvider>
+                    {children}
+                </NotificationProvider>
+            </ThemeContext.Provider>
         </ApolloProvider>
     );
 }

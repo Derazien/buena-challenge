@@ -23,10 +23,28 @@ import { motion } from 'framer-motion';
 import KanbanItem from './KanbanItem';
 import Badge from '@/components/ui/Badge';
 import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 
 type KanbanBoardProps = {
   onViewTicket: (ticket: Ticket) => void;
   onEditTicket: (ticket: Ticket) => void;
+};
+
+// Sort function for tickets based on criteria
+const sortTickets = (tickets: Ticket[]) => {
+  return [...tickets].sort((a, b) => {
+    // First sort by status (OPEN first, then IN_PROGRESS, then RESOLVED)
+    const statusOrder = { OPEN: 0, IN_PROGRESS: 1, RESOLVED: 2 };
+    const aStatus = statusOrder[a.status as keyof typeof statusOrder] || 3;
+    const bStatus = statusOrder[b.status as keyof typeof statusOrder] || 3;
+
+    if (aStatus !== bStatus) {
+      return aStatus - bStatus;
+    }
+
+    // Then sort by createdAt date (newest first)
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 };
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, onEditTicket }) => {
@@ -40,6 +58,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, onEditTicket })
   const [activeColumn, setActiveColumn] = useState<string | null>(null);
   const [draggedOverColumn, setDraggedOverColumn] = useState<string | null>(null);
   const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
+  const [isSorting, setIsSorting] = useState<boolean>(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -60,6 +79,38 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, onEditTicket })
       ));
     }
   }, [tickets]);
+
+  // Function to auto-sort tickets within each column
+  const handleAutoSort = () => {
+    setIsSorting(true);
+
+    if (tickets) {
+      try {
+        // Sort tickets in each column
+        const sortedUrgent = sortTickets(urgentTickets);
+        const sortedHigh = sortTickets(highTickets);
+        const sortedNormal = sortTickets(normalTickets);
+
+        // Update state
+        setUrgentTickets(sortedUrgent);
+        setHighTickets(sortedHigh);
+        setNormalTickets(sortedNormal);
+
+        addNotification({
+          type: 'success',
+          message: 'Tickets sorted successfully'
+        });
+      } catch (error) {
+        console.error('Error sorting tickets:', error);
+        addNotification({
+          type: 'error',
+          message: 'Failed to sort tickets'
+        });
+      } finally {
+        setIsSorting(false);
+      }
+    }
+  };
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
@@ -296,6 +347,48 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, onEditTicket })
           </div>
         </div>
       </Card>
+
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold">Task Board</h2>
+
+        <Button
+          variant="outline"
+          onClick={handleAutoSort}
+          disabled={isSorting || !tickets || tickets.length === 0}
+          className="flex items-center gap-2 px-3 py-2"
+        >
+          {isSorting ? (
+            <>
+              <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full mr-1"></span>
+              Sorting...
+            </>
+          ) : (
+            <>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="mr-1"
+              >
+                <path d="M11 5h10"></path>
+                <path d="M11 9h7"></path>
+                <path d="M11 13h4"></path>
+                <path d="M3 17h18"></path>
+                <path d="M3 21h18"></path>
+                <path d="M3 9l4-4 4 4"></path>
+                <path d="M3 13V5"></path>
+              </svg>
+              Auto Sort
+            </>
+          )}
+        </Button>
+      </div>
 
       <DndContext
         sensors={sensors}

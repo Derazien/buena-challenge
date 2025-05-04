@@ -8,6 +8,9 @@ const nextConfig = {
     NEXT_PUBLIC_GRAPHQL_HTTP_URL: 'http://localhost:5001/graphql',
     NEXT_PUBLIC_GRAPHQL_WS_URL: 'ws://localhost:5001/graphql',
   },
+  images: {
+    domains: ['images.unsplash.com'],
+  },
 };
 
-module.exports = nextConfig; 
+module.exports = nextConfig;

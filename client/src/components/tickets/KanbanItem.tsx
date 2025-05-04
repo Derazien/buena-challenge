@@ -128,7 +128,12 @@ const KanbanItem: React.FC<KanbanItemProps> = ({
         transition-all duration-200 touch-manipulation
         bg-gradient-to-r from-card to-background/80
       `}
-      onClick={() => !isDragging && onViewTicket(ticket)}
+      onClick={(e) => {
+        if (!isDragging) {
+          e.stopPropagation();
+          onViewTicket(ticket);
+        }
+      }}
       data-dragging={isDragging ? 'true' : 'false'}
       onTouchStart={handleTouchStart}
       {...attributes}
