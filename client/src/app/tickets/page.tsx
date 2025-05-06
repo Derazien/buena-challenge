@@ -302,13 +302,17 @@ export default function TicketsPage() {
                         </Button>
                         <div className="flex items-center space-x-2">
                             <button
-                                className={`px-2 py-1 rounded text-sm ${viewMode === 'list' ? 'bg-primary text-white' : 'bg-transparent text-muted-foreground hover:text-foreground'}`}
+                                className={`px-2 py-1 rounded text-sm ${viewMode === 'list'
+                                    ? 'bg-primary text-primary-foreground font-medium'
+                                    : 'bg-muted text-foreground hover:bg-muted/80'}`}
                                 onClick={() => setViewMode('list')}
                             >
                                 List
                             </button>
                             <button
-                                className={`px-2 py-1 rounded text-sm ${viewMode === 'kanban' ? 'bg-primary text-white' : 'bg-transparent text-muted-foreground hover:text-foreground'}`}
+                                className={`px-2 py-1 rounded text-sm ${viewMode === 'kanban'
+                                    ? 'bg-primary text-primary-foreground font-medium'
+                                    : 'bg-muted text-foreground hover:bg-muted/80'}`}
                                 onClick={() => setViewMode('kanban')}
                             >
                                 Kanban

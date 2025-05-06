@@ -13,15 +13,91 @@ import Link from 'next/link';
 import ScrollRevealCard from '@/components/portfolio/ScrollRevealCard';
 
 // Dynamically import components that use browser APIs to avoid hydration errors
-const RentGauge3D = dynamic(() => import('@/components/portfolio/RentGauge3D'), {
+const RentGauge2D = dynamic(() => import('@/components/portfolio/RentGauge2D'), {
     ssr: false,
-    loading: () => <div className="h-[400px] bg-muted/30 rounded-md flex items-center justify-center">Loading 3D visualization...</div>
+    loading: () => <div className="h-[400px] bg-muted/30 rounded-md flex items-center justify-center">Loading visualization...</div>
 });
 
 const ParallaxBalanceTicker = dynamic(() => import('@/components/portfolio/ParallaxBalanceTicker'), {
     ssr: false,
     loading: () => <div className="h-[200px] bg-muted/30 rounded-md flex items-center justify-center">Loading ticker...</div>
 });
+
+// Import the PropertyModelModal component
+const PropertyModelModal = dynamic(() => import('@/components/portfolio/PropertyModelModal'), {
+    ssr: false,
+    loading: () => <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"><LoadingSpinner text="Loading 3D models..." /></div>
+});
+
+// Sample 3D property data
+const samplePropertyModels = [
+    {
+        id: 1,
+        name: 'Stadtmitte Wohnung',
+        location: 'Berlin',
+        type: 'apartment' as const,
+        description: 'Elegant gestaltete Wohnung im Herzen von Berlin mit hervorragender Anbindung an öffentliche Verkehrsmittel, Restaurants und Einkaufsmöglichkeiten. Diese Immobilie bietet modernen Komfort und klassische Architektur.',
+        details: {
+            size: 85,
+            bedrooms: 2,
+            yearBuilt: 2012,
+            rentalYield: 4.2
+        }
+    },
+    {
+        id: 2,
+        name: 'Altbau Mehrfamilienhaus',
+        location: 'München',
+        type: 'building' as const,
+        description: 'Beeindruckendes Mehrfamilienhaus im Altbaustil, vollständig renoviert mit modernen Annehmlichkeiten bei gleichzeitiger Bewahrung des historischen Charmes. Ideal für Anleger, die ein stabiles Einkommen in einer der begehrtesten Städte Deutschlands suchen.',
+        details: {
+            size: 620,
+            floors: 5,
+            yearBuilt: 1928,
+            rentalYield: 3.8
+        }
+    },
+    {
+        id: 3,
+        name: 'Neubauwohnung am Rhein',
+        location: 'Köln',
+        type: 'apartment' as const,
+        description: 'Luxuriöse Neubauwohnung mit atemberaubendem Blick auf den Rhein. Diese moderne Wohnung bietet höchsten Wohnkomfort mit energieeffizienter Technologie und erstklassigen Materialien.',
+        details: {
+            size: 110,
+            bedrooms: 3,
+            yearBuilt: 2021,
+            rentalYield: 4.6
+        }
+    },
+    {
+        id: 4,
+        name: 'Historisches Doppelhaus',
+        location: 'Hamburg',
+        type: 'house' as const,
+        description: 'Wunderschönes Doppelhaus in einem ruhigen Viertel von Hamburg. Diese geräumige Immobilie bietet viel Platz für Familien und verfügt über einen gepflegten Garten, der zum Entspannen einlädt.',
+        details: {
+            size: 180,
+            bedrooms: 4,
+            floors: 2,
+            yearBuilt: 1956,
+            rentalYield: 3.5
+        }
+    },
+    {
+        id: 5,
+        name: 'Gründerzeit Wohnanlage',
+        location: 'Frankfurt',
+        type: 'building' as const,
+        description: 'Imposante Wohnanlage aus der Gründerzeit mit luxuriösen Details und modernen Annehmlichkeiten. Diese Immobilie bietet einen hervorragenden Mietertrag in einer der wirtschaftlich stärksten Städte Deutschlands.',
+        details: {
+            size: 750,
+            floors: 6,
+            yearBuilt: 1901,
+            rentalYield: 4.1
+        }
+    }
+];
 
 // Define investment suggestion types
 type Investment = {
@@ -289,6 +365,7 @@ export default function InvestmentsPage() {
     const [isRecommendationLoading, setIsRecommendationLoading] = useState(false);
     const [optimizedPortfolioView, setOptimizedPortfolioView] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
+    const [show3DModelModal, setShow3DModelModal] = useState(false);
 
     // Investment Wizard State
     const [step, setStep] = useState(1);
@@ -320,27 +397,28 @@ export default function InvestmentsPage() {
             availableToReinvest: 25000,
             // Added sample property data
             properties: [
-                { id: 1, name: 'Berlin Apartment', location: 'Berlin', monthlyRent: 3500, occupancyRate: 0.98 },
-                { id: 2, name: 'Paris Flat', location: 'Paris', monthlyRent: 4200, occupancyRate: 0.95 },
-                { id: 3, name: 'Rome Condo', location: 'Rome', monthlyRent: 2800, occupancyRate: 0.92 },
-                { id: 4, name: 'Madrid Villa', location: 'Madrid', monthlyRent: 2000, occupancyRate: 0.88 }
+                { id: 1, name: 'Stadtmitte Wohnung', location: 'Berlin', monthlyRent: 2800, occupancyRate: 0.98 },
+                { id: 2, name: 'Altbau Mehrfamilienhaus', location: 'München', monthlyRent: 4200, occupancyRate: 0.95 },
+                { id: 3, name: 'Neubauwohnung am Rhein', location: 'Köln', monthlyRent: 2100, occupancyRate: 0.96 },
+                { id: 4, name: 'Historisches Doppelhaus', location: 'Hamburg', monthlyRent: 3400, occupancyRate: 0.92 },
+                { id: 5, name: 'Gründerzeit Wohnanlage', location: 'Frankfurt', monthlyRent: 2750, occupancyRate: 0.94 }
             ],
             // Portfolio data
             reserveBalance: 24845,
             monthlyGrowth: 2.3,
             targetMonthlyRent: 18000,
             allocationBreakdown: [
-                { category: 'Bonds', percentage: 25, amount: 6211.25 },
-                { category: 'REITs', percentage: 35, amount: 8695.75 },
-                { category: 'Stocks', percentage: 30, amount: 7453.50 },
-                { category: 'Cash', percentage: 10, amount: 2484.50 }
+                { category: 'Anleihen', percentage: 25, amount: 6211.25 },
+                { category: 'Immobilienfonds', percentage: 35, amount: 8695.75 },
+                { category: 'Aktien', percentage: 30, amount: 7453.50 },
+                { category: 'Bargeld', percentage: 10, amount: 2484.50 }
             ],
             monthlyPerformance: [
                 { month: 'Jan', income: 14200 },
                 { month: 'Feb', income: 14500 },
-                { month: 'Mar', income: 14800 },
+                { month: 'Mär', income: 14800 },
                 { month: 'Apr', income: 15100 },
-                { month: 'May', income: 15400 },
+                { month: 'Mai', income: 15400 },
                 { month: 'Jun', income: 15750 }
             ]
         };
@@ -518,50 +596,48 @@ export default function InvestmentsPage() {
                         {/* Investment Summary */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <Card className="p-6 md:col-span-2">
-                                <h2 className="text-xl font-semibold mb-4">Rental Income Overview</h2>
+                                <h2 className="text-xl font-semibold mb-4">Mieteinnahmen Übersicht</h2>
 
-                                {isMounted && (
-                                    <div className="h-[400px]">
-                                        <RentGauge3D
-                                            monthlyRent={portfolioData.monthlyRentIn}
-                                            targetAmount={portfolioData.targetMonthlyRent}
-                                        />
-                                    </div>
-                                )}
+                                <div className="h-[400px]">
+                                    <RentGauge2D
+                                        monthlyRent={portfolioData.monthlyRentIn}
+                                        targetAmount={portfolioData.targetMonthlyRent}
+                                    />
+                                </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
                                     <div className="bg-muted/20 p-4 rounded-lg">
-                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Monthly Rental Income</h3>
+                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Monatliche Mieteinnahmen</h3>
                                         <div className="flex items-center">
-                                            <p className="text-2xl font-bold">€{portfolioData.monthlyRentIn.toLocaleString()}</p>
-                                            <span className="ml-2 text-sm text-green-600">+{portfolioData.monthlyGrowth}%</span>
+                                            <p className="text-2xl font-bold">€{portfolioData.monthlyRentIn.toLocaleString('de-DE')}</p>
+                                            <span className="ml-2 text-sm text-green-600">+{portfolioData.monthlyGrowth.toLocaleString('de-DE').replace('.', ',')}%</span>
                                         </div>
                                     </div>
                                     <div className="bg-muted/20 p-4 rounded-lg">
-                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Available for Investment</h3>
-                                        <p className="text-2xl font-bold">€{portfolioData.availableToReinvest.toLocaleString()}</p>
+                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Verfügbar für Investitionen</h3>
+                                        <p className="text-2xl font-bold">€{portfolioData.availableToReinvest.toLocaleString('de-DE')}</p>
                                     </div>
                                 </div>
                             </Card>
 
                             <Card className="p-6">
-                                <h2 className="text-xl font-semibold mb-4">Market Metrics</h2>
+                                <h2 className="text-xl font-semibold mb-4">Markt Kennzahlen</h2>
                                 <div className="space-y-4">
                                     <div>
-                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Forecasted Annual Yield</h3>
-                                        <p className="text-2xl font-bold">{(portfolioData.forecastedYield * 100).toFixed(2)}%</p>
+                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Prognostizierte Jahresrendite</h3>
+                                        <p className="text-2xl font-bold">{(portfolioData.forecastedYield * 100).toFixed(2).replace('.', ',')}%</p>
                                     </div>
                                     <div>
                                         <h3 className="text-sm font-medium text-muted-foreground mb-1">Euribor 3M</h3>
-                                        <p className="text-lg">{(portfolioData.euribor3M * 100).toFixed(2)}%</p>
+                                        <p className="text-lg">{(portfolioData.euribor3M * 100).toFixed(2).replace('.', ',')}%</p>
                                     </div>
                                     <div>
-                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">German CPI</h3>
-                                        <p className="text-lg">{(portfolioData.germanCPI * 100).toFixed(2)}%</p>
+                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Deutscher VPI</h3>
+                                        <p className="text-lg">{(portfolioData.germanCPI * 100).toFixed(2).replace('.', ',')}%</p>
                                     </div>
                                     <div>
-                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">CAGR Projection</h3>
-                                        <p className="text-lg">{(portfolioData.cagrProjection * 100).toFixed(2)}%</p>
+                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">CAGR Prognose</h3>
+                                        <p className="text-lg">{(portfolioData.cagrProjection * 100).toFixed(2).replace('.', ',')}%</p>
                                     </div>
                                 </div>
                             </Card>
@@ -569,15 +645,29 @@ export default function InvestmentsPage() {
 
                         {/* Property Income Breakdown */}
                         <Card className="p-6">
-                            <h2 className="text-xl font-semibold mb-4">Property Income Breakdown</h2>
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-xl font-semibold">Immobilien Einkommensübersicht</h2>
+                                <Button
+                                    onClick={() => setShow3DModelModal(true)}
+                                    className="flex items-center gap-1.5 text-sm"
+                                >
+                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M12 3a7 7 0 0 0-7 7v4h14v-4a7 7 0 0 0-7-7Z" />
+                                        <path d="M5 14v1a7 7 0 0 0 14 0v-1" />
+                                        <path d="M8 14v1a4 4 0 0 0 8 0v-1" />
+                                    </svg>
+                                    3D Modelle anzeigen
+                                </Button>
+                            </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
                                         <tr className="border-b">
-                                            <th className="text-left py-3 px-4">Property</th>
-                                            <th className="text-left py-3 px-4">Location</th>
-                                            <th className="text-right py-3 px-4">Monthly Rent</th>
-                                            <th className="text-right py-3 px-4">Occupancy</th>
+                                            <th className="text-left py-3 px-4">Immobilie</th>
+                                            <th className="text-left py-3 px-4">Standort</th>
+                                            <th className="text-right py-3 px-4">Monatliche Miete</th>
+                                            <th className="text-right py-3 px-4">Vermietungsgrad</th>
                                             <th className="text-right py-3 px-4">Status</th>
                                         </tr>
                                     </thead>
@@ -586,11 +676,11 @@ export default function InvestmentsPage() {
                                             <tr key={property.id} className="border-b hover:bg-muted/10">
                                                 <td className="py-3 px-4">{property.name}</td>
                                                 <td className="py-3 px-4">{property.location}</td>
-                                                <td className="py-3 px-4 text-right">€{property.monthlyRent.toLocaleString()}</td>
+                                                <td className="py-3 px-4 text-right">€{property.monthlyRent.toLocaleString('de-DE')}</td>
                                                 <td className="py-3 px-4 text-right">{(property.occupancyRate * 100).toFixed(0)}%</td>
                                                 <td className="py-3 px-4 text-right">
                                                     <Badge variant={property.occupancyRate > 0.9 ? "success" : "warning"}>
-                                                        {property.occupancyRate > 0.9 ? "Excellent" : "Good"}
+                                                        {property.occupancyRate > 0.95 ? "Ausgezeichnet" : property.occupancyRate > 0.9 ? "Sehr Gut" : "Gut"}
                                                     </Badge>
                                                 </td>
                                             </tr>
@@ -603,7 +693,7 @@ export default function InvestmentsPage() {
                         {/* Portfolio Allocation */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <Card className="p-6 md:col-span-2">
-                                <h2 className="text-xl font-semibold mb-4">Allocation Breakdown</h2>
+                                <h2 className="text-xl font-semibold mb-4">Portfolio Aufteilung</h2>
                                 <div className="space-y-6">
                                     <div className="flex flex-wrap gap-3 mb-6">
                                         {portfolioData.allocationBreakdown.map((allocation, index) => {
@@ -643,11 +733,11 @@ export default function InvestmentsPage() {
                                                     }}></div>
                                                     <div>
                                                         <div className="font-medium">{allocation.category}</div>
-                                                        <div className="text-xs text-muted-foreground">{allocation.percentage}% of portfolio</div>
+                                                        <div className="text-xs text-muted-foreground">{allocation.percentage}% des Portfolios</div>
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <div className="font-medium">€{allocation.amount.toLocaleString()}</div>
+                                                    <div className="font-medium">€{allocation.amount.toLocaleString('de-DE')}</div>
                                                 </div>
                                             </div>
                                         ))}
@@ -656,7 +746,7 @@ export default function InvestmentsPage() {
                             </Card>
 
                             <Card className="p-6">
-                                <h2 className="text-xl font-semibold mb-4">Monthly Performance</h2>
+                                <h2 className="text-xl font-semibold mb-4">Monatliche Leistung</h2>
                                 <div className="h-[250px] flex items-end space-x-2">
                                     {portfolioData.monthlyPerformance.map((data) => {
                                         const maxIncome = Math.max(...portfolioData.monthlyPerformance.map(d => d.income));
@@ -670,7 +760,7 @@ export default function InvestmentsPage() {
                                                 ></div>
                                                 <div className="mt-2 text-center">
                                                     <div className="text-xs font-medium">{data.month}</div>
-                                                    <div className="text-xs text-muted-foreground">€{data.income}</div>
+                                                    <div className="text-xs text-muted-foreground">€{data.income.toLocaleString('de-DE')}</div>
                                                 </div>
                                             </div>
                                         );
@@ -1231,6 +1321,13 @@ export default function InvestmentsPage() {
                     </Card>
                 </div>
             )}
+
+            {/* Property 3D Model Modal */}
+            <PropertyModelModal
+                isOpen={show3DModelModal}
+                onClose={() => setShow3DModelModal(false)}
+                properties={samplePropertyModels}
+            />
         </div>
     );
 }

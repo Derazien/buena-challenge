@@ -133,7 +133,7 @@ function RentGaugeScene({
     );
 }
 
-// Simple scroll state hook
+// Simple scroll state hook - simplified for better reliability
 const useScrollState = () => {
     const [scrollProgress, setScrollProgress] = useState(0);
 
@@ -141,29 +141,40 @@ const useScrollState = () => {
         if (typeof window === 'undefined') return;
 
         const handleScroll = () => {
-            // Calculate scroll progress (0-1) based on page scroll position
+            // Simplified calculation
             const scrollY = window.scrollY;
+            const docHeight = Math.max(
+                document.body.scrollHeight,
+                document.documentElement.scrollHeight,
+                document.body.offsetHeight,
+                document.documentElement.offsetHeight
+            );
             const winHeight = window.innerHeight;
-            const docHeight = document.body.scrollHeight;
-            const totalScrollable = docHeight - winHeight;
-            const progress = Math.min(1, Math.max(0, scrollY / totalScrollable));
+            const scrollable = docHeight - winHeight;
+            const progress = scrollable > 0 ? Math.min(1, scrollY / scrollable) : 0;
 
             setScrollProgress(progress);
         };
 
-        handleScroll(); // Initialize
-        window.addEventListener('scroll', handleScroll);
+        // Initial calculation
+        handleScroll();
+
+        // Add event listener
+        window.addEventListener('scroll', handleScroll, { passive: true });
+
+        // Cleanup
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
     return scrollProgress;
 };
 
+// Create a stand-alone inner component with minimal dependencies
 const ThreeComponentsInner: React.FC<ThreeComponentsProps> = ({ monthlyRent, targetAmount }) => {
     const scrollProgress = useScrollState();
 
     return (
-        <Canvas>
+        <Canvas frameloop="demand" dpr={[1, 2]}>
             <PerspectiveCamera makeDefault position={[0, 0, 8]} />
             <ambientLight intensity={0.5} />
             <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} />
@@ -182,20 +193,28 @@ const ThreeComponentsInner: React.FC<ThreeComponentsProps> = ({ monthlyRent, tar
     );
 };
 
-// Main export with error boundary and suspense
-const ThreeComponents: React.FC<ThreeComponentsProps> = (props) => {
-    // Only render if we're in the browser
-    if (typeof window === 'undefined') {
+// Main export as a function component
+function ThreeComponents(props: ThreeComponentsProps) {
+    const [hasWindow, setHasWindow] = useState(false);
+
+    useEffect(() => {
+        setHasWindow(typeof window !== 'undefined');
+    }, []);
+
+    // Don't render anything on the server
+    if (!hasWindow) {
         return null;
     }
 
     return (
         <ErrorBoundary fallback={<div style={{ height: '100%', backgroundColor: '#f0f0f0' }} />}>
             <Suspense fallback={<div style={{ height: '100%', backgroundColor: '#f5f5f5' }} />}>
-                <ThreeComponentsInner {...props} />
+                <div style={{ position: 'relative', height: '100%', width: '100%' }}>
+                    <ThreeComponentsInner {...props} />
+                </div>
             </Suspense>
         </ErrorBoundary>
     );
-};
+}
 
 export default ThreeComponents;
