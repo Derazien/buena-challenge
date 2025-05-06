@@ -67,6 +67,7 @@ type InvestmentResult {
   investmentId: String
   message: String!
   success: Boolean!
+  transactionId: String
 }
 
 type Lease {

@@ -10,4 +10,7 @@ export class InvestmentResult {
 
   @Field({ nullable: true })
   investmentId?: string;
+
+  @Field({ nullable: true })
+  transactionId?: string;
 } 

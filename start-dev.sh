@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Function to stop servers on exit
 function cleanup {
   echo "Stopping servers..."
@@ -15,36 +17,58 @@ function cleanup {
 # Register the cleanup function for when script exits
 trap cleanup EXIT INT TERM
 
-# Start API server with database preparation
-cd api
-echo "Generating Prisma client..."
-npx prisma generate
+cd "$(dirname "$0")"
 
-echo "Checking database status..."
-if [ ! -f "prisma/dev.db" ]; then
-  echo "Creating database and running migrations..."
-  npx prisma migrate dev --name init
-
-  echo "Seeding the database with test data..."
-  npm run prisma:seed
+# Step 1: Install dependencies for API
+if [ ! -d "api/node_modules" ]; then
+  echo "Installing API dependencies..."
+  cd api
+  npm install || exit 1
+  cd ..
+else
+  echo "API dependencies already installed."
 fi
 
-echo "Starting API server on port 5001..."
-npm run start:dev &
-API_PID=$!
+# Step 2: Install dependencies for Client
+if [ ! -d "client/node_modules" ]; then
+  echo "Installing Client dependencies..."
+  cd client
+  npm install || exit 1
+  cd ..
+else
+  echo "Client dependencies already installed."
+fi
+
+# Step 3: Prisma generate, migrate, and seed
+cd api
+npx prisma generate || exit 1
+npx prisma migrate dev --name start_dev_sync --skip-seed || exit 1
+if [ -f "prisma/seed.ts" ]; then
+  echo "Seeding the database with test data..."
+  npm run prisma:seed || exit 1
+else
+  echo "No seed script found, skipping seeding."
+fi
 cd ..
 
-# Start client server
+# Step 4: GraphQL codegen for client
 cd client
-echo "Starting client server on port 3000..."
-npm run dev &
+if [ -f "codegen.ts" ]; then
+  echo "Running GraphQL codegen..."
+  npm run codegen || exit 1
+else
+  echo "No codegen.ts found, skipping codegen."
+fi
+cd ..
+
+# Step 5: Start API and Client in parallel
+cd api && npm run start:dev &
+API_PID=$!
+cd ../client && npm run dev &
 CLIENT_PID=$!
 cd ..
 
-echo "Both servers are running."
-echo "API: http://localhost:5001/graphql"
-echo "Client: http://localhost:3000"
-echo "Press Ctrl+C to stop."
+echo "\nAll services started. API on port 5001, Client on port 3001."
+echo "Press Ctrl+C to stop all processes."
 
-# Wait for user to press Ctrl+C
 wait
