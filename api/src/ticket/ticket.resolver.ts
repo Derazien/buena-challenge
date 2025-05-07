@@ -6,12 +6,17 @@ import { CreateTicketInput } from './dto/create-ticket.input';
 import { UpdateTicketInput } from './dto/update-ticket.input';
 import { TicketFiltersInput } from './dto/ticket-filters.input';
 import { DeleteTicketResponse } from './dto/delete-ticket.response';
+import { TicketClassification } from './models/ticket-classification.model';
+import { AiService } from '../ai/ai.service';
 
 const pubSub = new PubSub();
 
 @Resolver(() => Ticket)
 export class TicketResolver {
-    constructor(private readonly ticketService: TicketService) { }
+    constructor(
+      private readonly ticketService: TicketService,
+      private readonly aiService: AiService
+    ) { }
 
     @Query(() => [Ticket])
     async tickets(@Args('filters', { nullable: true }) filters?: TicketFiltersInput) {
@@ -42,6 +47,12 @@ export class TicketResolver {
         const ticket = await this.ticketService.remove(id);
         pubSub.publish('ticketDeleted', { ticketDeleted: ticket });
         return { id: ticket.id, success: true };
+    }
+
+    @Mutation(() => TicketClassification)
+    async classifyTicket(@Args('description') description: string) {
+        // Integrate with AI service for classification
+        return this.aiService.classifyTicket(description);
     }
 
     @Subscription(() => Ticket)

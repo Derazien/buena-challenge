@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useSubscription, ApolloError } from '@apollo/client';
-import { GET_TICKETS, CREATE_TICKET, UPDATE_TICKET, DELETE_TICKET, TICKET_UPDATED_SUBSCRIPTION } from '@/graphql/queries';
+import { GET_TICKETS, CREATE_TICKET, UPDATE_TICKET, DELETE_TICKET } from '@/graphql/ticket.operations';
+import { TICKET_UPDATED_SUBSCRIPTION } from '@/graphql/queries';
 import { Ticket, TicketFormInput, TicketFilterOptions, TicketStatus } from '@/types/api/tickets.types';
 import { useConfetti } from './useConfetti';
 

@@ -240,58 +240,47 @@ type MonthlyPerformance = {
 };
 
 // Mock data for missing fields
-const mockPortfolioData = {
-    availableToInvest: 50000,
-    availableToReinvest: 25000,
+const mockPortfolioData: PortfolioSummary = {
+    monthlyRentIn: 5000,
+    allocatedReservePercentage: 20,
+    forecastedYield: 4.5,
+    euribor3M: 3.5,
+    germanCPI: 2.1,
+    cagrProjection: 6.2,
+    threeYearProjection: [
+        { year: 1, amount: 5000 },
+        { year: 2, amount: 5500 },
+        { year: 3, amount: 6000 }
+    ],
+    availableToInvest: 25000,
+    availableToReinvest: 15000,
     properties: [
         {
             id: 1,
-            name: 'City Center Apartment',
-            location: 'Berlin',
-            monthlyRent: 1200,
-            occupancyRate: 0.95
+            name: "City Center Apartment",
+            location: "Berlin",
+            monthlyRent: 2500,
+            occupancyRate: 95
         },
         {
             id: 2,
-            name: 'Historic Multi-Family House',
-            location: 'Munich',
-            monthlyRent: 3500,
-            occupancyRate: 0.98
+            name: "Suburban House",
+            location: "Munich",
+            monthlyRent: 3000,
+            occupancyRate: 98
         }
     ],
     reserveBalance: 10000,
-    monthlyGrowth: 0.05,
-    targetMonthlyRent: 10000,
+    monthlyGrowth: 2.5,
+    targetMonthlyRent: 8000,
     allocationBreakdown: [
-        {
-            category: 'Real Estate',
-            percentage: 60,
-            amount: 30000
-        },
-        {
-            category: 'Bonds',
-            percentage: 20,
-            amount: 10000
-        },
-        {
-            category: 'Stocks',
-            percentage: 20,
-            amount: 10000
-        }
+        { category: "Residential", percentage: 60, amount: 150000 },
+        { category: "Commercial", percentage: 40, amount: 100000 }
     ],
     monthlyPerformance: [
-        {
-            month: 'Jan',
-            income: 4500
-        },
-        {
-            month: 'Feb',
-            income: 4700
-        },
-        {
-            month: 'Mar',
-            income: 4900
-        }
+        { month: "Jan", income: 4500 },
+        { month: "Feb", income: 4800 },
+        { month: "Mar", income: 5000 }
     ]
 };
 
@@ -440,6 +429,10 @@ export default function InvestmentsPage() {
     // State
     const [activeTab, setActiveTab] = useState<string>('overview');
     const [isMounted, setIsMounted] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [portfolioData, setPortfolioData] = useState<PortfolioSummary | null>(null);
+    const [investmentAmount, setInvestmentAmount] = useState<number>(0);
     const [selectedInvestment, setSelectedInvestment] = useState<Investment | null>(null);
     const [riskProfile, setRiskProfile] = useState('moderate');
     const [showInvestmentModal, setShowInvestmentModal] = useState(false);
@@ -449,21 +442,22 @@ export default function InvestmentsPage() {
     const [optimizedPortfolioView, setOptimizedPortfolioView] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
     const [show3DModelModal, setShow3DModelModal] = useState(false);
+    const [showPropertyModel, setShowPropertyModel] = useState(false);
+    const [selectedProperty, setSelectedProperty] = useState<typeof samplePropertyModels[0] | null>(null);
+    const [showReinvestmentWizard, setShowReinvestmentWizard] = useState(false);
     const [showWizard, setShowWizard] = useState(false);
+    const [showOptimizedPortfolioModal, setShowOptimizedPortfolioModal] = useState(false);
 
     // Investment Wizard State
     const [step, setStep] = useState(1);
-    const [investmentAmount, setInvestmentAmount] = useState(0);
     const [fundingSource, setFundingSource] = useState<'new' | 'rental-income'>('rental-income');
 
     // GraphQL Queries
-    const { data: portfolioData, loading: portfolioLoading, error: portfolioError } = useQuery(GET_PORTFOLIO_SUMMARY);
+    const { data: portfolioQueryData, loading: portfolioLoading, error: portfolioError } = useQuery(GET_PORTFOLIO_SUMMARY);
     const { data: investmentOptionsData, loading: investmentOptionsLoading } = useQuery(GET_INVESTMENT_OPTIONS, {
         variables: {
-            surplusCash: mockPortfolioData.availableToReinvest,
-            riskProfile: riskProfile
-        },
-        skip: !portfolioData?.portfolioSummary
+            riskProfile
+        }
     });
     const [allocateFunds, { loading: allocationLoading }] = useMutation(ALLOCATE_FUNDS);
 
@@ -472,80 +466,40 @@ export default function InvestmentsPage() {
         setIsMounted(true);
     }, []);
 
-    // Mock data while we wait for the backend
+    // Update local state when GraphQL data changes
     useEffect(() => {
-        const mockData: PortfolioSummary = {
-            monthlyRentIn: 12500,
-            allocatedReservePercentage: 0.25,
-            forecastedYield: 0.068,
-            euribor3M: 0.0325,
-            germanCPI: 0.0246,
-            cagrProjection: 0.092,
-            threeYearProjection: [
-                { year: 2023, amount: 150000 },
-                { year: 2024, amount: 163800 },
-                { year: 2025, amount: 178878 }
-            ],
-            availableToInvest: 45000,
-            availableToReinvest: 25000,
-            // Added sample property data
-            properties: [
-                { id: 1, name: 'City Center Apartment', location: 'Berlin', monthlyRent: 2800, occupancyRate: 0.98 },
-                { id: 2, name: 'Period Apartment Building', location: 'München', monthlyRent: 4200, occupancyRate: 0.95 },
-                { id: 3, name: 'New Riverside Apartment', location: 'Köln', monthlyRent: 2100, occupancyRate: 0.96 },
-                { id: 4, name: 'Historic Semi-Detached House', location: 'Hamburg', monthlyRent: 3400, occupancyRate: 0.92 },
-                { id: 5, name: 'Victorian Era Residential Complex', location: 'Frankfurt', monthlyRent: 2750, occupancyRate: 0.94 }
-            ],
-            // Portfolio data
-            reserveBalance: 24845,
-            monthlyGrowth: 2.3,
-            targetMonthlyRent: 18000,
-            allocationBreakdown: [
-                { category: 'Bonds', percentage: 25, amount: 6211.25 },
-                { category: 'Real Estate Funds', percentage: 35, amount: 8695.75 },
-                { category: 'Stocks', percentage: 30, amount: 7453.50 },
-                { category: 'Cash', percentage: 10, amount: 2484.50 }
-            ],
-            monthlyPerformance: [
-                { month: 'Jan', income: 14200 },
-                { month: 'Feb', income: 14500 },
-                { month: 'Mar', income: 14800 },
-                { month: 'Apr', income: 15100 },
-                { month: 'May', income: 15400 },
-                { month: 'Jun', income: 15750 }
-            ]
-        };
-
-        // Simulate loading and then setting the data
-        const timer = setTimeout(() => {
-            setPortfolioData(mockData);
-            setInvestmentAmount(mockData.availableToReinvest);
+        if (portfolioQueryData?.portfolioSummary) {
+            setPortfolioData(portfolioQueryData.portfolioSummary);
+            setInvestmentAmount(portfolioQueryData.portfolioSummary.availableToReinvest);
             setLoading(false);
+        }
+    }, [portfolioQueryData]);
 
-            // Get initial portfolio recommendation
-            updatePortfolioRecommendation(mockData, 'moderate');
-        }, 1000);
+    // Update portfolio recommendation when data or risk profile changes
+    useEffect(() => {
+        if (portfolioData) {
+            updatePortfolioRecommendation(portfolioData, riskProfile);
+        }
+    }, [portfolioData, riskProfile]);
 
-        return () => clearTimeout(timer);
-    }, []);
-
-    // Function to update portfolio recommendations
     const updatePortfolioRecommendation = (data: PortfolioSummary, profile: string) => {
         setIsRecommendationLoading(true);
-
-        // Simulate API call delay
-        setTimeout(() => {
-            const recommendation = getPortfolioRecommendations(
-                data.monthlyRentIn,
-                data.availableToReinvest,
-                profile
-            );
-            setPortfolioRecommendation(recommendation);
-            setIsRecommendationLoading(false);
-        }, 800);
+        const recommendation = getPortfolioRecommendations(
+            data.monthlyRentIn,
+            data.availableToReinvest,
+            profile
+        );
+        setPortfolioRecommendation(recommendation);
+        setIsRecommendationLoading(false);
     };
 
-    // Track scroll position for animations
+    // Use mock data for missing fields
+    const portfolioDataWithMock = portfolioData ? {
+        ...portfolioData,
+        ...mockPortfolioData
+    } : mockPortfolioData;
+
+    // Handle scroll events
     useEffect(() => {
         const handleScroll = () => {
             setScrollY(window.scrollY);
@@ -555,89 +509,77 @@ export default function InvestmentsPage() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Function to get appropriate badge variant based on risk level
+    // Get risk badge variant based on risk level
     const getRiskBadgeVariant = (risk: string) => {
         switch (risk.toLowerCase()) {
-            case 'low': return 'default';
-            case 'medium': return 'info';
-            case 'medium-high': return 'warning';
-            case 'high': return 'danger';
-            default: return 'default';
+            case 'low':
+                return 'success';
+            case 'medium':
+                return 'warning';
+            case 'high':
+                return 'danger';
+            default:
+                return 'default';
         }
     };
 
+    // Handle investment wizard steps
     const handleNextStep = () => {
-        setStep(Math.min(step + 1, 3));
+        setStep(prev => prev + 1);
     };
 
     const handlePrevStep = () => {
-        setStep(Math.max(step - 1, 1));
+        setStep(prev => prev - 1);
     };
 
+    // Handle investment actions
     const handleInvestNow = (investment: Investment) => {
         setSelectedInvestment(investment);
-        setStep(1);
         setShowInvestmentModal(true);
     };
 
     const handleConfirmInvestment = async () => {
-        if (!selectedInvestment) return;
+        if (!selectedInvestment || !portfolioData) return;
 
         try {
-            const result = await allocateFunds({
+            await allocateFunds({
                 variables: {
                     input: {
-                        amount: investmentAmount,
                         investmentId: selectedInvestment.id,
-                        riskProfile: riskProfile
+                        amount: investmentAmount,
+                        fundingSource
                     }
                 }
             });
 
-            if (result.data.allocateFunds.success) {
-                setShowInvestmentModal(false);
-                setShowConfetti(true);
-            } else {
-                // Handle error
-                console.error('Failed to allocate funds:', result.data.allocateFunds.message);
-            }
+            setShowInvestmentModal(false);
+            setShowConfetti(true);
+            setTimeout(() => setShowConfetti(false), 5000);
         } catch (error) {
             console.error('Error allocating funds:', error);
         }
     };
 
     const handleAcceptOptimizedPortfolio = () => {
-        // In a real app, this would call an API to accept the optimized portfolio
-        setOptimizedPortfolioView(false);
+        if (!portfolioRecommendation) return;
+
+        setShowOptimizedPortfolioModal(false);
         setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 5000);
     };
 
-    // Use mock data for missing fields
-    const portfolioDataWithMock = {
-        ...portfolioData?.portfolioSummary,
-        ...mockPortfolioData
-    };
-
-    if (portfolioLoading) {
+    if (!portfolioQueryData?.portfolioSummary || !isMounted) {
         return (
             <div className="flex items-center justify-center min-h-[70vh]">
-                <LoadingSpinner text="Loading your investment dashboard..." />
+                <LoadingSpinner text="Loading portfolio data..." />
             </div>
         );
     }
 
     if (portfolioError) {
         return (
-            <div className="container mx-auto py-8">
-                <ErrorDisplay error={portfolioError.message} onRetry={() => window.location.reload()} />
-            </div>
-        );
-    }
-
-    if (!portfolioData?.portfolioSummary || !isMounted) {
-        return (
             <div className="flex items-center justify-center min-h-[70vh]">
-                <LoadingSpinner text="Preparing investment dashboard..." />
+                <ErrorDisplay error={portfolioError.message} />
             </div>
         );
     }
@@ -650,7 +592,7 @@ export default function InvestmentsPage() {
     ];
 
     return (
-        <div className="space-y-8">
+        <div className="container mx-auto px-4 py-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Investment Hub</h1>
@@ -684,6 +626,72 @@ export default function InvestmentsPage() {
             />
 
             <div className="mt-6">
+                {/* Investment Overview Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <Card>
+                        <div className="p-6">
+                            <h2 className="text-xl font-semibold mb-4">Investment Overview</h2>
+                            <div className="space-y-4">
+                                <div className="bg-muted/20 p-4 rounded-lg">
+                                    <h3 className="text-sm font-medium text-muted-foreground mb-1">Available for Investment</h3>
+                                    <p className="text-2xl font-bold">€{portfolioDataWithMock.availableToReinvest.toLocaleString('de-DE')}</p>
+                                </div>
+                                <div className="bg-muted/20 p-4 rounded-lg">
+                                    <h3 className="text-sm font-medium text-muted-foreground mb-1">Monthly Rental Income</h3>
+                                    <p className="text-2xl font-bold">€{portfolioDataWithMock.monthlyRentIn.toLocaleString('de-DE')}</p>
+                                </div>
+                                <div className="bg-muted/20 p-4 rounded-lg">
+                                    <h3 className="text-sm font-medium text-muted-foreground mb-1">Forecasted Annual Yield</h3>
+                                    <p className="text-2xl font-bold">{(portfolioDataWithMock.forecastedYield * 100).toFixed(1)}%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
+
+                    <Card>
+                        <div className="p-6">
+                            <h2 className="text-xl font-semibold mb-4">Market Indicators</h2>
+                            <div className="space-y-4">
+                                <div className="bg-muted/20 p-4 rounded-lg">
+                                    <h3 className="text-sm font-medium text-muted-foreground mb-1">3-Month EURIBOR</h3>
+                                    <p className="text-2xl font-bold">{portfolioDataWithMock.euribor3M.toFixed(2)}%</p>
+                                </div>
+                                <div className="bg-muted/20 p-4 rounded-lg">
+                                    <h3 className="text-sm font-medium text-muted-foreground mb-1">German CPI</h3>
+                                    <p className="text-2xl font-bold">{portfolioDataWithMock.germanCPI.toFixed(2)}%</p>
+                                </div>
+                                <div className="bg-muted/20 p-4 rounded-lg">
+                                    <h3 className="text-sm font-medium text-muted-foreground mb-1">CAGR Projection</h3>
+                                    <p className="text-2xl font-bold">{portfolioDataWithMock.cagrProjection.toFixed(1)}%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+
+                {/* Portfolio Performance */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <Card>
+                        <div className="p-6">
+                            <h2 className="text-xl font-semibold mb-4">Portfolio Performance</h2>
+                            <div className="space-y-4">
+                                <div className="bg-muted/20 p-4 rounded-lg">
+                                    <h3 className="text-sm font-medium text-muted-foreground mb-1">Monthly Growth</h3>
+                                    <p className="text-2xl font-bold">{portfolioDataWithMock.monthlyGrowth.toFixed(1)}%</p>
+                                </div>
+                                <div className="bg-muted/20 p-4 rounded-lg">
+                                    <h3 className="text-sm font-medium text-muted-foreground mb-1">Target Monthly Rent</h3>
+                                    <p className="text-2xl font-bold">€{portfolioDataWithMock.targetMonthlyRent.toLocaleString('de-DE')}</p>
+                                </div>
+                                <div className="bg-muted/20 p-4 rounded-lg">
+                                    <h3 className="text-sm font-medium text-muted-foreground mb-1">Reserve Balance</h3>
+                                    <p className="text-2xl font-bold">€{portfolioDataWithMock.reserveBalance.toLocaleString('de-DE')}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+
                 {/* Overview Tab */}
                 {activeTab === 'overview' && (
                     <div className="space-y-8">
@@ -711,7 +719,7 @@ export default function InvestmentsPage() {
                                     </div>
                                     <div className="bg-muted/20 p-4 rounded-lg">
                                         <h3 className="text-sm font-medium text-muted-foreground mb-1">Available for Investment</h3>
-                                        <p className="text-2xl font-bold">€{portfolioData.availableToReinvest.toLocaleString('de-DE')}</p>
+                                        <p className="text-2xl font-bold">€{portfolioDataWithMock.availableToReinvest.toLocaleString('de-DE')}</p>
                                     </div>
                                 </div>
                             </Card>
@@ -721,7 +729,7 @@ export default function InvestmentsPage() {
                                 <div className="space-y-4">
                                     <div>
                                         <h3 className="text-sm font-medium text-muted-foreground mb-1">Forecasted Annual Return</h3>
-                                        <p className="text-2xl font-bold">{(portfolioData.forecastedYield * 100).toFixed(2).replace('.', ',')}%</p>
+                                        <p className="text-2xl font-bold">{(portfolioDataWithMock.forecastedYield * 100).toFixed(2).replace('.', ',')}%</p>
                                     </div>
                                     <div>
                                         <h3 className="text-sm font-medium text-muted-foreground mb-1">Euribor 3M</h3>
@@ -729,11 +737,11 @@ export default function InvestmentsPage() {
                                     </div>
                                     <div>
                                         <h3 className="text-sm font-medium text-muted-foreground mb-1">German CPI</h3>
-                                        <p className="text-lg">{(portfolioData.germanCPI * 100).toFixed(2).replace('.', ',')}%</p>
+                                        <p className="text-lg">{(portfolioDataWithMock.germanCPI * 100).toFixed(2).replace('.', ',')}%</p>
                                     </div>
                                     <div>
                                         <h3 className="text-sm font-medium text-muted-foreground mb-1">CAGR Forecast</h3>
-                                        <p className="text-lg">{(portfolioData.cagrProjection * 100).toFixed(2).replace('.', ',')}%</p>
+                                        <p className="text-lg">{(portfolioDataWithMock.cagrProjection * 100).toFixed(2).replace('.', ',')}%</p>
                                     </div>
                                 </div>
                             </Card>
@@ -1222,7 +1230,7 @@ export default function InvestmentsPage() {
                                     <button
                                         onClick={() => {
                                             setFundingSource('rental-income');
-                                            setInvestmentAmount(portfolioData.availableToReinvest);
+                                            setInvestmentAmount(portfolioDataWithMock.availableToReinvest);
                                         }}
                                         className={`p-4 border rounded-lg text-left transition-colors ${fundingSource === 'rental-income'
                                             ? 'border-primary bg-primary/5'
@@ -1231,13 +1239,13 @@ export default function InvestmentsPage() {
                                     >
                                         <span className="block font-medium">Rental Income</span>
                                         <span className="block text-sm text-muted-foreground">
-                                            €{portfolioData.availableToReinvest.toLocaleString()} available
+                                            €{portfolioDataWithMock.availableToReinvest.toLocaleString()} available
                                         </span>
                                     </button>
                                     <button
                                         onClick={() => {
                                             setFundingSource('new');
-                                            setInvestmentAmount(portfolioData.availableToInvest);
+                                            setInvestmentAmount(portfolioDataWithMock.availableToInvest);
                                         }}
                                         className={`p-4 border rounded-lg text-left transition-colors ${fundingSource === 'new'
                                             ? 'border-primary bg-primary/5'
@@ -1246,7 +1254,7 @@ export default function InvestmentsPage() {
                                     >
                                         <span className="block font-medium">New Funds</span>
                                         <span className="block text-sm text-muted-foreground">
-                                            €{portfolioData.availableToInvest.toLocaleString()} available
+                                            €{portfolioDataWithMock.availableToInvest.toLocaleString()} available
                                         </span>
                                     </button>
                                 </div>
@@ -1265,19 +1273,19 @@ export default function InvestmentsPage() {
                                         type="range"
                                         id="investment-amount"
                                         min="0"
-                                        max={fundingSource === 'rental-income' ? portfolioData.availableToReinvest : portfolioData.availableToInvest}
-                                        step={Math.max(100, Math.floor((fundingSource === 'rental-income' ? portfolioData.availableToReinvest : portfolioData.availableToInvest) / 100))}
+                                        max={fundingSource === 'rental-income' ? portfolioDataWithMock.availableToReinvest : portfolioDataWithMock.availableToInvest}
+                                        step={Math.max(100, Math.floor((fundingSource === 'rental-income' ? portfolioDataWithMock.availableToReinvest : portfolioDataWithMock.availableToInvest) / 100))}
                                         value={investmentAmount}
                                         onChange={(e) => setInvestmentAmount(Number(e.target.value))}
                                         className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
                                     />
                                     <div className="flex justify-between text-xs text-muted-foreground mt-1">
                                         <span>€0</span>
-                                        <span>€{(fundingSource === 'rental-income' ? portfolioData.availableToReinvest : portfolioData.availableToInvest).toLocaleString()}</span>
+                                        <span>€{(fundingSource === 'rental-income' ? portfolioDataWithMock.availableToReinvest : portfolioDataWithMock.availableToInvest).toLocaleString()}</span>
                                     </div>
                                 </div>
                                 <p className="text-sm text-muted-foreground mt-2">
-                                    Available: €{(fundingSource === 'rental-income' ? portfolioData.availableToReinvest : portfolioData.availableToInvest).toLocaleString()}
+                                    Available: €{(fundingSource === 'rental-income' ? portfolioDataWithMock.availableToReinvest : portfolioDataWithMock.availableToInvest).toLocaleString()}
                                 </p>
                             </div>
 
@@ -1285,7 +1293,7 @@ export default function InvestmentsPage() {
                             <Button
                                 className="w-full"
                                 onClick={handleConfirmInvestment}
-                                disabled={investmentAmount <= 0 || investmentAmount > (fundingSource === 'rental-income' ? portfolioData.availableToReinvest : portfolioData.availableToInvest)}
+                                disabled={investmentAmount <= 0 || investmentAmount > (fundingSource === 'rental-income' ? portfolioDataWithMock.availableToReinvest : portfolioDataWithMock.availableToInvest)}
                             >
                                 Confirm Investment
                             </Button>

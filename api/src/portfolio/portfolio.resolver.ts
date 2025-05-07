@@ -4,6 +4,7 @@ import { PortfolioSummary } from './models/portfolio-summary.model';
 import { InvestmentOption } from './models/investment-option.model';
 import { AllocateFundsInput } from './dto/allocate-funds.input';
 import { InvestmentResult } from './models/investment-result.model';
+import { HistoricalReturn } from './models/historical-return.model';
 
 @Resolver()
 export class PortfolioResolver {
@@ -27,5 +28,15 @@ export class PortfolioResolver {
     @Args('input') input: AllocateFundsInput,
   ) {
     return this.portfolioService.allocateFunds(input);
+  }
+
+  @Query(() => [HistoricalReturn])
+  async historicalReturns() {
+    // Return mock data for now
+    return [
+      { date: '2023-01-01', value: 5.2 },
+      { date: '2023-02-01', value: 5.5 },
+      { date: '2023-03-01', value: 5.7 },
+    ];
   }
 } 

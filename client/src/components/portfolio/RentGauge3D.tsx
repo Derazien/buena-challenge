@@ -32,8 +32,8 @@ function AnimatedDonut({ monthlyRent = 12500, targetAmount = 18000 }) {
 
   // Create animated props with react-spring
   const { scale, rotation, emissive } = useSpring({
-    scale: [1, 1, 1],
-    rotation: [0, 0, 0],
+    scale: 1,
+    rotation: 0,
     emissive: getColor(),
     config: config.molasses
   });
@@ -45,18 +45,9 @@ function AnimatedDonut({ monthlyRent = 12500, targetAmount = 18000 }) {
     // Get current scroll position from useScroll
     const scrollOffset = scroll.offset;
 
-    // Animate scale and rotation based on scroll
-    scale.set(
-      1 + scrollOffset * 0.5,
-      1 + scrollOffset * 0.5,
-      1 + scrollOffset * 0.5
-    );
-
-    rotation.set(
-      groupRef.current.rotation.x,
-      scrollOffset * Math.PI * 2,
-      groupRef.current.rotation.z
-    );
+    // Update scale and rotation
+    scale.start(1 + scrollOffset * 0.5);
+    rotation.start(scrollOffset * Math.PI * 2);
 
     // Gentle continuous rotation
     groupRef.current.rotation.z += 0.001;
@@ -79,7 +70,9 @@ function AnimatedDonut({ monthlyRent = 12500, targetAmount = 18000 }) {
       {/* Animated progress ring */}
       <AnimatedTorus
         args={[3, 0.35, 32, 100, Math.PI * 2 * percentageFilled]}
-        rotation={[Math.PI / 2, 0, 0]}
+        rotation-x={Math.PI / 2}
+        rotation-y={rotation}
+        rotation-z={0}
         scale={scale}
       >
         <animated.meshStandardMaterial

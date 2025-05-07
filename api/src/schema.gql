@@ -48,6 +48,11 @@ type DeleteTicketResponse {
   success: Boolean!
 }
 
+type HistoricalReturn {
+  date: String!
+  value: Float!
+}
+
 type InvestmentOption {
   description: String!
   expectedReturn: String!
@@ -102,6 +107,7 @@ type MonthlyIncomeStats {
 
 type Mutation {
   allocateFunds(input: AllocateFundsInput!): InvestmentResult!
+  classifyTicket(description: String!): TicketClassification!
   createProperty(createPropertyInput: CreatePropertyInput!): Property!
   createTicket(input: CreateTicketInput!): Ticket!
   deleteTicket(id: Int!): DeleteTicketResponse!
@@ -146,6 +152,7 @@ type Property {
 
 type Query {
   dashboardStats: DashboardStats!
+  historicalReturns: [HistoricalReturn!]!
   investmentOptions(riskProfile: String!, surplusCash: Float!): [InvestmentOption!]!
   portfolioSummary: PortfolioSummary!
   properties: [Property!]!
@@ -171,6 +178,14 @@ type Ticket {
   status: String!
   title: String!
   updatedAt: Timestamp!
+}
+
+type TicketClassification {
+  category: String!
+  estimatedTimeToFix: String
+  priority: String!
+  suggestedAction: String
+  title: String!
 }
 
 input TicketFiltersInput {

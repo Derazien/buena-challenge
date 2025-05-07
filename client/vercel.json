@@ -10,5 +10,10 @@
       "src": "package.json",
       "use": "@vercel/next"
     }
-  ]
+  ],
+  "env": {
+    "NEXT_PUBLIC_API_URL": "https://buena-challenge.onrender.com",
+    "NEXT_PUBLIC_GRAPHQL_HTTP_URL": "https://buena-challenge.onrender.com/graphql",
+    "NEXT_PUBLIC_GRAPHQL_WS_URL": "wss://buena-challenge.onrender.com/graphql"
+  }
 } 

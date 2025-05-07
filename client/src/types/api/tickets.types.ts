@@ -1,7 +1,7 @@
 import { Property } from './property.types';
 
 export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent';
-export type TicketStatus = 'in_progress_by_ai' | 'under_review' | 'pending_approval' | 'completed';
+export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'in_progress_by_ai' | 'under_review' | 'pending_approval' | 'completed';
 
 export interface TicketAttachment {
     filename: string;

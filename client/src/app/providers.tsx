@@ -62,7 +62,7 @@ export default function Providers({ children }: ProvidersProps) {
         try {
             // Client-side code
             const apiUrl = process.env.NEXT_PUBLIC_GRAPHQL_HTTP_URL || 'http://localhost:5001/graphql';
-            const wsUrl = process.env.NEXT_PUBLIC_GRAPHQL_WS_URL || 'ws://localhost:5001/graphql-ws';
+            const wsUrl = process.env.NEXT_PUBLIC_GRAPHQL_WS_URL || 'ws://localhost:5001/graphql';
             const isDebug = process.env.NEXT_PUBLIC_DEBUG === 'true';
 
             // Error handling link

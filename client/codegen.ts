@@ -10,7 +10,7 @@ const config: CodegenConfig = {
   // Exclude src/graphql/future from codegen so future/planned operations do not break the build
   documents: ['./src/**/*.{ts,tsx}', '!./src/graphql/future/**/*'],
   generates: {
-    './src/graphql/generated/': {
+    './src/graphql/generated/index.ts': {
       plugins: [
         'typescript',
         'typescript-operations',
@@ -21,4 +21,4 @@ const config: CodegenConfig = {
   ignoreNoDocuments: true, // for better experience with the watcher
 };
 
-export default config; 
+export default config;

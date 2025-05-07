@@ -1,3 +1,5 @@
+import { Ticket } from './tickets.types';
+
 export interface Lease {
     id: number;
     startDate: string;
@@ -5,17 +7,6 @@ export interface Lease {
     monthlyRent: number;
     tenantName: string;
     isActive: boolean;
-}
-
-export interface Ticket {
-    id: number;
-    title: string;
-    description: string;
-    priority: string;
-    status: string;
-    createdAt: string;
-    propertyId?: number;
-    propertyAddress?: string;
 }
 
 export interface CashFlow {
@@ -68,22 +59,6 @@ export interface UpdateLeaseInput {
     monthlyRent?: number;
     tenantName?: string;
     isActive?: boolean;
-}
-
-export interface CreateTicketInput {
-    propertyId: number;
-    title: string;
-    description: string;
-    priority: 'Low' | 'Medium' | 'High';
-    status: 'Open' | 'In Progress' | 'Resolved';
-}
-
-export interface UpdateTicketInput {
-    id: number;
-    title?: string;
-    description?: string;
-    priority?: 'Low' | 'Medium' | 'High';
-    status?: 'Open' | 'In Progress' | 'Resolved';
 }
 
 export interface CreateCashFlowInput {

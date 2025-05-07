@@ -48,10 +48,8 @@ export const GET_INVESTMENT_OPTIONS = gql`
 export const GET_HISTORICAL_RETURNS = gql`
   query GetHistoricalReturns {
     historicalReturns {
-      month
-      year
-      amount
-      source
+      date
+      value
     }
   }
-`; 
+`;

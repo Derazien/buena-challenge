@@ -9,10 +9,14 @@ import { useUpcomingLeases } from '@/hooks/useDashboardData';
 import { Skeleton } from '@/components/ui/Skeleton';
 
 interface Lease {
-    id: string;
-    propertyAddress: string;
-    tenantName: string;
+    id: number;
+    startDate: string;
     endDate: string;
+    monthlyRent: number;
+    tenantName: string;
+    isActive: boolean;
+    propertyId: number;
+    propertyAddress: string;
 }
 
 const CalendarIcon = () => (
