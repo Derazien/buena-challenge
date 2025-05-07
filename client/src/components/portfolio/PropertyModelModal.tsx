@@ -103,9 +103,9 @@ const PropertyModelModal: React.FC<PropertyModelModalProps> = ({
                         {/* Header with controls */}
                         <div className="p-4 flex items-center justify-between border-b dark:border-gray-700 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
                             <h2 className="text-xl font-bold flex items-center gap-2">
-                                <span className="text-primary">3D</span> Immobilienmodelle
+                                <span className="text-primary">3D</span> Property Models
                                 <span className="text-xs font-normal text-gray-500 dark:text-gray-400 hidden sm:inline-block">
-                                    (Nutzen Sie die Pfeiltasten zum Navigieren)
+                                    (Use the arrow keys to navigate)
                                 </span>
                             </h2>
 
@@ -225,30 +225,30 @@ const PropertyModelModal: React.FC<PropertyModelModalProps> = ({
 
                                             <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-6">
                                                 <h4 className="font-semibold text-lg mb-3 border-b pb-2 dark:border-gray-700">
-                                                    Immobilien Details
+                                                    Property Details
                                                 </h4>
                                                 <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
-                                                    <dt className="text-gray-600 dark:text-gray-400">Größe:</dt>
+                                                    <dt className="text-gray-600 dark:text-gray-400">Size:</dt>
                                                     <dd className="text-right font-medium">{currentProperty.details.size} m²</dd>
 
                                                     {currentProperty.details.bedrooms && (
                                                         <>
-                                                            <dt className="text-gray-600 dark:text-gray-400">Schlafzimmer:</dt>
+                                                            <dt className="text-gray-600 dark:text-gray-400">Bedrooms:</dt>
                                                             <dd className="text-right font-medium">{currentProperty.details.bedrooms}</dd>
                                                         </>
                                                     )}
 
                                                     {currentProperty.details.floors && (
                                                         <>
-                                                            <dt className="text-gray-600 dark:text-gray-400">Etagen:</dt>
+                                                            <dt className="text-gray-600 dark:text-gray-400">Floors:</dt>
                                                             <dd className="text-right font-medium">{currentProperty.details.floors}</dd>
                                                         </>
                                                     )}
 
-                                                    <dt className="text-gray-600 dark:text-gray-400">Baujahr:</dt>
+                                                    <dt className="text-gray-600 dark:text-gray-400">Year Built:</dt>
                                                     <dd className="text-right font-medium">{currentProperty.details.yearBuilt}</dd>
 
-                                                    <dt className="text-gray-600 dark:text-gray-400">Mietrendite:</dt>
+                                                    <dt className="text-gray-600 dark:text-gray-400">Rental Yield:</dt>
                                                     <dd className="text-right font-medium text-primary">
                                                         {currentProperty.details.rentalYield.toFixed(2).replace('.', ',')}%
                                                     </dd>
@@ -257,21 +257,21 @@ const PropertyModelModal: React.FC<PropertyModelModalProps> = ({
 
                                             <div className="space-y-3">
                                                 <h4 className="font-semibold border-b pb-2 dark:border-gray-700">
-                                                    Finanzielle Übersicht
+                                                    Financial Overview
                                                 </h4>
 
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-gray-600 dark:text-gray-400">Monatliche Miete</span>
+                                                    <span className="text-gray-600 dark:text-gray-400">Monthly Rent</span>
                                                     <span className="font-bold">{formatCurrency(currentProperty.details.size * 15)}</span>
                                                 </div>
 
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-gray-600 dark:text-gray-400">Jährliche Einnahmen</span>
+                                                    <span className="text-gray-600 dark:text-gray-400">Annual Income</span>
                                                     <span className="font-bold">{formatCurrency(currentProperty.details.size * 15 * 12)}</span>
                                                 </div>
 
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-gray-600 dark:text-gray-400">Geschätzter Wert</span>
+                                                    <span className="text-gray-600 dark:text-gray-400">Estimated Value</span>
                                                     <span className="font-bold">{formatCurrency(currentProperty.details.size * 4500)}</span>
                                                 </div>
                                             </div>
@@ -286,7 +286,7 @@ const PropertyModelModal: React.FC<PropertyModelModalProps> = ({
                                             <button
                                                 className="flex-1 px-4 py-2 bg-primary text-white rounded font-medium hover:bg-primary/90 transition-colors"
                                             >
-                                                Investieren
+                                                Invest
                                             </button>
                                         </div>
                                     </motion.div>

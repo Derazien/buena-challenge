@@ -139,7 +139,7 @@ const AnimatedText = ({
     const { container, children } = getVariants();
 
     return (
-        <motion.div
+        <motion.span
             ref={ref}
             className={cn("inline-block", className)}
             initial="hidden"
@@ -156,7 +156,7 @@ const AnimatedText = ({
                     {item}
                 </motion.span>
             ))}
-        </motion.div>
+        </motion.span>
     );
 };
 

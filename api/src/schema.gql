@@ -11,14 +11,14 @@ input AllocateFundsInput {
 type CashFlow {
   amount: Float!
   category: String!
-  createdAt: DateTime!
-  date: DateTime!
+  createdAt: Timestamp!
+  date: Timestamp!
   id: Int!
   note: String
   property: Property!
   propertyId: Int!
   type: String!
-  updatedAt: DateTime!
+  updatedAt: Timestamp!
 }
 
 input CreatePropertyInput {
@@ -43,11 +43,6 @@ type DashboardStats {
   totalProperties: Int!
 }
 
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
-
 type DeleteTicketResponse {
   id: Int!
   success: Boolean!
@@ -71,18 +66,18 @@ type InvestmentResult {
 }
 
 type Lease {
-  createdAt: DateTime!
-  endDate: DateTime!
+  createdAt: Timestamp!
+  endDate: Timestamp!
   id: Int!
   isActive: Boolean!
   monthlyRent: Float!
   property: Property!
   propertyId: Int!
-  startDate: DateTime!
+  startDate: Timestamp!
   tenantEmail: String
   tenantName: String!
   tenantPhone: String
-  updatedAt: DateTime!
+  updatedAt: Timestamp!
 }
 
 type LeaseStats {
@@ -140,12 +135,12 @@ type Property {
   address: String!
   cashFlows: [CashFlow!]
   city: String!
-  createdAt: DateTime!
+  createdAt: Timestamp!
   id: Int!
   leases: [Lease!]
   state: String!
   tickets: [Ticket!]
-  updatedAt: DateTime!
+  updatedAt: Timestamp!
   zipCode: String!
 }
 
@@ -159,8 +154,14 @@ type Query {
   tickets(filters: TicketFiltersInput): [Ticket!]!
 }
 
+type Subscription {
+  ticketCreated: Ticket!
+  ticketDeleted: Ticket!
+  ticketUpdated: Ticket!
+}
+
 type Ticket {
-  createdAt: DateTime!
+  createdAt: Timestamp!
   description: String!
   id: Int!
   priority: String!
@@ -169,7 +170,7 @@ type Ticket {
   propertyId: Int!
   status: String!
   title: String!
-  updatedAt: DateTime!
+  updatedAt: Timestamp!
 }
 
 input TicketFiltersInput {
@@ -183,6 +184,11 @@ type TicketStats {
   openTickets: [OpenTicket!]!
   totalCount: Int!
 }
+
+"""
+`Date` type as integer. Type represents date and time as number of milliseconds from start of UNIX epoch.
+"""
+scalar Timestamp
 
 type UpcomingRenewal {
   endDate: String!

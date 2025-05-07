@@ -165,89 +165,50 @@ export const GET_UPCOMING_LEASES = gql`
   }
 `;
 
-export const GET_TICKETS = gql`
-  query GetTickets($filters: TicketFiltersInput) {
-    tickets(filters: $filters) {
-      id
-      title
-      description
-      priority
-      status
-      createdAt
-      updatedAt
-      propertyId
-      propertyAddress
-    }
-  }
-`;
-
-export const GET_TICKET = gql`
-  query GetTicket($id: Int!) {
-    ticket(id: $id) {
-      id
-      title
-      description
-      priority
-      status
-      createdAt
-      updatedAt
-      propertyId
-      propertyAddress
-    }
-  }
-`;
-
-export const CREATE_TICKET = gql`
-  mutation CreateTicket($input: CreateTicketInput!) {
-    createTicket(input: $input) {
-      id
-      title
-      description
-      priority
-      status
-      createdAt
-      propertyId
-      propertyAddress
-    }
-  }
-`;
-
-export const UPDATE_TICKET = gql`
-  mutation UpdateTicket($input: UpdateTicketInput!) {
-    updateTicket(input: $input) {
-      id
-      title
-      description
-      priority
-      status
-      updatedAt
-      propertyId
-      propertyAddress
-    }
-  }
-`;
-
-export const DELETE_TICKET = gql`
-  mutation DeleteTicket($id: Int!) {
-    deleteTicket(id: $id) {
-      id
-      success
-    }
-  }
-`;
-
 export const TICKET_UPDATED_SUBSCRIPTION = gql`
-  subscription TicketUpdated {
+  subscription OnTicketUpdated {
     ticketUpdated {
       id
       title
       description
-      priority
       status
-      createdAt
-      updatedAt
+      priority
       propertyId
       propertyAddress
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const TICKET_CREATED_SUBSCRIPTION = gql`
+  subscription OnTicketCreated {
+    ticketCreated {
+      id
+      title
+      description
+      status
+      priority
+      propertyId
+      propertyAddress
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const TICKET_DELETED_SUBSCRIPTION = gql`
+  subscription OnTicketDeleted {
+    ticketDeleted {
+      id
+      title
+      description
+      status
+      priority
+      propertyId
+      propertyAddress
+      createdAt
+      updatedAt
     }
   }
 `;

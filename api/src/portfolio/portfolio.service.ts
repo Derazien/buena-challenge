@@ -83,35 +83,26 @@ export class PortfolioService {
   }
 
   async getInvestmentOptions(surplusCash: number, riskProfile: string): Promise<InvestmentOption[]> {
-    try {
-      // Get real-time investment options from Finnhub
-      const marketData = await this.getRealTimeMarketData();
-      
-      // Get AI suggestions based on current market conditions
-      const aiSuggestions = await this.llamaService.suggestInvestment(surplusCash, riskProfile);
-      
-      // Combine AI suggestions with real market data
-      const investmentOptions = aiSuggestions.map((suggestion, index) => {
-        const marketInfo = marketData.find(m => m.symbol === suggestion.symbol);
-        return {
-          id: `inv-${Date.now()}-${index}`,
-          name: suggestion.name,
-          type: suggestion.type,
-          expectedReturn: this.calculateExpectedReturn(suggestion, marketInfo),
-          risk: this.calculateRiskLevel(suggestion, marketInfo),
-          minimumInvestment: suggestion.minimumInvestment,
-          description: suggestion.description,
-          currentPrice: marketInfo?.price,
-          historicalPerformance: marketInfo?.historicalPerformance,
-        };
-      });
+    // Get real-time market data
+    const [euribor, cpi, marketIndicators] = await Promise.all([
+      this.getEuribor3M(),
+      this.getGermanCPI(),
+      this.getMarketIndicators(),
+    ]);
 
-      return investmentOptions;
-    } catch (error) {
-      console.error('Error getting investment options:', error);
-      // Fallback to mock data if API calls fail
-      return this.getMockInvestmentOptions(surplusCash, riskProfile);
-    }
+    // Get AI suggestions with market data
+    const aiSuggestions = await this.llamaService.suggestInvestment(
+      surplusCash,
+      riskProfile,
+      {
+        euribor,
+        cpi,
+        marketIndicators
+      }
+    );
+
+    // Combine AI suggestions with mock data for now
+    return [...aiSuggestions, ...this.getMockInvestmentOptions(surplusCash, riskProfile)];
   }
 
   async allocateFunds(input: AllocateFundsInput): Promise<InvestmentResult> {

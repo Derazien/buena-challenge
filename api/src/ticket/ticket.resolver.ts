@@ -1,213 +1,61 @@
 import { Resolver, Query, Mutation, Args, Int, Subscription } from '@nestjs/graphql';
-import { PrismaService } from '../prisma.service';
+import { PubSub } from 'graphql-subscriptions';
 import { Ticket } from './models/ticket.model';
-import { TicketFiltersInput } from './dto/ticket-filters.input';
+import { TicketService } from './ticket.service';
 import { CreateTicketInput } from './dto/create-ticket.input';
 import { UpdateTicketInput } from './dto/update-ticket.input';
+import { TicketFiltersInput } from './dto/ticket-filters.input';
 import { DeleteTicketResponse } from './dto/delete-ticket.response';
-import { PubSub } from 'graphql-subscriptions';
 
 const pubSub = new PubSub();
 
 @Resolver(() => Ticket)
 export class TicketResolver {
-    constructor(private prisma: PrismaService) { }
+    constructor(private readonly ticketService: TicketService) { }
 
     @Query(() => [Ticket])
-    async tickets(@Args('filters', { nullable: true }) filters?: TicketFiltersInput): Promise<Ticket[]> {
-        console.log('Received filters:', filters);
-
-        const where: any = {};
-
-        if (filters) {
-            if (filters.status) {
-                console.log(`Filtering by status: ${filters.status}`);
-                where.status = filters.status.toUpperCase();
-            }
-
-            if (filters.priority) {
-                console.log(`Filtering by priority: ${filters.priority}`);
-                where.priority = filters.priority.toUpperCase();
-            }
-
-            if (filters.propertyId) {
-                console.log(`Filtering by propertyId: ${filters.propertyId}`);
-                where.propertyId = filters.propertyId;
-            }
-
-            if (filters.searchQuery && filters.searchQuery.trim()) {
-                console.log(`Filtering by searchQuery: ${filters.searchQuery}`);
-                const searchTerm = filters.searchQuery.trim();
-                where.OR = [
-                    { title: { contains: searchTerm } },
-                    { description: { contains: searchTerm } }
-                ];
-            }
-        }
-
-        console.log('Final query where clause:', JSON.stringify(where, null, 2));
-
-        try {
-            const tickets = await this.prisma.ticket.findMany({
-                where,
-                include: {
-                    property: true
-                },
-                orderBy: { createdAt: 'desc' }
-            });
-
-            console.log(`Found ${tickets.length} tickets matching filters`);
-
-            // Add propertyAddress field to each ticket and normalize status/priority to lowercase
-            return tickets.map(ticket => ({
-                ...ticket,
-                // Convert status and priority to lowercase for client consistency
-                status: ticket.status.toLowerCase(),
-                priority: ticket.priority.toLowerCase(),
-                propertyAddress: ticket.property?.address || 'Unknown'
-            }));
-        } catch (error) {
-            console.error('Prisma query error:', error);
-            // Return empty array in case of error
-            return [];
-        }
+    async tickets(@Args('filters', { nullable: true }) filters?: TicketFiltersInput) {
+        return this.ticketService.findAll(filters);
     }
 
     @Query(() => Ticket)
-    async ticket(@Args('id', { type: () => Int }) id: number): Promise<Ticket> {
-        const ticket = await this.prisma.ticket.findUnique({
-            where: { id },
-            include: {
-                property: true
-            }
-        });
-
-        if (!ticket) {
-            throw new Error(`Ticket with ID ${id} not found`);
-        }
-
-        return {
-            ...ticket,
-            // Convert status and priority to lowercase for client consistency
-            status: ticket.status.toLowerCase(),
-            priority: ticket.priority.toLowerCase(),
-            propertyAddress: ticket.property?.address || 'Unknown'
-        };
+    async ticket(@Args('id', { type: () => Int }) id: number) {
+        return this.ticketService.findOne(id);
     }
 
     @Mutation(() => Ticket)
-    async createTicket(@Args('input') input: CreateTicketInput): Promise<Ticket> {
-        const { propertyId, priority, status, ...rest } = input;
-
-        // Convert status and priority to uppercase for database
-        const ticket = await this.prisma.ticket.create({
-            data: {
-                ...rest,
-                priority: priority.toUpperCase(),
-                status: status.toUpperCase(),
-                property: {
-                    connect: { id: propertyId }
-                }
-            },
-            include: {
-                property: true
-            }
-        });
-
-        const formattedTicket = {
-            ...ticket,
-            // Convert status and priority to lowercase for client consistency
-            status: ticket.status.toLowerCase(),
-            priority: ticket.priority.toLowerCase(),
-            propertyAddress: ticket.property?.address || 'Unknown'
-        };
-
-        // Publish the ticket created event
-        pubSub.publish('ticketUpdated', { ticketUpdated: formattedTicket });
-
-        return formattedTicket;
+    async createTicket(@Args('input') input: CreateTicketInput) {
+        const ticket = await this.ticketService.create(input);
+        pubSub.publish('ticketCreated', { ticketCreated: ticket });
+        return ticket;
     }
 
     @Mutation(() => Ticket)
-    async updateTicket(@Args('input') input: UpdateTicketInput): Promise<Ticket> {
-        const { id, priority, status, propertyId, ...rest } = input;
-
-        // Prepare update data with case conversion
-        const updateData: any = { ...rest };
-
-        if (priority) {
-            updateData.priority = priority.toUpperCase();
-        }
-
-        if (status) {
-            updateData.status = status.toUpperCase();
-        }
-
-        if (propertyId) {
-            updateData.property = {
-                connect: { id: propertyId }
-            };
-        }
-
-        const ticket = await this.prisma.ticket.update({
-            where: { id },
-            data: updateData,
-            include: {
-                property: true
-            }
-        });
-
-        const formattedTicket = {
-            ...ticket,
-            // Convert status and priority to lowercase for client consistency
-            status: ticket.status.toLowerCase(),
-            priority: ticket.priority.toLowerCase(),
-            propertyAddress: ticket.property?.address || 'Unknown'
-        };
-
-        // Publish the ticket updated event
-        pubSub.publish('ticketUpdated', { ticketUpdated: formattedTicket });
-
-        return formattedTicket;
+    async updateTicket(@Args('input') input: UpdateTicketInput) {
+        const ticket = await this.ticketService.update(input);
+        pubSub.publish('ticketUpdated', { ticketUpdated: ticket });
+        return ticket;
     }
 
     @Mutation(() => DeleteTicketResponse)
-    async deleteTicket(@Args('id', { type: () => Int }) id: number): Promise<DeleteTicketResponse> {
-        try {
-            const ticket = await this.prisma.ticket.findUnique({
-                where: { id },
-                include: { property: true }
-            });
+    async deleteTicket(@Args('id', { type: () => Int }) id: number) {
+        const ticket = await this.ticketService.remove(id);
+        pubSub.publish('ticketDeleted', { ticketDeleted: ticket });
+        return { id: ticket.id, success: true };
+    }
 
-            if (ticket) {
-                await this.prisma.ticket.delete({
-                    where: { id }
-                });
-
-                // Publish the ticket deleted event with the deleted ticket data
-                const formattedTicket = {
-                    ...ticket,
-                    status: ticket.status.toLowerCase(),
-                    priority: ticket.priority.toLowerCase(),
-                    propertyAddress: ticket.property?.address || 'Unknown'
-                };
-                pubSub.publish('ticketUpdated', { ticketUpdated: formattedTicket });
-            }
-
-            return {
-                id,
-                success: true
-            };
-        } catch (error) {
-            return {
-                id,
-                success: false
-            };
-        }
+    @Subscription(() => Ticket)
+    ticketCreated() {
+        return pubSub.asyncIterator('ticketCreated');
     }
 
     @Subscription(() => Ticket)
     ticketUpdated() {
         return pubSub.asyncIterator('ticketUpdated');
+    }
+
+    @Subscription(() => Ticket)
+    ticketDeleted() {
+        return pubSub.asyncIterator('ticketDeleted');
     }
 }

@@ -11,6 +11,9 @@ import ErrorDisplay from '@/components/common/ErrorDisplay';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import ScrollRevealCard from '@/components/portfolio/ScrollRevealCard';
+import { useQuery, useMutation } from '@apollo/client';
+import { GET_PORTFOLIO_SUMMARY, GET_INVESTMENT_OPTIONS, ALLOCATE_FUNDS } from '@/graphql/portfolio.operations';
+import { ReinvestmentWizard } from '@/components/investments/ReinvestmentWizard';
 
 // Dynamically import components that use browser APIs to avoid hydration errors
 const RentGauge2D = dynamic(() => import('@/components/portfolio/RentGauge2D'), {
@@ -33,10 +36,10 @@ const PropertyModelModal = dynamic(() => import('@/components/portfolio/Property
 const samplePropertyModels = [
     {
         id: 1,
-        name: 'Stadtmitte Wohnung',
+        name: 'City Center Apartment',
         location: 'Berlin',
         type: 'apartment' as const,
-        description: 'Elegant gestaltete Wohnung im Herzen von Berlin mit hervorragender Anbindung an öffentliche Verkehrsmittel, Restaurants und Einkaufsmöglichkeiten. Diese Immobilie bietet modernen Komfort und klassische Architektur.',
+        description: 'Elegantly designed apartment in the heart of Berlin with excellent access to public transport, restaurants, and shopping. This property offers modern comfort combined with classic architecture.',
         details: {
             size: 85,
             bedrooms: 2,
@@ -46,10 +49,10 @@ const samplePropertyModels = [
     },
     {
         id: 2,
-        name: 'Altbau Mehrfamilienhaus',
+        name: 'Period Apartment Building',
         location: 'München',
         type: 'building' as const,
-        description: 'Beeindruckendes Mehrfamilienhaus im Altbaustil, vollständig renoviert mit modernen Annehmlichkeiten bei gleichzeitiger Bewahrung des historischen Charmes. Ideal für Anleger, die ein stabiles Einkommen in einer der begehrtesten Städte Deutschlands suchen.',
+        description: 'Impressive period building, fully renovated with modern amenities while preserving its historical charm. Ideal for investors seeking stable income in one of Germany\'s most desirable cities.',
         details: {
             size: 620,
             floors: 5,
@@ -59,10 +62,10 @@ const samplePropertyModels = [
     },
     {
         id: 3,
-        name: 'Neubauwohnung am Rhein',
+        name: 'New Riverside Apartment',
         location: 'Köln',
         type: 'apartment' as const,
-        description: 'Luxuriöse Neubauwohnung mit atemberaubendem Blick auf den Rhein. Diese moderne Wohnung bietet höchsten Wohnkomfort mit energieeffizienter Technologie und erstklassigen Materialien.',
+        description: 'Luxurious new apartment with breathtaking views of the Rhine. This modern apartment offers premium living comfort with energy-efficient technology and first-class materials.',
         details: {
             size: 110,
             bedrooms: 3,
@@ -72,10 +75,10 @@ const samplePropertyModels = [
     },
     {
         id: 4,
-        name: 'Historisches Doppelhaus',
+        name: 'Historic Semi-Detached House',
         location: 'Hamburg',
         type: 'house' as const,
-        description: 'Wunderschönes Doppelhaus in einem ruhigen Viertel von Hamburg. Diese geräumige Immobilie bietet viel Platz für Familien und verfügt über einen gepflegten Garten, der zum Entspannen einlädt.',
+        description: 'Beautiful semi-detached house in a quiet district of Hamburg. This spacious property offers plenty of room for families and features a well-maintained garden perfect for relaxation.',
         details: {
             size: 180,
             bedrooms: 4,
@@ -86,10 +89,10 @@ const samplePropertyModels = [
     },
     {
         id: 5,
-        name: 'Gründerzeit Wohnanlage',
+        name: 'Victorian Era Residential Complex',
         location: 'Frankfurt',
         type: 'building' as const,
-        description: 'Imposante Wohnanlage aus der Gründerzeit mit luxuriösen Details und modernen Annehmlichkeiten. Diese Immobilie bietet einen hervorragenden Mietertrag in einer der wirtschaftlich stärksten Städte Deutschlands.',
+        description: 'Imposing Victorian-era residential complex with luxurious details and modern amenities. This property offers excellent rental yield in one of Germany\'s strongest economic cities.',
         details: {
             size: 750,
             floors: 6,
@@ -101,6 +104,7 @@ const samplePropertyModels = [
 
 // Define investment suggestion types
 type Investment = {
+    id: string;
     name: string;
     type: string;
     expectedReturn: string;
@@ -124,6 +128,7 @@ type PortfolioRecommendation = {
 // Investment suggestion mock data
 const INVESTMENT_SUGGESTIONS: Investment[] = [
     {
+        id: 'Vanguard Total Stock Market ETF (VTI)',
         name: 'Vanguard Total Stock Market ETF (VTI)',
         type: 'ETF',
         expectedReturn: '8-10%',
@@ -132,6 +137,7 @@ const INVESTMENT_SUGGESTIONS: Investment[] = [
         description: 'A low-cost ETF that tracks the performance of the entire U.S. stock market.'
     },
     {
+        id: 'iShares Core EU Aggregate Bond ETF',
         name: 'iShares Core EU Aggregate Bond ETF',
         type: 'Bond ETF',
         expectedReturn: '3-5%',
@@ -140,6 +146,7 @@ const INVESTMENT_SUGGESTIONS: Investment[] = [
         description: 'A bond ETF that provides exposure to the European investment-grade bond market.'
     },
     {
+        id: 'SPDR EURO STOXX 50 ETF',
         name: 'SPDR EURO STOXX 50 ETF',
         type: 'REIT ETF',
         expectedReturn: '4-7%',
@@ -148,6 +155,7 @@ const INVESTMENT_SUGGESTIONS: Investment[] = [
         description: 'An ETF that tracks the performance of the EURO STOXX 50 Index.'
     },
     {
+        id: 'iShares European Technology ETF',
         name: 'iShares European Technology ETF',
         type: 'Sector ETF',
         expectedReturn: '10-14%',
@@ -156,6 +164,7 @@ const INVESTMENT_SUGGESTIONS: Investment[] = [
         description: 'Focused exposure to European tech companies with high growth potential.'
     },
     {
+        id: 'Xtrackers MSCI Europe ESG UCITS ETF',
         name: 'Xtrackers MSCI Europe ESG UCITS ETF',
         type: 'International ETF',
         expectedReturn: '6-9%',
@@ -164,6 +173,7 @@ const INVESTMENT_SUGGESTIONS: Investment[] = [
         description: 'Diversified exposure to European markets with ESG screening.'
     },
     {
+        id: 'iShares European Property Yield UCITS ETF',
         name: 'iShares European Property Yield UCITS ETF',
         type: 'REIT ETF',
         expectedReturn: '5-8%',
@@ -207,6 +217,82 @@ type PortfolioSummary = {
         month: string;
         income: number;
     }[];
+};
+
+// Define types for the data structures
+type Property = {
+    id: number;
+    name: string;
+    location: string;
+    monthlyRent: number;
+    occupancyRate: number;
+};
+
+type Allocation = {
+    category: string;
+    percentage: number;
+    amount: number;
+};
+
+type MonthlyPerformance = {
+    month: string;
+    income: number;
+};
+
+// Mock data for missing fields
+const mockPortfolioData = {
+    availableToInvest: 50000,
+    availableToReinvest: 25000,
+    properties: [
+        {
+            id: 1,
+            name: 'City Center Apartment',
+            location: 'Berlin',
+            monthlyRent: 1200,
+            occupancyRate: 0.95
+        },
+        {
+            id: 2,
+            name: 'Historic Multi-Family House',
+            location: 'Munich',
+            monthlyRent: 3500,
+            occupancyRate: 0.98
+        }
+    ],
+    reserveBalance: 10000,
+    monthlyGrowth: 0.05,
+    targetMonthlyRent: 10000,
+    allocationBreakdown: [
+        {
+            category: 'Real Estate',
+            percentage: 60,
+            amount: 30000
+        },
+        {
+            category: 'Bonds',
+            percentage: 20,
+            amount: 10000
+        },
+        {
+            category: 'Stocks',
+            percentage: 20,
+            amount: 10000
+        }
+    ],
+    monthlyPerformance: [
+        {
+            month: 'Jan',
+            income: 4500
+        },
+        {
+            month: 'Feb',
+            income: 4700
+        },
+        {
+            month: 'Mar',
+            income: 4900
+        }
+    ]
 };
 
 // Simulated API function to get portfolio recommendations based on rental income and risk profile
@@ -353,9 +439,6 @@ const getPortfolioRecommendations = (
 export default function InvestmentsPage() {
     // State
     const [activeTab, setActiveTab] = useState<string>('overview');
-    const [portfolioData, setPortfolioData] = useState<PortfolioSummary | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
     const [isMounted, setIsMounted] = useState(false);
     const [selectedInvestment, setSelectedInvestment] = useState<Investment | null>(null);
     const [riskProfile, setRiskProfile] = useState('moderate');
@@ -366,13 +449,23 @@ export default function InvestmentsPage() {
     const [optimizedPortfolioView, setOptimizedPortfolioView] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
     const [show3DModelModal, setShow3DModelModal] = useState(false);
+    const [showWizard, setShowWizard] = useState(false);
 
     // Investment Wizard State
     const [step, setStep] = useState(1);
     const [investmentAmount, setInvestmentAmount] = useState(0);
-
-    // Selected funding source
     const [fundingSource, setFundingSource] = useState<'new' | 'rental-income'>('rental-income');
+
+    // GraphQL Queries
+    const { data: portfolioData, loading: portfolioLoading, error: portfolioError } = useQuery(GET_PORTFOLIO_SUMMARY);
+    const { data: investmentOptionsData, loading: investmentOptionsLoading } = useQuery(GET_INVESTMENT_OPTIONS, {
+        variables: {
+            surplusCash: mockPortfolioData.availableToReinvest,
+            riskProfile: riskProfile
+        },
+        skip: !portfolioData?.portfolioSummary
+    });
+    const [allocateFunds, { loading: allocationLoading }] = useMutation(ALLOCATE_FUNDS);
 
     // Ensure the component is mounted before rendering client-side components
     useEffect(() => {
@@ -397,28 +490,28 @@ export default function InvestmentsPage() {
             availableToReinvest: 25000,
             // Added sample property data
             properties: [
-                { id: 1, name: 'Stadtmitte Wohnung', location: 'Berlin', monthlyRent: 2800, occupancyRate: 0.98 },
-                { id: 2, name: 'Altbau Mehrfamilienhaus', location: 'München', monthlyRent: 4200, occupancyRate: 0.95 },
-                { id: 3, name: 'Neubauwohnung am Rhein', location: 'Köln', monthlyRent: 2100, occupancyRate: 0.96 },
-                { id: 4, name: 'Historisches Doppelhaus', location: 'Hamburg', monthlyRent: 3400, occupancyRate: 0.92 },
-                { id: 5, name: 'Gründerzeit Wohnanlage', location: 'Frankfurt', monthlyRent: 2750, occupancyRate: 0.94 }
+                { id: 1, name: 'City Center Apartment', location: 'Berlin', monthlyRent: 2800, occupancyRate: 0.98 },
+                { id: 2, name: 'Period Apartment Building', location: 'München', monthlyRent: 4200, occupancyRate: 0.95 },
+                { id: 3, name: 'New Riverside Apartment', location: 'Köln', monthlyRent: 2100, occupancyRate: 0.96 },
+                { id: 4, name: 'Historic Semi-Detached House', location: 'Hamburg', monthlyRent: 3400, occupancyRate: 0.92 },
+                { id: 5, name: 'Victorian Era Residential Complex', location: 'Frankfurt', monthlyRent: 2750, occupancyRate: 0.94 }
             ],
             // Portfolio data
             reserveBalance: 24845,
             monthlyGrowth: 2.3,
             targetMonthlyRent: 18000,
             allocationBreakdown: [
-                { category: 'Anleihen', percentage: 25, amount: 6211.25 },
-                { category: 'Immobilienfonds', percentage: 35, amount: 8695.75 },
-                { category: 'Aktien', percentage: 30, amount: 7453.50 },
-                { category: 'Bargeld', percentage: 10, amount: 2484.50 }
+                { category: 'Bonds', percentage: 25, amount: 6211.25 },
+                { category: 'Real Estate Funds', percentage: 35, amount: 8695.75 },
+                { category: 'Stocks', percentage: 30, amount: 7453.50 },
+                { category: 'Cash', percentage: 10, amount: 2484.50 }
             ],
             monthlyPerformance: [
                 { month: 'Jan', income: 14200 },
                 { month: 'Feb', income: 14500 },
-                { month: 'Mär', income: 14800 },
+                { month: 'Mar', income: 14800 },
                 { month: 'Apr', income: 15100 },
-                { month: 'Mai', income: 15400 },
+                { month: 'May', income: 15400 },
                 { month: 'Jun', income: 15750 }
             ]
         };
@@ -462,30 +555,6 @@ export default function InvestmentsPage() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Update portfolio recommendation when risk profile changes
-    useEffect(() => {
-        if (portfolioData) {
-            updatePortfolioRecommendation(portfolioData, riskProfile);
-        }
-    }, [riskProfile]);
-
-    // Confetti effect when user clicks "Optimize Portfolio"
-    useEffect(() => {
-        if (showConfetti) {
-            import('canvas-confetti').then(confetti => {
-                confetti.default({
-                    particleCount: 100,
-                    spread: 70,
-                    origin: { y: 0.6 }
-                });
-
-                setTimeout(() => {
-                    setShowConfetti(false);
-                }, 2000);
-            });
-        }
-    }, [showConfetti]);
-
     // Function to get appropriate badge variant based on risk level
     const getRiskBadgeVariant = (risk: string) => {
         switch (risk.toLowerCase()) {
@@ -511,11 +580,30 @@ export default function InvestmentsPage() {
         setShowInvestmentModal(true);
     };
 
-    const handleConfirmInvestment = () => {
+    const handleConfirmInvestment = async () => {
         if (!selectedInvestment) return;
 
-        // In a real app, this would call an API to process the investment
-        setShowInvestmentModal(false);
+        try {
+            const result = await allocateFunds({
+                variables: {
+                    input: {
+                        amount: investmentAmount,
+                        investmentId: selectedInvestment.id,
+                        riskProfile: riskProfile
+                    }
+                }
+            });
+
+            if (result.data.allocateFunds.success) {
+                setShowInvestmentModal(false);
+                setShowConfetti(true);
+            } else {
+                // Handle error
+                console.error('Failed to allocate funds:', result.data.allocateFunds.message);
+            }
+        } catch (error) {
+            console.error('Error allocating funds:', error);
+        }
     };
 
     const handleAcceptOptimizedPortfolio = () => {
@@ -524,7 +612,13 @@ export default function InvestmentsPage() {
         setShowConfetti(true);
     };
 
-    if (loading) {
+    // Use mock data for missing fields
+    const portfolioDataWithMock = {
+        ...portfolioData?.portfolioSummary,
+        ...mockPortfolioData
+    };
+
+    if (portfolioLoading) {
         return (
             <div className="flex items-center justify-center min-h-[70vh]">
                 <LoadingSpinner text="Loading your investment dashboard..." />
@@ -532,15 +626,15 @@ export default function InvestmentsPage() {
         );
     }
 
-    if (error) {
+    if (portfolioError) {
         return (
             <div className="container mx-auto py-8">
-                <ErrorDisplay error={error.message} onRetry={() => window.location.reload()} />
+                <ErrorDisplay error={portfolioError.message} onRetry={() => window.location.reload()} />
             </div>
         );
     }
 
-    if (!portfolioData || !isMounted) {
+    if (!portfolioData?.portfolioSummary || !isMounted) {
         return (
             <div className="flex items-center justify-center min-h-[70vh]">
                 <LoadingSpinner text="Preparing investment dashboard..." />
@@ -596,47 +690,49 @@ export default function InvestmentsPage() {
                         {/* Investment Summary */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <Card className="p-6 md:col-span-2">
-                                <h2 className="text-xl font-semibold mb-4">Mieteinnahmen Übersicht</h2>
+                                <h2 className="text-xl font-semibold mb-4">Rental Income Overview</h2>
 
-                                <div className="h-[400px]">
-                                    <RentGauge2D
-                                        monthlyRent={portfolioData.monthlyRentIn}
-                                        targetAmount={portfolioData.targetMonthlyRent}
-                                    />
-                                </div>
+                                {isMounted && (
+                                    <div className="h-[400px]">
+                                        <RentGauge2D
+                                            monthlyRent={portfolioDataWithMock.monthlyRentIn}
+                                            targetAmount={portfolioDataWithMock.targetMonthlyRent}
+                                        />
+                                    </div>
+                                )}
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
                                     <div className="bg-muted/20 p-4 rounded-lg">
-                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Monatliche Mieteinnahmen</h3>
+                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Monthly Rental Income</h3>
                                         <div className="flex items-center">
-                                            <p className="text-2xl font-bold">€{portfolioData.monthlyRentIn.toLocaleString('de-DE')}</p>
-                                            <span className="ml-2 text-sm text-green-600">+{portfolioData.monthlyGrowth.toLocaleString('de-DE').replace('.', ',')}%</span>
+                                            <p className="text-2xl font-bold">€{portfolioDataWithMock.monthlyRentIn.toLocaleString()}</p>
+                                            <span className="ml-2 text-sm text-green-600">+{portfolioDataWithMock.monthlyGrowth.toLocaleString('en-US').replace('.', ',')}%</span>
                                         </div>
                                     </div>
                                     <div className="bg-muted/20 p-4 rounded-lg">
-                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Verfügbar für Investitionen</h3>
+                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Available for Investment</h3>
                                         <p className="text-2xl font-bold">€{portfolioData.availableToReinvest.toLocaleString('de-DE')}</p>
                                     </div>
                                 </div>
                             </Card>
 
                             <Card className="p-6">
-                                <h2 className="text-xl font-semibold mb-4">Markt Kennzahlen</h2>
+                                <h2 className="text-xl font-semibold mb-4">Market Metrics</h2>
                                 <div className="space-y-4">
                                     <div>
-                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Prognostizierte Jahresrendite</h3>
+                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Forecasted Annual Return</h3>
                                         <p className="text-2xl font-bold">{(portfolioData.forecastedYield * 100).toFixed(2).replace('.', ',')}%</p>
                                     </div>
                                     <div>
                                         <h3 className="text-sm font-medium text-muted-foreground mb-1">Euribor 3M</h3>
-                                        <p className="text-lg">{(portfolioData.euribor3M * 100).toFixed(2).replace('.', ',')}%</p>
+                                        <p className="text-lg">{(portfolioDataWithMock.euribor3M * 100).toFixed(2).replace('.', ',')}%</p>
                                     </div>
                                     <div>
-                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Deutscher VPI</h3>
+                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">German CPI</h3>
                                         <p className="text-lg">{(portfolioData.germanCPI * 100).toFixed(2).replace('.', ',')}%</p>
                                     </div>
                                     <div>
-                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">CAGR Prognose</h3>
+                                        <h3 className="text-sm font-medium text-muted-foreground mb-1">CAGR Forecast</h3>
                                         <p className="text-lg">{(portfolioData.cagrProjection * 100).toFixed(2).replace('.', ',')}%</p>
                                     </div>
                                 </div>
@@ -646,7 +742,7 @@ export default function InvestmentsPage() {
                         {/* Property Income Breakdown */}
                         <Card className="p-6">
                             <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-xl font-semibold">Immobilien Einkommensübersicht</h2>
+                                <h2 className="text-xl font-semibold">Property Income Overview</h2>
                                 <Button
                                     onClick={() => setShow3DModelModal(true)}
                                     className="flex items-center gap-1.5 text-sm"
@@ -657,30 +753,30 @@ export default function InvestmentsPage() {
                                         <path d="M5 14v1a7 7 0 0 0 14 0v-1" />
                                         <path d="M8 14v1a4 4 0 0 0 8 0v-1" />
                                     </svg>
-                                    3D Modelle anzeigen
+                                    View 3D Models
                                 </Button>
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
                                         <tr className="border-b">
-                                            <th className="text-left py-3 px-4">Immobilie</th>
-                                            <th className="text-left py-3 px-4">Standort</th>
-                                            <th className="text-right py-3 px-4">Monatliche Miete</th>
-                                            <th className="text-right py-3 px-4">Vermietungsgrad</th>
+                                            <th className="text-left py-3 px-4">Property</th>
+                                            <th className="text-left py-3 px-4">Location</th>
+                                            <th className="text-right py-3 px-4">Monthly Rent</th>
+                                            <th className="text-right py-3 px-4">Occupancy Rate</th>
                                             <th className="text-right py-3 px-4">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {portfolioData.properties.map(property => (
+                                        {portfolioDataWithMock.properties.map((property: Property) => (
                                             <tr key={property.id} className="border-b hover:bg-muted/10">
                                                 <td className="py-3 px-4">{property.name}</td>
                                                 <td className="py-3 px-4">{property.location}</td>
-                                                <td className="py-3 px-4 text-right">€{property.monthlyRent.toLocaleString('de-DE')}</td>
+                                                <td className="py-3 px-4 text-right">€{property.monthlyRent.toLocaleString('en-US')}</td>
                                                 <td className="py-3 px-4 text-right">{(property.occupancyRate * 100).toFixed(0)}%</td>
                                                 <td className="py-3 px-4 text-right">
                                                     <Badge variant={property.occupancyRate > 0.9 ? "success" : "warning"}>
-                                                        {property.occupancyRate > 0.95 ? "Ausgezeichnet" : property.occupancyRate > 0.9 ? "Sehr Gut" : "Gut"}
+                                                        {property.occupancyRate > 0.95 ? "Excellent" : property.occupancyRate > 0.9 ? "Very Good" : "Good"}
                                                     </Badge>
                                                 </td>
                                             </tr>
@@ -693,10 +789,10 @@ export default function InvestmentsPage() {
                         {/* Portfolio Allocation */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <Card className="p-6 md:col-span-2">
-                                <h2 className="text-xl font-semibold mb-4">Portfolio Aufteilung</h2>
+                                <h2 className="text-xl font-semibold mb-4">Portfolio Allocation</h2>
                                 <div className="space-y-6">
                                     <div className="flex flex-wrap gap-3 mb-6">
-                                        {portfolioData.allocationBreakdown.map((allocation, index) => {
+                                        {portfolioDataWithMock.allocationBreakdown.map((allocation: Allocation, index: number) => {
                                             const colors = ['bg-blue-500', 'bg-green-500', 'bg-amber-500', 'bg-purple-500'];
                                             const textColors = ['text-blue-500', 'text-green-500', 'text-amber-500', 'text-purple-500'];
                                             return (
@@ -711,7 +807,7 @@ export default function InvestmentsPage() {
                                     </div>
 
                                     <div className="h-8 w-full rounded-md overflow-hidden flex">
-                                        {portfolioData.allocationBreakdown.map((allocation, index) => {
+                                        {portfolioDataWithMock.allocationBreakdown.map((allocation: Allocation, index: number) => {
                                             const colors = ['bg-blue-500', 'bg-green-500', 'bg-amber-500', 'bg-purple-500'];
                                             return (
                                                 <div
@@ -725,7 +821,7 @@ export default function InvestmentsPage() {
                                     </div>
 
                                     <div className="space-y-3 mt-6">
-                                        {portfolioData.allocationBreakdown.map((allocation, index) => (
+                                        {portfolioDataWithMock.allocationBreakdown.map((allocation: Allocation, index: number) => (
                                             <div key={allocation.category} className="flex justify-between items-center">
                                                 <div className="flex items-center">
                                                     <div className="w-1 h-8 bg-blue-500 mr-3" style={{
@@ -733,11 +829,11 @@ export default function InvestmentsPage() {
                                                     }}></div>
                                                     <div>
                                                         <div className="font-medium">{allocation.category}</div>
-                                                        <div className="text-xs text-muted-foreground">{allocation.percentage}% des Portfolios</div>
+                                                        <div className="text-xs text-muted-foreground">{allocation.percentage}% of Portfolio</div>
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <div className="font-medium">€{allocation.amount.toLocaleString('de-DE')}</div>
+                                                    <div className="font-medium">€{allocation.amount.toLocaleString('en-US')}</div>
                                                 </div>
                                             </div>
                                         ))}
@@ -746,10 +842,10 @@ export default function InvestmentsPage() {
                             </Card>
 
                             <Card className="p-6">
-                                <h2 className="text-xl font-semibold mb-4">Monatliche Leistung</h2>
+                                <h2 className="text-xl font-semibold mb-4">Monthly Performance</h2>
                                 <div className="h-[250px] flex items-end space-x-2">
-                                    {portfolioData.monthlyPerformance.map((data) => {
-                                        const maxIncome = Math.max(...portfolioData.monthlyPerformance.map(d => d.income));
+                                    {portfolioDataWithMock.monthlyPerformance.map((data: MonthlyPerformance) => {
+                                        const maxIncome = Math.max(...portfolioDataWithMock.monthlyPerformance.map((d: MonthlyPerformance) => d.income));
                                         const height = (data.income / maxIncome) * 200;
 
                                         return (
@@ -760,7 +856,7 @@ export default function InvestmentsPage() {
                                                 ></div>
                                                 <div className="mt-2 text-center">
                                                     <div className="text-xs font-medium">{data.month}</div>
-                                                    <div className="text-xs text-muted-foreground">€{data.income.toLocaleString('de-DE')}</div>
+                                                    <div className="text-xs text-muted-foreground">€{data.income.toLocaleString('en-US')}</div>
                                                 </div>
                                             </div>
                                         );
@@ -774,148 +870,38 @@ export default function InvestmentsPage() {
                 {/* Investment Opportunities Tab */}
                 {activeTab === 'opportunities' && (
                     <div className="space-y-8">
-                        {/* Risk Profile Selector */}
-                        <Card className="p-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-xl font-semibold">Investment Risk Profile</h2>
-                                <div className="flex items-center space-x-2">
-                                    <span className="text-sm font-medium">Current Profile:</span>
-                                    <select
-                                        value={riskProfile}
-                                        onChange={(e) => setRiskProfile(e.target.value)}
-                                        className="border rounded-md px-3 py-1 bg-background text-sm"
-                                    >
-                                        <option value="conservative">Conservative</option>
-                                        <option value="moderate">Moderate</option>
-                                        <option value="aggressive">Aggressive</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div
-                                    className={`p-5 border rounded-lg cursor-pointer transition-colors ${riskProfile === 'conservative'
-                                        ? 'border-primary bg-primary/5'
-                                        : 'hover:bg-muted/10'
-                                        }`}
-                                    onClick={() => setRiskProfile('conservative')}
-                                >
-                                    <h3 className="font-medium mb-2">Conservative</h3>
-                                    <p className="text-sm text-muted-foreground mb-4">Lower risk investments with stable but modest returns. Focus on capital preservation.</p>
-                                    <div className="flex items-center text-sm text-muted-foreground">
-                                        <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                                        <span>Expected Return: 3-6%</span>
-                                    </div>
-                                </div>
-
-                                <div
-                                    className={`p-5 border rounded-lg cursor-pointer transition-colors ${riskProfile === 'moderate'
-                                        ? 'border-primary bg-primary/5'
-                                        : 'hover:bg-muted/10'
-                                        }`}
-                                    onClick={() => setRiskProfile('moderate')}
-                                >
-                                    <h3 className="font-medium mb-2">Moderate</h3>
-                                    <p className="text-sm text-muted-foreground mb-4">Balanced approach with a mix of growth and income investments.</p>
-                                    <div className="flex items-center text-sm text-muted-foreground">
-                                        <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-                                        <span>Expected Return: 5-9%</span>
-                                    </div>
-                                </div>
-
-                                <div
-                                    className={`p-5 border rounded-lg cursor-pointer transition-colors ${riskProfile === 'aggressive'
-                                        ? 'border-primary bg-primary/5'
-                                        : 'hover:bg-muted/10'
-                                        }`}
-                                    onClick={() => setRiskProfile('aggressive')}
-                                >
-                                    <h3 className="font-medium mb-2">Aggressive</h3>
-                                    <p className="text-sm text-muted-foreground mb-4">Higher risk investments with potential for significant returns but also greater volatility.</p>
-                                    <div className="flex items-center text-sm text-muted-foreground">
-                                        <span className="w-3 h-3 bg-amber-500 rounded-full mr-2"></span>
-                                        <span>Expected Return: 8-14%</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </Card>
-
                         {/* Investment Recommendations */}
                         <Card className="p-6">
-                            <h2 className="text-xl font-semibold mb-6">Recommended Investments</h2>
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-xl font-semibold">Investment Opportunities</h2>
+                            </div>
 
-                            <p className="mb-6">
-                                Based on your monthly rental income of <strong>€{portfolioData.monthlyRentIn.toLocaleString()}</strong> and available
-                                reinvestment amount of <strong>€{portfolioData.availableToReinvest.toLocaleString()}</strong>,
-                                we recommend the following investment strategy:
-                            </p>
-
-                            {isRecommendationLoading ? (
-                                <div className="h-40 flex items-center justify-center">
-                                    <LoadingSpinner text="Updating recommendations..." />
-                                </div>
-                            ) : portfolioRecommendation ? (
-                                <div className="space-y-6">
-                                    <div className="p-4 bg-muted/20 rounded-lg">
-                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
-                                            <h3 className="text-lg font-medium">Recommended Investment Amount</h3>
-                                            <p className="text-xl font-bold">€{portfolioRecommendation.recommendedAmount.toLocaleString()}</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {INVESTMENT_SUGGESTIONS.map((investment, idx) => (
+                                    <Card key={idx} className="p-4 h-full flex flex-col">
+                                        <div className="flex items-start justify-between mb-2">
+                                            <h4 className="font-medium">{investment.name}</h4>
+                                            <Badge variant={getRiskBadgeVariant(investment.risk)}>
+                                                {investment.risk}
+                                            </Badge>
                                         </div>
-                                        <p className="text-sm text-muted-foreground">
-                                            {portfolioRecommendation.allocationPercentage * 100}% of your available rental income
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <h3 className="text-lg font-medium mb-3">Investment Rationale</h3>
-                                        <div className="bg-primary/5 border border-primary/10 rounded-lg p-4">
-                                            <ul className="space-y-2 list-disc pl-5">
-                                                {portfolioRecommendation.reasonsForRecommendation.map((reason, idx) => (
-                                                    <li key={idx} className="text-sm">{reason}</li>
-                                                ))}
-                                            </ul>
+                                        <p className="text-sm text-muted-foreground mb-2">{investment.type}</p>
+                                        <p className="text-sm mb-4">{investment.description}</p>
+                                        <div className="mt-auto space-y-2">
+                                            <div className="flex justify-between">
+                                                <span className="text-sm">Expected Return:</span>
+                                                <span className="text-sm font-medium">{investment.expectedReturn}</span>
+                                            </div>
+                                            <Button
+                                                className="w-full mt-2"
+                                                onClick={() => handleInvestNow(investment)}
+                                            >
+                                                Invest Now
+                                            </Button>
                                         </div>
-                                    </div>
-
-                                    <div>
-                                        <h3 className="text-lg font-medium mb-3">Suggested Investment Allocation</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                            {portfolioRecommendation.suggestedInvestments.map((item, idx) => (
-                                                <Card key={idx} className="p-4 h-full flex flex-col">
-                                                    <div className="flex items-start justify-between mb-2">
-                                                        <h4 className="font-medium">{item.investment.name}</h4>
-                                                        <Badge variant={getRiskBadgeVariant(item.investment.risk)}>
-                                                            {item.investment.risk}
-                                                        </Badge>
-                                                    </div>
-                                                    <p className="text-sm text-muted-foreground mb-2">{item.investment.type}</p>
-                                                    <p className="text-sm mb-4">{item.investment.description}</p>
-                                                    <div className="mt-auto space-y-2">
-                                                        <div className="flex justify-between">
-                                                            <span className="text-sm">Expected Return:</span>
-                                                            <span className="text-sm font-medium">{item.investment.expectedReturn}</span>
-                                                        </div>
-                                                        <div className="flex justify-between">
-                                                            <span className="text-sm">Allocation:</span>
-                                                            <span className="text-sm font-medium">{(item.percentage * 100).toFixed(1)}%</span>
-                                                        </div>
-                                                        <div className="flex justify-between">
-                                                            <span className="text-sm">Amount:</span>
-                                                            <span className="text-sm font-medium">€{item.amount.toLocaleString()}</span>
-                                                        </div>
-                                                        <Button
-                                                            className="w-full mt-2"
-                                                            onClick={() => handleInvestNow(item.investment)}
-                                                        >
-                                                            Invest Now
-                                                        </Button>
-                                                    </div>
-                                                </Card>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : null}
+                                    </Card>
+                                ))}
+                            </div>
                         </Card>
                     </div>
                 )}
@@ -929,27 +915,27 @@ export default function InvestmentsPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                 <div className="bg-primary/5 rounded-lg p-4">
                                     <h3 className="text-sm font-medium text-muted-foreground mb-1">Monthly Income</h3>
-                                    <p className="text-2xl font-bold">€{portfolioData.monthlyRentIn.toLocaleString()}</p>
-                                    <p className="text-sm text-green-600 mt-1">+{portfolioData.monthlyGrowth}% from last month</p>
+                                    <p className="text-2xl font-bold">€{portfolioDataWithMock.monthlyRentIn.toLocaleString()}</p>
+                                    <p className="text-sm text-green-600 mt-1">+{portfolioDataWithMock.monthlyGrowth.toLocaleString('en-US').replace('.', ',')}% from last month</p>
                                 </div>
 
                                 <div className="bg-primary/5 rounded-lg p-4">
                                     <h3 className="text-sm font-medium text-muted-foreground mb-1">Annual Income</h3>
-                                    <p className="text-2xl font-bold">€{(portfolioData.monthlyRentIn * 12).toLocaleString()}</p>
+                                    <p className="text-2xl font-bold">€{(portfolioDataWithMock.monthlyRentIn * 12).toLocaleString()}</p>
                                     <p className="text-sm text-muted-foreground mt-1">Based on current rates</p>
                                 </div>
 
                                 <div className="bg-primary/5 rounded-lg p-4">
                                     <h3 className="text-sm font-medium text-muted-foreground mb-1">Total Properties</h3>
-                                    <p className="text-2xl font-bold">{portfolioData.properties.length}</p>
-                                    <p className="text-sm text-muted-foreground mt-1">Across {new Set(portfolioData.properties.map(p => p.location)).size} locations</p>
+                                    <p className="text-2xl font-bold">{portfolioDataWithMock.properties.length}</p>
+                                    <p className="text-sm text-muted-foreground mt-1">Across {new Set(portfolioDataWithMock.properties.map((p: Property) => p.location)).size} locations</p>
                                 </div>
 
                                 <div className="bg-primary/5 rounded-lg p-4">
                                     <h3 className="text-sm font-medium text-muted-foreground mb-1">Avg. Occupancy</h3>
                                     <p className="text-2xl font-bold">
-                                        {(portfolioData.properties.reduce((sum, p) => sum + p.occupancyRate, 0) /
-                                            portfolioData.properties.length * 100).toFixed(1)}%
+                                        {(portfolioDataWithMock.properties.reduce((sum: number, p: Property) => sum + p.occupancyRate, 0) /
+                                            portfolioDataWithMock.properties.length * 100).toFixed(1)}%
                                     </p>
                                     <p className="text-sm text-muted-foreground mt-1">Across all properties</p>
                                 </div>
@@ -960,7 +946,7 @@ export default function InvestmentsPage() {
                         <Card className="p-6">
                             <h2 className="text-xl font-semibold mb-4">Earnings Breakdown by Property</h2>
                             <div className="space-y-6">
-                                {portfolioData.properties.map(property => {
+                                {portfolioDataWithMock.properties.map((property: Property) => {
                                     const annualRent = property.monthlyRent * 12;
                                     const maintenanceCost = annualRent * 0.15; // Estimate 15% for maintenance
                                     const taxes = annualRent * 0.2; // Estimate 20% for property taxes
@@ -1031,13 +1017,13 @@ export default function InvestmentsPage() {
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between">
                                             <span className="text-sm font-medium">Current Available</span>
-                                            <span>€{portfolioData.availableToReinvest.toLocaleString()}</span>
+                                            <span>€{portfolioDataWithMock.availableToReinvest.toLocaleString()}</span>
                                         </div>
 
                                         {/* Generate 5 year projection with compounding */}
                                         {[1, 2, 3, 4, 5].map(year => {
-                                            const amount = portfolioData.availableToReinvest *
-                                                Math.pow(1 + portfolioData.forecastedYield, year);
+                                            const amount = portfolioDataWithMock.availableToReinvest *
+                                                Math.pow(1 + portfolioDataWithMock.forecastedYield, year);
                                             return (
                                                 <div key={year} className="flex items-center justify-between">
                                                     <span className="text-sm font-medium">Year {year}</span>
@@ -1052,7 +1038,7 @@ export default function InvestmentsPage() {
                                     <h3 className="text-lg font-medium mb-3">Where to Invest</h3>
 
                                     <div className="space-y-3">
-                                        {portfolioData.allocationBreakdown.map((allocation, idx) => (
+                                        {portfolioDataWithMock.allocationBreakdown.map((allocation: Allocation, idx: number) => (
                                             <div key={allocation.category} className="flex justify-between items-center p-3 bg-muted/10 rounded-lg">
                                                 <div className="flex items-center">
                                                     <div className="w-2 h-10 mr-3" style={{
@@ -1076,12 +1062,13 @@ export default function InvestmentsPage() {
                                         ))}
                                     </div>
 
-                                    <Button
-                                        onClick={() => setActiveTab('opportunities')}
-                                        className="w-full mt-4"
-                                    >
-                                        View Investment Opportunities
-                                    </Button>
+                                    <div className="mt-6">
+                                        <Button
+                                            onClick={() => setActiveTab('opportunities')}
+                                        >
+                                            View Investment Opportunities
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1102,7 +1089,7 @@ export default function InvestmentsPage() {
 
                                     {/* Current Plan Line */}
                                     <div className="absolute bottom-0 left-0 h-[120px] w-full border-t border-primary border-dashed"></div>
-                                    <div className="absolute bottom-[120px] left-0 text-xs text-primary">Your Plan {(portfolioData.forecastedYield * 100).toFixed(1)}%</div>
+                                    <div className="absolute bottom-[120px] left-0 text-xs text-primary">Your Plan {(portfolioDataWithMock.forecastedYield * 100).toFixed(1)}%</div>
                                 </div>
                                 <div className="flex justify-between text-xs text-muted-foreground mt-2">
                                     <span>Year 1</span>
@@ -1122,7 +1109,7 @@ export default function InvestmentsPage() {
                             </div>
 
                             <p className="mb-6">
-                                With your current rental income of <strong>€{portfolioData.monthlyRentIn.toLocaleString()}</strong> per month,
+                                With your current rental income of <strong>€{portfolioDataWithMock.monthlyRentIn.toLocaleString()}</strong> per month,
                                 you can accelerate wealth growth by investing in these opportunities:
                             </p>
 
@@ -1198,126 +1185,111 @@ export default function InvestmentsPage() {
             {showInvestmentModal && selectedInvestment && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
-                        <h2 className="text-xl font-bold mb-4">Invest in {selectedInvestment.name}</h2>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold">Invest in {selectedInvestment.name}</h2>
+                            <Button variant="ghost" onClick={() => setShowInvestmentModal(false)}>
+                                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M18 6L6 18M6 6l12 12" />
+                                </svg>
+                            </Button>
+                        </div>
 
-                        {step === 1 && (
-                            <div className="space-y-4">
-                                <h3 className="font-medium">Step 1: Select Funding Source</h3>
-
-                                <div className="space-y-3">
-                                    <label className={`flex items-center p-4 border rounded-md cursor-pointer hover:bg-muted/10 transition-colors ${fundingSource === 'rental-income' ? 'border-primary bg-muted/10' : 'border-border'}`}>
-                                        <input
-                                            type="radio"
-                                            name="funding-source"
-                                            value="rental-income"
-                                            checked={fundingSource === 'rental-income'}
-                                            onChange={() => {
-                                                setFundingSource('rental-income');
-                                                setInvestmentAmount(portfolioData.availableToReinvest);
-                                            }}
-                                            className="h-4 w-4 text-primary focus:ring-primary"
-                                        />
-                                        <div className="ml-3">
-                                            <span className="block font-medium">Use Rental Income</span>
-                                            <span className="block text-sm text-muted-foreground">€{portfolioData.availableToReinvest.toLocaleString()} available</span>
-                                        </div>
-                                    </label>
-
-                                    <label className={`flex items-center p-4 border rounded-md cursor-pointer hover:bg-muted/10 transition-colors ${fundingSource === 'new' ? 'border-primary bg-muted/10' : 'border-border'}`}>
-                                        <input
-                                            type="radio"
-                                            name="funding-source"
-                                            value="new"
-                                            checked={fundingSource === 'new'}
-                                            onChange={() => {
-                                                setFundingSource('new');
-                                                setInvestmentAmount(portfolioData.availableToInvest);
-                                            }}
-                                            className="h-4 w-4 text-primary focus:ring-primary"
-                                        />
-                                        <div className="ml-3">
-                                            <span className="block font-medium">Use New Funds</span>
-                                            <span className="block text-sm text-muted-foreground">€{portfolioData.availableToInvest.toLocaleString()} available</span>
-                                        </div>
-                                    </label>
+                        <div className="space-y-6">
+                            {/* Investment Details */}
+                            <div className="bg-muted/10 p-4 rounded-lg space-y-3">
+                                <div className="flex justify-between">
+                                    <span className="text-sm">Type:</span>
+                                    <span className="text-sm font-medium">{selectedInvestment.type}</span>
                                 </div>
-
-                                <div className="flex justify-between pt-4">
-                                    <Button variant="outline" onClick={() => setShowInvestmentModal(false)}>Cancel</Button>
-                                    <Button onClick={handleNextStep}>Next</Button>
+                                <div className="flex justify-between">
+                                    <span className="text-sm">Expected Return:</span>
+                                    <span className="text-sm font-medium">{selectedInvestment.expectedReturn}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm">Risk Level:</span>
+                                    <Badge variant={getRiskBadgeVariant(selectedInvestment.risk)}>
+                                        {selectedInvestment.risk}
+                                    </Badge>
                                 </div>
                             </div>
-                        )}
 
-                        {step === 2 && (
-                            <div className="space-y-4">
-                                <h3 className="font-medium">Step 2: Enter Investment Amount</h3>
+                            {/* Funding Source */}
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    Funding Source
+                                </label>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <button
+                                        onClick={() => {
+                                            setFundingSource('rental-income');
+                                            setInvestmentAmount(portfolioData.availableToReinvest);
+                                        }}
+                                        className={`p-4 border rounded-lg text-left transition-colors ${fundingSource === 'rental-income'
+                                            ? 'border-primary bg-primary/5'
+                                            : 'hover:bg-muted/10'
+                                            }`}
+                                    >
+                                        <span className="block font-medium">Rental Income</span>
+                                        <span className="block text-sm text-muted-foreground">
+                                            €{portfolioData.availableToReinvest.toLocaleString()} available
+                                        </span>
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setFundingSource('new');
+                                            setInvestmentAmount(portfolioData.availableToInvest);
+                                        }}
+                                        className={`p-4 border rounded-lg text-left transition-colors ${fundingSource === 'new'
+                                            ? 'border-primary bg-primary/5'
+                                            : 'hover:bg-muted/10'
+                                            }`}
+                                    >
+                                        <span className="block font-medium">New Funds</span>
+                                        <span className="block text-sm text-muted-foreground">
+                                            €{portfolioData.availableToInvest.toLocaleString()} available
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
 
-                                <div>
-                                    <label htmlFor="investment-amount" className="block text-sm font-medium mb-1">
-                                        How much would you like to invest?
+                            {/* Investment Amount */}
+                            <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <label htmlFor="investment-amount" className="block text-sm font-medium">
+                                        Investment Amount
                                     </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <span className="text-muted-foreground">€</span>
-                                        </div>
-                                        <input
-                                            type="number"
-                                            id="investment-amount"
-                                            value={investmentAmount}
-                                            onChange={(e) => setInvestmentAmount(Number(e.target.value))}
-                                            className="block w-full pl-7 pr-12 py-2 border border-border rounded-md focus:ring-primary focus:border-primary"
-                                            placeholder="0.00"
-                                            max={fundingSource === 'rental-income' ? portfolioData.availableToReinvest : portfolioData.availableToInvest}
-                                        />
+                                    <span className="text-lg font-semibold">€{investmentAmount.toLocaleString()}</span>
+                                </div>
+                                <div className="relative">
+                                    <input
+                                        type="range"
+                                        id="investment-amount"
+                                        min="0"
+                                        max={fundingSource === 'rental-income' ? portfolioData.availableToReinvest : portfolioData.availableToInvest}
+                                        step={Math.max(100, Math.floor((fundingSource === 'rental-income' ? portfolioData.availableToReinvest : portfolioData.availableToInvest) / 100))}
+                                        value={investmentAmount}
+                                        onChange={(e) => setInvestmentAmount(Number(e.target.value))}
+                                        className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                                    />
+                                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                                        <span>€0</span>
+                                        <span>€{(fundingSource === 'rental-income' ? portfolioData.availableToReinvest : portfolioData.availableToInvest).toLocaleString()}</span>
                                     </div>
-                                    <p className="text-sm text-muted-foreground mt-1">
-                                        Maximum available: €{(fundingSource === 'rental-income' ? portfolioData.availableToReinvest : portfolioData.availableToInvest).toLocaleString()}
-                                    </p>
                                 </div>
-
-                                <div className="flex justify-between pt-4">
-                                    <Button variant="outline" onClick={handlePrevStep}>Back</Button>
-                                    <Button onClick={handleNextStep}>Next</Button>
-                                </div>
+                                <p className="text-sm text-muted-foreground mt-2">
+                                    Available: €{(fundingSource === 'rental-income' ? portfolioData.availableToReinvest : portfolioData.availableToInvest).toLocaleString()}
+                                </p>
                             </div>
-                        )}
 
-                        {step === 3 && (
-                            <div className="space-y-4">
-                                <h3 className="font-medium">Step 3: Review and Confirm</h3>
-
-                                <div className="bg-muted/10 p-4 rounded-lg space-y-3">
-                                    <div className="flex justify-between">
-                                        <span className="text-sm">Investment:</span>
-                                        <span className="text-sm font-medium">{selectedInvestment.name}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-sm">Amount:</span>
-                                        <span className="text-sm font-medium">€{investmentAmount.toLocaleString()}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-sm">Funding Source:</span>
-                                        <span className="text-sm font-medium">{fundingSource === 'rental-income' ? 'Rental Income' : 'New Funds'}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-sm">Expected Return:</span>
-                                        <span className="text-sm font-medium">{selectedInvestment.expectedReturn}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-sm">Risk Level:</span>
-                                        <Badge variant={getRiskBadgeVariant(selectedInvestment.risk)}>
-                                            {selectedInvestment.risk}
-                                        </Badge>
-                                    </div>
-                                </div>
-
-                                <div className="flex justify-between pt-4">
-                                    <Button variant="outline" onClick={handlePrevStep}>Back</Button>
-                                    <Button onClick={handleConfirmInvestment}>Confirm Investment</Button>
-                                </div>
-                            </div>
-                        )}
+                            {/* Confirm Button */}
+                            <Button
+                                className="w-full"
+                                onClick={handleConfirmInvestment}
+                                disabled={investmentAmount <= 0 || investmentAmount > (fundingSource === 'rental-income' ? portfolioData.availableToReinvest : portfolioData.availableToInvest)}
+                            >
+                                Confirm Investment
+                            </Button>
+                        </div>
                     </Card>
                 </div>
             )}
@@ -1328,6 +1300,12 @@ export default function InvestmentsPage() {
                 onClose={() => setShow3DModelModal(false)}
                 properties={samplePropertyModels}
             />
+
+            {showWizard && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <ReinvestmentWizard onComplete={() => setShowWizard(false)} />
+                </div>
+            )}
         </div>
     );
 }

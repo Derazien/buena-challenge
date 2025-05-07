@@ -70,7 +70,7 @@ model Ticket {
   title       String
   description String
   priority    String   // "LOW", "MEDIUM", "HIGH", "URGENT"
-  status      String   // "OPEN", "IN_PROGRESS", "PENDING", "RESOLVED"
+  status      String   // "IN_PROGRESS_BY_AI", "UNDER_REVIEW", "PENDING_APPROVAL", "COMPLETED"
   property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   propertyId  Int
   createdAt   DateTime @default(now())

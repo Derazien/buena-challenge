@@ -17,7 +17,9 @@ import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     HttpModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
@@ -26,8 +28,15 @@ import { HttpModule } from '@nestjs/axios';
       playground: true,
       installSubscriptionHandlers: true,
       subscriptions: {
-        'graphql-ws': true,
-        'subscriptions-transport-ws': true,
+        'graphql-ws': {
+          path: '/graphql',
+          onConnect: (connectionParams) => {
+            return true;
+          },
+        },
+      },
+      buildSchemaOptions: {
+        dateScalarMode: 'timestamp',
       },
     }),
     AiModule,

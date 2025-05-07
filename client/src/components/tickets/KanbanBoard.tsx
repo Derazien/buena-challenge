@@ -27,6 +27,7 @@ import Button from '@/components/ui/Button';
 
 type KanbanBoardProps = {
   onViewTicket: (ticket: Ticket) => void;
+  tickets: Ticket[];
 };
 
 // Sort function for tickets based on criteria
@@ -37,8 +38,8 @@ const sortTickets = (tickets: Ticket[]) => {
   });
 };
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket }) => {
-  const { tickets, loading, error, updateTicket } = useTickets();
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, tickets }) => {
+  const { loading, error, updateTicket } = useTickets();
   const { addNotification } = useNotification();
 
   const [inProgressByAiTickets, setInProgressByAiTickets] = useState<Ticket[]>([]);
@@ -63,10 +64,53 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket }) => {
   // Organize tickets by status
   useEffect(() => {
     if (tickets) {
-      setInProgressByAiTickets(tickets.filter(ticket => ticket.status.toLowerCase() === 'in_progress_by_ai'));
-      setUnderReviewTickets(tickets.filter(ticket => ticket.status.toLowerCase() === 'under_review'));
-      setPendingApprovalTickets(tickets.filter(ticket => ticket.status.toLowerCase() === 'pending_approval'));
-      setCompletedTickets(tickets.filter(ticket => ticket.status.toLowerCase() === 'completed'));
+      // Helper function to normalize status
+      const normalizeStatus = (status: string): TicketStatus => {
+        const normalized = status.toLowerCase().replace(/\s+/g, '_');
+        switch (normalized) {
+          case 'in_progress_by_ai':
+          case 'in_progress':
+            return 'in_progress_by_ai';
+          case 'under_review':
+            return 'under_review';
+          case 'pending_approval':
+            return 'pending_approval';
+          case 'completed':
+            return 'completed';
+          default:
+            return 'in_progress_by_ai'; // Default status
+        }
+      };
+
+      // Filter tickets by status
+      const inProgress = tickets.filter(ticket =>
+        normalizeStatus(ticket.status) === 'in_progress_by_ai'
+      );
+      const underReview = tickets.filter(ticket =>
+        normalizeStatus(ticket.status) === 'under_review'
+      );
+      const pendingApproval = tickets.filter(ticket =>
+        normalizeStatus(ticket.status) === 'pending_approval'
+      );
+      const completed = tickets.filter(ticket =>
+        normalizeStatus(ticket.status) === 'completed'
+      );
+
+      // Update state with filtered tickets
+      setInProgressByAiTickets(inProgress);
+      setUnderReviewTickets(underReview);
+      setPendingApprovalTickets(pendingApproval);
+      setCompletedTickets(completed);
+
+      // Log for debugging
+      console.log('Tickets organized:', {
+        inProgress: inProgress.length,
+        underReview: underReview.length,
+        pendingApproval: pendingApproval.length,
+        completed: completed.length,
+        total: tickets.length,
+        allTickets: tickets.map(t => ({ id: t.id, status: t.status, normalized: normalizeStatus(t.status) }))
+      });
     }
   }, [tickets]);
 
@@ -182,16 +226,16 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket }) => {
 
     switch (targetColumn) {
       case 'in_progress_by_ai':
-        newStatus = 'in_progress_by_ai' as TicketStatus;
+        newStatus = 'in_progress_by_ai';
         break;
       case 'under_review':
-        newStatus = 'under_review' as TicketStatus;
+        newStatus = 'under_review';
         break;
       case 'pending_approval':
-        newStatus = 'pending_approval' as TicketStatus;
+        newStatus = 'pending_approval';
         break;
       case 'completed':
-        newStatus = 'completed' as TicketStatus;
+        newStatus = 'completed';
         break;
       default:
         return;
@@ -363,7 +407,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket }) => {
               </svg>
               In Progress by AI
             </Badge>
-            <Badge variant="purple" className="flex items-center gap-1 py-1 px-3">
+            <Badge variant="secondary" className="flex items-center gap-1 py-1 px-3">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                 <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />

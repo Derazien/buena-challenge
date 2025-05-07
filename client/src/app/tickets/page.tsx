@@ -368,6 +368,7 @@ export default function TicketsPage() {
                     >
                         <Card className="p-4 shadow-sm">
                             <KanbanBoard
+                                tickets={tickets}
                                 onViewTicket={(ticket) => {
                                     setSelectedTicket(ticket);
                                     setIsViewing(true);
