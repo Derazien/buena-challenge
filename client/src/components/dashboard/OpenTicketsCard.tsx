@@ -103,7 +103,7 @@ const OpenTicketsCard = () => {
 
             <div className="mt-6 space-y-3">
                 {openTickets.length > 0 ? (
-                    openTickets.slice(0, 2).map((ticket) => (
+                    openTickets.slice(0, 2).map((ticket: OpenTicket) => (
                         <div key={ticket.id} className="p-4 rounded-lg border border-border bg-gradient-to-r from-background to-muted hover:shadow-sm transition-shadow">
                             <div className="flex justify-between">
                                 <div className="font-medium text-foreground">{ticket.title}</div>

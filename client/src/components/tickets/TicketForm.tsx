@@ -38,12 +38,12 @@ export default function TicketForm({ mode, initialData, onSubmit, onCancel, isSu
         title: initialData?.title || '',
         description: initialData?.description || '',
         priority: initialData?.priority || 'medium',
-        status: initialData?.status || 'open',
+        status: initialData?.status || 'in_progress_by_ai',
         propertyId: initialData?.propertyId || undefined,
         contactPhone: initialData?.metadata?.contactPhone || '',
         contactEmail: initialData?.metadata?.contactEmail || '',
         estimatedCost: initialData?.metadata?.estimatedCost || '',
-        dueDate: initialData?.metadata?.dueDate || '',
+        dueDate: initialData?.metadata?.dueDate ? String(initialData.metadata.dueDate) : '',
         notes: initialData?.metadata?.notes || '',
         useAI: mode === 'create' ? true : false
     });
@@ -374,22 +374,19 @@ export default function TicketForm({ mode, initialData, onSubmit, onCancel, isSu
                                                     name="status"
                                                     value={formData.status}
                                                     onChange={handleChange}
-                                                    className="w-full pl-10 pr-3 py-2 rounded-md border border-border bg-background appearance-none focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+                                                    className="w-full pl-12 px-3 py-2 rounded-md border border-border bg-background appearance-none focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
                                                 >
-                                                    <option value="open">Open</option>
-                                                    <option value="in_progress">In Progress</option>
-                                                    <option value="pending">Pending</option>
+                                                    <option value="in_progress_by_ai">In Progress by AI</option>
+                                                    <option value="needs_manual_review">Needs Manual Review</option>
                                                     <option value="resolved">Resolved</option>
                                                 </select>
                                                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                                     <div className={`w-6 h-6 rounded-full flex items-center justify-center
-                                                        ${formData.status === 'open' ? 'bg-destructive/15 text-destructive' :
-                                                            formData.status === 'in_progress' ? 'bg-primary/15 text-primary' :
-                                                                String(formData.status) === 'pending' ? 'bg-amber-500/15 text-amber-600' :
-                                                                    'bg-emerald-500/15 text-emerald-600'}`}>
-                                                        {formData.status === 'open' ? '!' :
-                                                            formData.status === 'in_progress' ? '→' :
-                                                                String(formData.status) === 'pending' ? '⏱' : '✓'}
+                                                        ${formData.status === 'in_progress_by_ai' ? 'bg-primary/15 text-primary' :
+                                                            formData.status === 'needs_manual_review' ? 'bg-amber-500/15 text-amber-600' :
+                                                                'bg-emerald-500/15 text-emerald-600'}`}>
+                                                        {formData.status === 'in_progress_by_ai' ? '→' :
+                                                            formData.status === 'needs_manual_review' ? '⏱' : '✓'}
                                                     </div>
                                                 </div>
                                                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
