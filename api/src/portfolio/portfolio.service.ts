@@ -71,6 +71,56 @@ export class PortfolioService {
       currentAmount *= (1 + cagrProjection);
     }
 
+    // Get user investments to calculate available funds
+    const investments = await this.prisma.$queryRaw`
+      SELECT * FROM Investment
+    `;
+    const totalInvested = Array.isArray(investments) 
+      ? investments.reduce((total, inv: any) => total + inv.amount, 0)
+      : 0;
+    
+    // Calculate reserve balance (25% of total monthly rent)
+    const reserveBalance = monthlyRent * 3; // 3 months of rent as reserve
+    
+    // Target monthly rent (20% more than current)
+    const targetMonthlyRent = monthlyRent * 1.2;
+    
+    // Calculate available to reinvest (75% of monthly rent)
+    const availableToReinvest = monthlyRent * 0.75;
+    
+    // Calculate available to invest (new funds - estimated)
+    const availableToInvest = 25000; // Default value for new investment
+    
+    // Monthly growth percentage (mock data)
+    const monthlyGrowth = 2.8;
+    
+    // Property summaries
+    const propertySummaries = properties.map(property => ({
+      id: property.id,
+      name: `Property ${property.id}`,
+      location: `${property.city}, ${property.state}`,
+      monthlyRent: property.monthlyRent,
+      occupancyRate: property.occupancyRate || 0.95,
+    }));
+    
+    // Allocation breakdown (mock data)
+    const allocationBreakdown = [
+      { category: 'REITs', percentage: 35, amount: 87500 },
+      { category: 'Bonds', percentage: 25, amount: 62500 },
+      { category: 'Stocks', percentage: 30, amount: 75000 },
+      { category: 'Cash', percentage: 10, amount: 25000 },
+    ];
+    
+    // Monthly performance (mock data)
+    const monthlyPerformance = [
+      { month: 'Jan', income: monthlyRent * 0.95 },
+      { month: 'Feb', income: monthlyRent * 0.97 },
+      { month: 'Mar', income: monthlyRent * 0.99 },
+      { month: 'Apr', income: monthlyRent * 1.0 },
+      { month: 'May', income: monthlyRent * 1.02 },
+      { month: 'Jun', income: monthlyRent * 1.03 },
+    ];
+
     return {
       monthlyRentIn: monthlyRent,
       allocatedReservePercentage: 0.25, // 25% allocated to reserve
@@ -79,54 +129,90 @@ export class PortfolioService {
       germanCPI: cpi,
       cagrProjection,
       threeYearProjection,
+      // New fields
+      availableToInvest,
+      availableToReinvest,
+      reserveBalance,
+      monthlyGrowth,
+      targetMonthlyRent,
+      properties: propertySummaries,
+      allocationBreakdown,
+      monthlyPerformance,
     };
   }
 
   async getInvestmentOptions(surplusCash: number, riskProfile: string): Promise<InvestmentOption[]> {
-    // Get real-time market data
-    const [euribor, cpi, marketIndicators] = await Promise.all([
-      this.getEuribor3M(),
-      this.getGermanCPI(),
-      this.getMarketIndicators(),
-    ]);
+    try {
+      // Get real-time market data
+      const [euribor, cpi, marketIndicators] = await Promise.all([
+        this.getEuribor3M(),
+        this.getGermanCPI(),
+        this.getMarketIndicators(),
+      ]);
 
-    // Get AI suggestions with market data
-    const aiSuggestions = await this.llamaService.suggestInvestment(
-      surplusCash,
-      riskProfile,
-      {
-        euribor,
-        cpi,
-        marketIndicators
+      // Try to get AI suggestions, but don't let failures block the response
+      let aiSuggestions = [];
+      try {
+        aiSuggestions = await this.llamaService.suggestInvestment(
+          surplusCash,
+          riskProfile,
+          {
+            euribor,
+            cpi,
+            marketIndicators
+          }
+        );
+      } catch (error) {
+        this.logger.error('Failed to get AI investment suggestions:', error);
+        // Continue without AI suggestions
       }
-    );
 
-    // Combine AI suggestions with mock data for now
-    return [...aiSuggestions, ...this.getMockInvestmentOptions(surplusCash, riskProfile)];
+      // Always return the mock options, combine with AI suggestions if available
+      const mockOptions = this.getMockInvestmentOptions(surplusCash, riskProfile);
+      return [...aiSuggestions, ...mockOptions];
+    } catch (error) {
+      this.logger.error('Error in getInvestmentOptions:', error);
+      // In case of any error, still return mock options
+      return this.getMockInvestmentOptions(surplusCash, riskProfile);
+    }
   }
 
   async allocateFunds(input: AllocateFundsInput): Promise<InvestmentResult> {
     try {
-      // Initialize Plaid client
-      const plaid = require('plaid');
-      const plaidClient = new plaid.Client({
-        clientID: this.plaidClientId,
-        secret: this.plaidSecret,
-        env: plaid.environments[this.plaidEnv],
-      });
+      // Look up the investment details based on investmentId
+      const investmentOptions = await this.getInvestmentOptions(input.amount, input.riskProfile);
+      const selectedInvestment = investmentOptions.find(opt => opt.id === input.investmentId);
+      
+      if (!selectedInvestment) {
+        return {
+          success: false,
+          message: `Investment with ID ${input.investmentId} not found`,
+          investmentId: input.investmentId,
+        };
+      }
+      
+      // Save the investment record to the database using raw query
+      await this.prisma.$executeRaw`
+        INSERT INTO Investment (investmentId, name, type, amount, expectedReturn, risk, date, createdAt, updatedAt)
+        VALUES (
+          ${input.investmentId}, 
+          ${selectedInvestment.name}, 
+          ${selectedInvestment.type}, 
+          ${input.amount}, 
+          ${selectedInvestment.expectedReturn}, 
+          ${selectedInvestment.risk},
+          datetime('now'),
+          datetime('now'),
+          datetime('now')
+        )
+      `;
 
-      // Execute the investment
-      const result = await plaidClient.investments.transactions.create({
-        investment_id: input.investmentId,
-        amount: input.amount,
-        currency: 'EUR',
-      });
-
+      // Return success response
       return {
         success: true,
-        message: `Successfully allocated €${input.amount.toLocaleString()} to investment ${input.investmentId}`,
+        message: `Successfully allocated €${input.amount.toLocaleString()} to investment ${selectedInvestment.name}`,
         investmentId: input.investmentId,
-        transactionId: result.transaction_id,
+        transactionId: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       };
     } catch (error) {
       console.error('Error allocating funds:', error);
@@ -242,35 +328,178 @@ export class PortfolioService {
   }
 
   private getMockInvestmentOptions(surplusCash: number, riskProfile: string): InvestmentOption[] {
-    return [
-      {
-        id: `inv-${Date.now()}-1`,
-        name: 'European REITs Index Fund',
-        type: 'ETF',
-        expectedReturn: '7-9% annually',
-        risk: 'Medium',
-        minimumInvestment: '€5,000',
-        description: 'Diversified exposure to European real estate investment trusts with focus on commercial properties.',
-      },
-      {
-        id: `inv-${Date.now()}-2`,
-        name: 'Real Estate Debt Fund',
-        type: 'Fund',
-        expectedReturn: '5-6% annually',
-        risk: 'Low-Medium',
-        minimumInvestment: '€10,000',
-        description: 'Invests in secured real estate debt with priority claim over equity investors.',
-      },
-      {
-        id: `inv-${Date.now()}-3`,
-        name: 'Property Development Partnership',
-        type: 'Direct Investment',
-        expectedReturn: '10-15% annually',
-        risk: 'High',
-        minimumInvestment: '€25,000',
-        description: 'Direct partnership in residential development projects in growing urban centers.',
-      },
+    // Ensure we always have at least a few fallback options
+    const fallbackOptions = [
+        {
+            id: `inv-fallback-1`,
+            name: 'Stable Income REIT',
+            type: 'REIT',
+            expectedReturn: '6-8% annually',
+            risk: 'Medium',
+            minimumInvestment: '€2,000',
+            description: 'A diversified REIT focused on stable income-producing properties across Europe.',
+        },
+        {
+            id: `inv-fallback-2`,
+            name: 'European Corporate Bond Fund',
+            type: 'Bond Fund',
+            expectedReturn: '4-6% annually',
+            risk: 'Low-Medium',
+            minimumInvestment: '€1,000',
+            description: 'Investment grade corporate bonds providing reliable income with moderate risk.',
+        },
+        {
+            id: `inv-fallback-3`,
+            name: 'Growth Equity Portfolio',
+            type: 'Equity Fund',
+            expectedReturn: '9-12% annually',
+            risk: 'High',
+            minimumInvestment: '€3,000',
+            description: 'Focused on growth equities with potential for significant capital appreciation.',
+        }
     ];
+
+    // Base set of investment options
+    const baseOptions = [
+        {
+            id: `inv-${Date.now()}-1`,
+            name: 'European REITs Index Fund',
+            type: 'ETF',
+            expectedReturn: '7-9% annually',
+            risk: 'Medium',
+            minimumInvestment: '€5,000',
+            description: 'Diversified exposure to European real estate investment trusts with focus on commercial properties.',
+        },
+        {
+            id: `inv-${Date.now()}-2`,
+            name: 'Real Estate Debt Fund',
+            type: 'Fund',
+            expectedReturn: '5-6% annually',
+            risk: 'Low-Medium',
+            minimumInvestment: '€10,000',
+            description: 'Invests in secured real estate debt with priority claim over equity investors.',
+        },
+        {
+            id: `inv-${Date.now()}-3`,
+            name: 'Property Development Partnership',
+            type: 'Direct Investment',
+            expectedReturn: '10-15% annually',
+            risk: 'High',
+            minimumInvestment: '€25,000',
+            description: 'Direct partnership in residential development projects in growing urban centers.',
+        }
+    ];
+
+    // Conservative options
+    const conservativeOptions = [
+        {
+            id: `inv-${Date.now()}-4`,
+            name: 'Government Bond ETF',
+            type: 'Bond ETF',
+            expectedReturn: '3-4% annually',
+            risk: 'Low',
+            minimumInvestment: '€1,000',
+            description: 'Safe investment in government bonds with stable, predictable returns.',
+        },
+        {
+            id: `inv-${Date.now()}-5`,
+            name: 'Corporate Bond Fund',
+            type: 'Bond Fund',
+            expectedReturn: '4-5% annually',
+            risk: 'Low',
+            minimumInvestment: '€2,500',
+            description: 'Investment grade corporate bonds providing slightly higher yield than government securities.',
+        },
+        {
+            id: `inv-${Date.now()}-6`,
+            name: 'Residential Rental REIT',
+            type: 'REIT',
+            expectedReturn: '5-7% annually',
+            risk: 'Low-Medium',
+            minimumInvestment: '€5,000',
+            description: 'Focus on stable residential properties with high occupancy rates and reliable rental income.',
+        }
+    ];
+
+    // Moderate options
+    const moderateOptions = [
+        {
+            id: `inv-${Date.now()}-7`,
+            name: 'Balanced Growth Fund',
+            type: 'Mixed Fund',
+            expectedReturn: '6-8% annually',
+            risk: 'Medium',
+            minimumInvestment: '€5,000',
+            description: 'Balanced portfolio of bonds, stocks and real estate investments with moderate growth potential.',
+        },
+        {
+            id: `inv-${Date.now()}-8`,
+            name: 'Commercial Property REIT',
+            type: 'REIT',
+            expectedReturn: '7-9% annually',
+            risk: 'Medium',
+            minimumInvestment: '€7,500',
+            description: 'Focus on prime commercial properties in major European cities with strong rental yields.',
+        },
+        {
+            id: `inv-${Date.now()}-9`,
+            name: 'European Dividend Stock ETF',
+            type: 'Equity ETF',
+            expectedReturn: '6-9% annually',
+            risk: 'Medium',
+            minimumInvestment: '€3,000',
+            description: 'Diversified portfolio of European stocks with consistent dividend payments.',
+        }
+    ];
+
+    // Aggressive options
+    const aggressiveOptions = [
+        {
+            id: `inv-${Date.now()}-10`,
+            name: 'Growth Stock ETF',
+            type: 'Equity ETF',
+            expectedReturn: '10-14% annually',
+            risk: 'High',
+            minimumInvestment: '€5,000',
+            description: 'Focus on high-growth companies with strong earnings potential.',
+        },
+        {
+            id: `inv-${Date.now()}-11`,
+            name: 'Property Development Fund',
+            type: 'Real Estate Fund',
+            expectedReturn: '12-18% annually',
+            risk: 'High',
+            minimumInvestment: '€15,000',
+            description: 'Invest in property development projects with significant capital appreciation potential.',
+        },
+        {
+            id: `inv-${Date.now()}-12`,
+            name: 'Tech Innovation Fund',
+            type: 'Sector Fund',
+            expectedReturn: '15-20% annually',
+            risk: 'Very High',
+            minimumInvestment: '€10,000',
+            description: 'Focus on disruptive technologies and innovative companies with exponential growth potential.',
+        }
+    ];
+
+    // Make sure we return a non-empty array based on the risk profile
+    let result = [];
+    switch(riskProfile.toLowerCase()) {
+        case 'conservative':
+            result = [...conservativeOptions, baseOptions[1]];
+            break;
+        case 'aggressive':
+            result = [...aggressiveOptions, baseOptions[2]];
+            break;
+        case 'moderate':
+        default:
+            result = [...moderateOptions, baseOptions[0]];
+            break;
+    }
+
+    // Final safety check - if somehow we still have no options, return all fallback options
+    return result.length > 0 ? result : fallbackOptions;
   }
 
   private parseEuriborFromXML(xml: string): number {
@@ -291,5 +520,29 @@ export class PortfolioService {
   private analyzeMarketTrend(data: any): string {
     // Implement market trend analysis
     return 'stable'; // Mock value for now
+  }
+
+  // Add new method to fetch user investments
+  async getUserInvestments() {
+    try {
+      const investments = await this.prisma.$queryRaw`
+        SELECT * FROM Investment ORDER BY date DESC
+      `;
+      
+      const totalInvested = Array.isArray(investments) 
+        ? investments.reduce((total, inv: any) => total + inv.amount, 0)
+        : 0;
+      
+      return {
+        investments: Array.isArray(investments) ? investments : [],
+        totalInvested,
+      };
+    } catch (error) {
+      console.error('Error fetching user investments:', error);
+      return {
+        investments: [],
+        totalInvested: 0,
+      };
+    }
   }
 } 

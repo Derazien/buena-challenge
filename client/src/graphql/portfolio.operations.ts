@@ -14,6 +14,27 @@ export const GET_PORTFOLIO_SUMMARY = gql`
         year
         amount
       }
+      availableToInvest
+      availableToReinvest
+      reserveBalance
+      monthlyGrowth
+      targetMonthlyRent
+      properties {
+        id
+        name
+        location
+        monthlyRent
+        occupancyRate
+      }
+      allocationBreakdown {
+        category
+        percentage
+        amount
+      }
+      monthlyPerformance {
+        month
+        income
+      }
     }
   }
 `;
@@ -25,6 +46,7 @@ export const ALLOCATE_FUNDS = gql`
       success
       message
       investmentId
+      transactionId
     }
   }
 `;
@@ -50,6 +72,24 @@ export const GET_HISTORICAL_RETURNS = gql`
     historicalReturns {
       date
       value
+    }
+  }
+`;
+
+export const GET_USER_INVESTMENTS = gql`
+  query GetUserInvestments {
+    userInvestments {
+      investments {
+        id
+        investmentId
+        name
+        type
+        amount
+        expectedReturn
+        risk
+        date
+      }
+      totalInvested
     }
   }
 `;

@@ -349,6 +349,15 @@ async function main() {
 
     console.log(`Created ${tickets.length} tickets`);
 
+    // Add some dummy user investments
+    await prisma.$executeRaw`
+      INSERT INTO Investment (investmentId, name, type, amount, expectedReturn, risk, date, createdAt, updatedAt)
+      VALUES 
+        ('inv-20230615-123', 'European REITs Index Fund', 'ETF', 12500, '7-9% annually', 'Medium', datetime('now', '-3 month'), datetime('now', '-3 month'), datetime('now', '-3 month')),
+        ('inv-20230810-456', 'Government Bond Fund', 'Bond ETF', 20000, '3-5% annually', 'Low', datetime('now', '-2 month'), datetime('now', '-2 month'), datetime('now', '-2 month')),
+        ('inv-20231122-789', 'Tech Growth ETF', 'Sector ETF', 7500, '10-14% annually', 'High', datetime('now', '-1 month'), datetime('now', '-1 month'), datetime('now', '-1 month'))
+    `;
+
     console.log('Seed completed successfully!');
 }
 

@@ -315,7 +315,7 @@ const RentGauge2D: React.FC<RentGauge2DProps> = ({
                     letterSpacing: '0.08em',
                     textShadow: '0 1px 1px rgba(255, 255, 255, 0.8)'
                 }}>
-                    Mieteinnahmen
+                    Rental Income
                 </h3>
                 <p style={{
                     margin: '0 0 8px 0',
@@ -384,7 +384,7 @@ const RentGauge2D: React.FC<RentGauge2DProps> = ({
                     fontSize: '0.875rem',
                     color: '#64748b'
                 }}>
-                    von <span style={{ fontWeight: 'bold', color: '#334155' }}>€{targetAmount.toLocaleString('de-DE')}</span> Zielbetrag
+                    of <span style={{ fontWeight: 'bold', color: '#334155' }}>€{targetAmount.toLocaleString('de-DE')}</span> Target Amount
                 </p>
             </div>
 

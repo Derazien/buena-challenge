@@ -70,6 +70,19 @@ export enum LeaseScalarFieldEnum {
     updatedAt = "updatedAt"
 }
 
+export enum InvestmentScalarFieldEnum {
+    id = "id",
+    investmentId = "investmentId",
+    name = "name",
+    type = "type",
+    amount = "amount",
+    expectedReturn = "expectedReturn",
+    risk = "risk",
+    date = "date",
+    createdAt = "createdAt",
+    updatedAt = "updatedAt"
+}
+
 export enum CashFlowScalarFieldEnum {
     id = "id",
     amount = "amount",
@@ -83,6 +96,7 @@ export enum CashFlowScalarFieldEnum {
 }
 
 registerEnumType(CashFlowScalarFieldEnum, { name: 'CashFlowScalarFieldEnum', description: undefined })
+registerEnumType(InvestmentScalarFieldEnum, { name: 'InvestmentScalarFieldEnum', description: undefined })
 registerEnumType(LeaseScalarFieldEnum, { name: 'LeaseScalarFieldEnum', description: undefined })
 registerEnumType(NullsOrder, { name: 'NullsOrder', description: undefined })
 registerEnumType(SortOrder, { name: 'SortOrder', description: undefined })
@@ -1136,6 +1150,803 @@ export class UpsertOneCashFlowArgs {
     @Field(() => CashFlowUpdateInput, {nullable:false})
     @Type(() => CashFlowUpdateInput)
     update!: InstanceType<typeof CashFlowUpdateInput>;
+}
+
+@ObjectType()
+export class AggregateInvestment {
+    @Field(() => InvestmentCountAggregate, {nullable:true})
+    _count?: InstanceType<typeof InvestmentCountAggregate>;
+    @Field(() => InvestmentAvgAggregate, {nullable:true})
+    _avg?: InstanceType<typeof InvestmentAvgAggregate>;
+    @Field(() => InvestmentSumAggregate, {nullable:true})
+    _sum?: InstanceType<typeof InvestmentSumAggregate>;
+    @Field(() => InvestmentMinAggregate, {nullable:true})
+    _min?: InstanceType<typeof InvestmentMinAggregate>;
+    @Field(() => InvestmentMaxAggregate, {nullable:true})
+    _max?: InstanceType<typeof InvestmentMaxAggregate>;
+}
+
+@ArgsType()
+export class CreateOneInvestmentArgs {
+    @Field(() => InvestmentCreateInput, {nullable:false})
+    @Type(() => InvestmentCreateInput)
+    data!: InstanceType<typeof InvestmentCreateInput>;
+}
+
+@ArgsType()
+export class DeleteManyInvestmentArgs {
+    @Field(() => InvestmentWhereInput, {nullable:true})
+    @Type(() => InvestmentWhereInput)
+    where?: InstanceType<typeof InvestmentWhereInput>;
+}
+
+@ArgsType()
+export class DeleteOneInvestmentArgs {
+    @Field(() => InvestmentWhereUniqueInput, {nullable:false})
+    @Type(() => InvestmentWhereUniqueInput)
+    where!: Prisma.AtLeast<InvestmentWhereUniqueInput, 'id'>;
+}
+
+@ArgsType()
+export class FindFirstInvestmentOrThrowArgs {
+    @Field(() => InvestmentWhereInput, {nullable:true})
+    @Type(() => InvestmentWhereInput)
+    where?: InstanceType<typeof InvestmentWhereInput>;
+    @Field(() => [InvestmentOrderByWithRelationInput], {nullable:true})
+    orderBy?: Array<InvestmentOrderByWithRelationInput>;
+    @Field(() => InvestmentWhereUniqueInput, {nullable:true})
+    cursor?: Prisma.AtLeast<InvestmentWhereUniqueInput, 'id'>;
+    @Field(() => Int, {nullable:true})
+    take?: number;
+    @Field(() => Int, {nullable:true})
+    skip?: number;
+    @Field(() => [InvestmentScalarFieldEnum], {nullable:true})
+    distinct?: Array<`${InvestmentScalarFieldEnum}`>;
+}
+
+@ArgsType()
+export class FindFirstInvestmentArgs {
+    @Field(() => InvestmentWhereInput, {nullable:true})
+    @Type(() => InvestmentWhereInput)
+    where?: InstanceType<typeof InvestmentWhereInput>;
+    @Field(() => [InvestmentOrderByWithRelationInput], {nullable:true})
+    orderBy?: Array<InvestmentOrderByWithRelationInput>;
+    @Field(() => InvestmentWhereUniqueInput, {nullable:true})
+    cursor?: Prisma.AtLeast<InvestmentWhereUniqueInput, 'id'>;
+    @Field(() => Int, {nullable:true})
+    take?: number;
+    @Field(() => Int, {nullable:true})
+    skip?: number;
+    @Field(() => [InvestmentScalarFieldEnum], {nullable:true})
+    distinct?: Array<`${InvestmentScalarFieldEnum}`>;
+}
+
+@ArgsType()
+export class FindManyInvestmentArgs {
+    @Field(() => InvestmentWhereInput, {nullable:true})
+    @Type(() => InvestmentWhereInput)
+    where?: InstanceType<typeof InvestmentWhereInput>;
+    @Field(() => [InvestmentOrderByWithRelationInput], {nullable:true})
+    orderBy?: Array<InvestmentOrderByWithRelationInput>;
+    @Field(() => InvestmentWhereUniqueInput, {nullable:true})
+    cursor?: Prisma.AtLeast<InvestmentWhereUniqueInput, 'id'>;
+    @Field(() => Int, {nullable:true})
+    take?: number;
+    @Field(() => Int, {nullable:true})
+    skip?: number;
+    @Field(() => [InvestmentScalarFieldEnum], {nullable:true})
+    distinct?: Array<`${InvestmentScalarFieldEnum}`>;
+}
+
+@ArgsType()
+export class FindUniqueInvestmentOrThrowArgs {
+    @Field(() => InvestmentWhereUniqueInput, {nullable:false})
+    @Type(() => InvestmentWhereUniqueInput)
+    where!: Prisma.AtLeast<InvestmentWhereUniqueInput, 'id'>;
+}
+
+@ArgsType()
+export class FindUniqueInvestmentArgs {
+    @Field(() => InvestmentWhereUniqueInput, {nullable:false})
+    @Type(() => InvestmentWhereUniqueInput)
+    where!: Prisma.AtLeast<InvestmentWhereUniqueInput, 'id'>;
+}
+
+@ArgsType()
+export class InvestmentAggregateArgs {
+    @Field(() => InvestmentWhereInput, {nullable:true})
+    @Type(() => InvestmentWhereInput)
+    where?: InstanceType<typeof InvestmentWhereInput>;
+    @Field(() => [InvestmentOrderByWithRelationInput], {nullable:true})
+    orderBy?: Array<InvestmentOrderByWithRelationInput>;
+    @Field(() => InvestmentWhereUniqueInput, {nullable:true})
+    cursor?: Prisma.AtLeast<InvestmentWhereUniqueInput, 'id'>;
+    @Field(() => Int, {nullable:true})
+    take?: number;
+    @Field(() => Int, {nullable:true})
+    skip?: number;
+    @Field(() => InvestmentCountAggregateInput, {nullable:true})
+    _count?: InstanceType<typeof InvestmentCountAggregateInput>;
+    @Field(() => InvestmentAvgAggregateInput, {nullable:true})
+    _avg?: InstanceType<typeof InvestmentAvgAggregateInput>;
+    @Field(() => InvestmentSumAggregateInput, {nullable:true})
+    _sum?: InstanceType<typeof InvestmentSumAggregateInput>;
+    @Field(() => InvestmentMinAggregateInput, {nullable:true})
+    _min?: InstanceType<typeof InvestmentMinAggregateInput>;
+    @Field(() => InvestmentMaxAggregateInput, {nullable:true})
+    _max?: InstanceType<typeof InvestmentMaxAggregateInput>;
+}
+
+@InputType()
+export class InvestmentAvgAggregateInput {
+    @Field(() => Boolean, {nullable:true})
+    id?: true;
+    @Field(() => Boolean, {nullable:true})
+    amount?: true;
+}
+
+@ObjectType()
+export class InvestmentAvgAggregate {
+    @Field(() => Float, {nullable:true})
+    id?: number;
+    @Field(() => Float, {nullable:true})
+    amount?: number;
+}
+
+@InputType()
+export class InvestmentAvgOrderByAggregateInput {
+    @Field(() => SortOrder, {nullable:true})
+    id?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    amount?: `${SortOrder}`;
+}
+
+@InputType()
+export class InvestmentCountAggregateInput {
+    @Field(() => Boolean, {nullable:true})
+    id?: true;
+    @Field(() => Boolean, {nullable:true})
+    investmentId?: true;
+    @Field(() => Boolean, {nullable:true})
+    name?: true;
+    @Field(() => Boolean, {nullable:true})
+    type?: true;
+    @Field(() => Boolean, {nullable:true})
+    amount?: true;
+    @Field(() => Boolean, {nullable:true})
+    expectedReturn?: true;
+    @Field(() => Boolean, {nullable:true})
+    risk?: true;
+    @Field(() => Boolean, {nullable:true})
+    date?: true;
+    @Field(() => Boolean, {nullable:true})
+    createdAt?: true;
+    @Field(() => Boolean, {nullable:true})
+    updatedAt?: true;
+    @Field(() => Boolean, {nullable:true})
+    _all?: true;
+}
+
+@ObjectType()
+export class InvestmentCountAggregate {
+    @Field(() => Int, {nullable:false})
+    id!: number;
+    @Field(() => Int, {nullable:false})
+    investmentId!: number;
+    @Field(() => Int, {nullable:false})
+    name!: number;
+    @Field(() => Int, {nullable:false})
+    type!: number;
+    @Field(() => Int, {nullable:false})
+    amount!: number;
+    @Field(() => Int, {nullable:false})
+    expectedReturn!: number;
+    @Field(() => Int, {nullable:false})
+    risk!: number;
+    @Field(() => Int, {nullable:false})
+    date!: number;
+    @Field(() => Int, {nullable:false})
+    createdAt!: number;
+    @Field(() => Int, {nullable:false})
+    updatedAt!: number;
+    @Field(() => Int, {nullable:false})
+    _all!: number;
+}
+
+@InputType()
+export class InvestmentCountOrderByAggregateInput {
+    @Field(() => SortOrder, {nullable:true})
+    id?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    investmentId?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    name?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    type?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    amount?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    expectedReturn?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    risk?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    date?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    createdAt?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    updatedAt?: `${SortOrder}`;
+}
+
+@InputType()
+export class InvestmentCreateInput {
+    @Field(() => String, {nullable:false})
+    investmentId!: string;
+    @Field(() => String, {nullable:false})
+    name!: string;
+    @Field(() => String, {nullable:false})
+    type!: string;
+    @Field(() => Float, {nullable:false})
+    amount!: number;
+    @Field(() => String, {nullable:false})
+    expectedReturn!: string;
+    @Field(() => String, {nullable:false})
+    risk!: string;
+    @Field(() => Date, {nullable:true})
+    date?: Date | string;
+    @Field(() => Date, {nullable:true})
+    createdAt?: Date | string;
+    @Field(() => Date, {nullable:true})
+    updatedAt?: Date | string;
+}
+
+@ArgsType()
+export class InvestmentGroupByArgs {
+    @Field(() => InvestmentWhereInput, {nullable:true})
+    @Type(() => InvestmentWhereInput)
+    where?: InstanceType<typeof InvestmentWhereInput>;
+    @Field(() => [InvestmentOrderByWithAggregationInput], {nullable:true})
+    orderBy?: Array<InvestmentOrderByWithAggregationInput>;
+    @Field(() => [InvestmentScalarFieldEnum], {nullable:false})
+    by!: Array<`${InvestmentScalarFieldEnum}`>;
+    @Field(() => InvestmentScalarWhereWithAggregatesInput, {nullable:true})
+    having?: InstanceType<typeof InvestmentScalarWhereWithAggregatesInput>;
+    @Field(() => Int, {nullable:true})
+    take?: number;
+    @Field(() => Int, {nullable:true})
+    skip?: number;
+    @Field(() => InvestmentCountAggregateInput, {nullable:true})
+    _count?: InstanceType<typeof InvestmentCountAggregateInput>;
+    @Field(() => InvestmentAvgAggregateInput, {nullable:true})
+    _avg?: InstanceType<typeof InvestmentAvgAggregateInput>;
+    @Field(() => InvestmentSumAggregateInput, {nullable:true})
+    _sum?: InstanceType<typeof InvestmentSumAggregateInput>;
+    @Field(() => InvestmentMinAggregateInput, {nullable:true})
+    _min?: InstanceType<typeof InvestmentMinAggregateInput>;
+    @Field(() => InvestmentMaxAggregateInput, {nullable:true})
+    _max?: InstanceType<typeof InvestmentMaxAggregateInput>;
+}
+
+@ObjectType()
+export class InvestmentGroupBy {
+    @Field(() => Int, {nullable:false})
+    id!: number;
+    @Field(() => String, {nullable:false})
+    investmentId!: string;
+    @Field(() => String, {nullable:false})
+    name!: string;
+    @Field(() => String, {nullable:false})
+    type!: string;
+    @Field(() => Float, {nullable:false})
+    amount!: number;
+    @Field(() => String, {nullable:false})
+    expectedReturn!: string;
+    @Field(() => String, {nullable:false})
+    risk!: string;
+    @Field(() => Date, {nullable:false})
+    date!: Date | string;
+    @Field(() => Date, {nullable:false})
+    createdAt!: Date | string;
+    @Field(() => Date, {nullable:false})
+    updatedAt!: Date | string;
+    @Field(() => InvestmentCountAggregate, {nullable:true})
+    _count?: InstanceType<typeof InvestmentCountAggregate>;
+    @Field(() => InvestmentAvgAggregate, {nullable:true})
+    _avg?: InstanceType<typeof InvestmentAvgAggregate>;
+    @Field(() => InvestmentSumAggregate, {nullable:true})
+    _sum?: InstanceType<typeof InvestmentSumAggregate>;
+    @Field(() => InvestmentMinAggregate, {nullable:true})
+    _min?: InstanceType<typeof InvestmentMinAggregate>;
+    @Field(() => InvestmentMaxAggregate, {nullable:true})
+    _max?: InstanceType<typeof InvestmentMaxAggregate>;
+}
+
+@InputType()
+export class InvestmentMaxAggregateInput {
+    @Field(() => Boolean, {nullable:true})
+    id?: true;
+    @Field(() => Boolean, {nullable:true})
+    investmentId?: true;
+    @Field(() => Boolean, {nullable:true})
+    name?: true;
+    @Field(() => Boolean, {nullable:true})
+    type?: true;
+    @Field(() => Boolean, {nullable:true})
+    amount?: true;
+    @Field(() => Boolean, {nullable:true})
+    expectedReturn?: true;
+    @Field(() => Boolean, {nullable:true})
+    risk?: true;
+    @Field(() => Boolean, {nullable:true})
+    date?: true;
+    @Field(() => Boolean, {nullable:true})
+    createdAt?: true;
+    @Field(() => Boolean, {nullable:true})
+    updatedAt?: true;
+}
+
+@ObjectType()
+export class InvestmentMaxAggregate {
+    @Field(() => Int, {nullable:true})
+    id?: number;
+    @Field(() => String, {nullable:true})
+    investmentId?: string;
+    @Field(() => String, {nullable:true})
+    name?: string;
+    @Field(() => String, {nullable:true})
+    type?: string;
+    @Field(() => Float, {nullable:true})
+    amount?: number;
+    @Field(() => String, {nullable:true})
+    expectedReturn?: string;
+    @Field(() => String, {nullable:true})
+    risk?: string;
+    @Field(() => Date, {nullable:true})
+    date?: Date | string;
+    @Field(() => Date, {nullable:true})
+    createdAt?: Date | string;
+    @Field(() => Date, {nullable:true})
+    updatedAt?: Date | string;
+}
+
+@InputType()
+export class InvestmentMaxOrderByAggregateInput {
+    @Field(() => SortOrder, {nullable:true})
+    id?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    investmentId?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    name?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    type?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    amount?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    expectedReturn?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    risk?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    date?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    createdAt?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    updatedAt?: `${SortOrder}`;
+}
+
+@InputType()
+export class InvestmentMinAggregateInput {
+    @Field(() => Boolean, {nullable:true})
+    id?: true;
+    @Field(() => Boolean, {nullable:true})
+    investmentId?: true;
+    @Field(() => Boolean, {nullable:true})
+    name?: true;
+    @Field(() => Boolean, {nullable:true})
+    type?: true;
+    @Field(() => Boolean, {nullable:true})
+    amount?: true;
+    @Field(() => Boolean, {nullable:true})
+    expectedReturn?: true;
+    @Field(() => Boolean, {nullable:true})
+    risk?: true;
+    @Field(() => Boolean, {nullable:true})
+    date?: true;
+    @Field(() => Boolean, {nullable:true})
+    createdAt?: true;
+    @Field(() => Boolean, {nullable:true})
+    updatedAt?: true;
+}
+
+@ObjectType()
+export class InvestmentMinAggregate {
+    @Field(() => Int, {nullable:true})
+    id?: number;
+    @Field(() => String, {nullable:true})
+    investmentId?: string;
+    @Field(() => String, {nullable:true})
+    name?: string;
+    @Field(() => String, {nullable:true})
+    type?: string;
+    @Field(() => Float, {nullable:true})
+    amount?: number;
+    @Field(() => String, {nullable:true})
+    expectedReturn?: string;
+    @Field(() => String, {nullable:true})
+    risk?: string;
+    @Field(() => Date, {nullable:true})
+    date?: Date | string;
+    @Field(() => Date, {nullable:true})
+    createdAt?: Date | string;
+    @Field(() => Date, {nullable:true})
+    updatedAt?: Date | string;
+}
+
+@InputType()
+export class InvestmentMinOrderByAggregateInput {
+    @Field(() => SortOrder, {nullable:true})
+    id?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    investmentId?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    name?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    type?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    amount?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    expectedReturn?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    risk?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    date?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    createdAt?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    updatedAt?: `${SortOrder}`;
+}
+
+@InputType()
+export class InvestmentOrderByWithAggregationInput {
+    @Field(() => SortOrder, {nullable:true})
+    id?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    investmentId?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    name?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    type?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    amount?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    expectedReturn?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    risk?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    date?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    createdAt?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    updatedAt?: `${SortOrder}`;
+    @Field(() => InvestmentCountOrderByAggregateInput, {nullable:true})
+    _count?: InstanceType<typeof InvestmentCountOrderByAggregateInput>;
+    @Field(() => InvestmentAvgOrderByAggregateInput, {nullable:true})
+    _avg?: InstanceType<typeof InvestmentAvgOrderByAggregateInput>;
+    @Field(() => InvestmentMaxOrderByAggregateInput, {nullable:true})
+    _max?: InstanceType<typeof InvestmentMaxOrderByAggregateInput>;
+    @Field(() => InvestmentMinOrderByAggregateInput, {nullable:true})
+    _min?: InstanceType<typeof InvestmentMinOrderByAggregateInput>;
+    @Field(() => InvestmentSumOrderByAggregateInput, {nullable:true})
+    _sum?: InstanceType<typeof InvestmentSumOrderByAggregateInput>;
+}
+
+@InputType()
+export class InvestmentOrderByWithRelationInput {
+    @Field(() => SortOrder, {nullable:true})
+    id?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    investmentId?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    name?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    type?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    amount?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    expectedReturn?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    risk?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    date?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    createdAt?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    updatedAt?: `${SortOrder}`;
+}
+
+@InputType()
+export class InvestmentScalarWhereWithAggregatesInput {
+    @Field(() => [InvestmentScalarWhereWithAggregatesInput], {nullable:true})
+    AND?: Array<InvestmentScalarWhereWithAggregatesInput>;
+    @Field(() => [InvestmentScalarWhereWithAggregatesInput], {nullable:true})
+    OR?: Array<InvestmentScalarWhereWithAggregatesInput>;
+    @Field(() => [InvestmentScalarWhereWithAggregatesInput], {nullable:true})
+    NOT?: Array<InvestmentScalarWhereWithAggregatesInput>;
+    @Field(() => IntWithAggregatesFilter, {nullable:true})
+    id?: InstanceType<typeof IntWithAggregatesFilter>;
+    @Field(() => StringWithAggregatesFilter, {nullable:true})
+    investmentId?: InstanceType<typeof StringWithAggregatesFilter>;
+    @Field(() => StringWithAggregatesFilter, {nullable:true})
+    name?: InstanceType<typeof StringWithAggregatesFilter>;
+    @Field(() => StringWithAggregatesFilter, {nullable:true})
+    type?: InstanceType<typeof StringWithAggregatesFilter>;
+    @Field(() => FloatWithAggregatesFilter, {nullable:true})
+    amount?: InstanceType<typeof FloatWithAggregatesFilter>;
+    @Field(() => StringWithAggregatesFilter, {nullable:true})
+    expectedReturn?: InstanceType<typeof StringWithAggregatesFilter>;
+    @Field(() => StringWithAggregatesFilter, {nullable:true})
+    risk?: InstanceType<typeof StringWithAggregatesFilter>;
+    @Field(() => DateTimeWithAggregatesFilter, {nullable:true})
+    date?: InstanceType<typeof DateTimeWithAggregatesFilter>;
+    @Field(() => DateTimeWithAggregatesFilter, {nullable:true})
+    createdAt?: InstanceType<typeof DateTimeWithAggregatesFilter>;
+    @Field(() => DateTimeWithAggregatesFilter, {nullable:true})
+    updatedAt?: InstanceType<typeof DateTimeWithAggregatesFilter>;
+}
+
+@InputType()
+export class InvestmentSumAggregateInput {
+    @Field(() => Boolean, {nullable:true})
+    id?: true;
+    @Field(() => Boolean, {nullable:true})
+    amount?: true;
+}
+
+@ObjectType()
+export class InvestmentSumAggregate {
+    @Field(() => Int, {nullable:true})
+    id?: number;
+    @Field(() => Float, {nullable:true})
+    amount?: number;
+}
+
+@InputType()
+export class InvestmentSumOrderByAggregateInput {
+    @Field(() => SortOrder, {nullable:true})
+    id?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    amount?: `${SortOrder}`;
+}
+
+@InputType()
+export class InvestmentUncheckedCreateInput {
+    @Field(() => Int, {nullable:true})
+    id?: number;
+    @Field(() => String, {nullable:false})
+    investmentId!: string;
+    @Field(() => String, {nullable:false})
+    name!: string;
+    @Field(() => String, {nullable:false})
+    type!: string;
+    @Field(() => Float, {nullable:false})
+    amount!: number;
+    @Field(() => String, {nullable:false})
+    expectedReturn!: string;
+    @Field(() => String, {nullable:false})
+    risk!: string;
+    @Field(() => Date, {nullable:true})
+    date?: Date | string;
+    @Field(() => Date, {nullable:true})
+    createdAt?: Date | string;
+    @Field(() => Date, {nullable:true})
+    updatedAt?: Date | string;
+}
+
+@InputType()
+export class InvestmentUncheckedUpdateManyInput {
+    @Field(() => Int, {nullable:true})
+    id?: number;
+    @Field(() => String, {nullable:true})
+    investmentId?: string;
+    @Field(() => String, {nullable:true})
+    name?: string;
+    @Field(() => String, {nullable:true})
+    type?: string;
+    @Field(() => Float, {nullable:true})
+    amount?: number;
+    @Field(() => String, {nullable:true})
+    expectedReturn?: string;
+    @Field(() => String, {nullable:true})
+    risk?: string;
+    @Field(() => Date, {nullable:true})
+    date?: Date | string;
+    @Field(() => Date, {nullable:true})
+    createdAt?: Date | string;
+    @Field(() => Date, {nullable:true})
+    updatedAt?: Date | string;
+}
+
+@InputType()
+export class InvestmentUncheckedUpdateInput {
+    @Field(() => Int, {nullable:true})
+    id?: number;
+    @Field(() => String, {nullable:true})
+    investmentId?: string;
+    @Field(() => String, {nullable:true})
+    name?: string;
+    @Field(() => String, {nullable:true})
+    type?: string;
+    @Field(() => Float, {nullable:true})
+    amount?: number;
+    @Field(() => String, {nullable:true})
+    expectedReturn?: string;
+    @Field(() => String, {nullable:true})
+    risk?: string;
+    @Field(() => Date, {nullable:true})
+    date?: Date | string;
+    @Field(() => Date, {nullable:true})
+    createdAt?: Date | string;
+    @Field(() => Date, {nullable:true})
+    updatedAt?: Date | string;
+}
+
+@InputType()
+export class InvestmentUpdateManyMutationInput {
+    @Field(() => String, {nullable:true})
+    investmentId?: string;
+    @Field(() => String, {nullable:true})
+    name?: string;
+    @Field(() => String, {nullable:true})
+    type?: string;
+    @Field(() => Float, {nullable:true})
+    amount?: number;
+    @Field(() => String, {nullable:true})
+    expectedReturn?: string;
+    @Field(() => String, {nullable:true})
+    risk?: string;
+    @Field(() => Date, {nullable:true})
+    date?: Date | string;
+    @Field(() => Date, {nullable:true})
+    createdAt?: Date | string;
+    @Field(() => Date, {nullable:true})
+    updatedAt?: Date | string;
+}
+
+@InputType()
+export class InvestmentUpdateInput {
+    @Field(() => String, {nullable:true})
+    investmentId?: string;
+    @Field(() => String, {nullable:true})
+    name?: string;
+    @Field(() => String, {nullable:true})
+    type?: string;
+    @Field(() => Float, {nullable:true})
+    amount?: number;
+    @Field(() => String, {nullable:true})
+    expectedReturn?: string;
+    @Field(() => String, {nullable:true})
+    risk?: string;
+    @Field(() => Date, {nullable:true})
+    date?: Date | string;
+    @Field(() => Date, {nullable:true})
+    createdAt?: Date | string;
+    @Field(() => Date, {nullable:true})
+    updatedAt?: Date | string;
+}
+
+@InputType()
+export class InvestmentWhereUniqueInput {
+    @Field(() => Int, {nullable:true})
+    id?: number;
+    @Field(() => [InvestmentWhereInput], {nullable:true})
+    AND?: Array<InvestmentWhereInput>;
+    @Field(() => [InvestmentWhereInput], {nullable:true})
+    OR?: Array<InvestmentWhereInput>;
+    @Field(() => [InvestmentWhereInput], {nullable:true})
+    NOT?: Array<InvestmentWhereInput>;
+    @Field(() => StringFilter, {nullable:true})
+    investmentId?: InstanceType<typeof StringFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    name?: InstanceType<typeof StringFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    type?: InstanceType<typeof StringFilter>;
+    @Field(() => FloatFilter, {nullable:true})
+    amount?: InstanceType<typeof FloatFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    expectedReturn?: InstanceType<typeof StringFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    risk?: InstanceType<typeof StringFilter>;
+    @Field(() => DateTimeFilter, {nullable:true})
+    date?: InstanceType<typeof DateTimeFilter>;
+    @Field(() => DateTimeFilter, {nullable:true})
+    createdAt?: InstanceType<typeof DateTimeFilter>;
+    @Field(() => DateTimeFilter, {nullable:true})
+    updatedAt?: InstanceType<typeof DateTimeFilter>;
+}
+
+@InputType()
+export class InvestmentWhereInput {
+    @Field(() => [InvestmentWhereInput], {nullable:true})
+    AND?: Array<InvestmentWhereInput>;
+    @Field(() => [InvestmentWhereInput], {nullable:true})
+    OR?: Array<InvestmentWhereInput>;
+    @Field(() => [InvestmentWhereInput], {nullable:true})
+    NOT?: Array<InvestmentWhereInput>;
+    @Field(() => IntFilter, {nullable:true})
+    id?: InstanceType<typeof IntFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    investmentId?: InstanceType<typeof StringFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    name?: InstanceType<typeof StringFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    type?: InstanceType<typeof StringFilter>;
+    @Field(() => FloatFilter, {nullable:true})
+    amount?: InstanceType<typeof FloatFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    expectedReturn?: InstanceType<typeof StringFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    risk?: InstanceType<typeof StringFilter>;
+    @Field(() => DateTimeFilter, {nullable:true})
+    date?: InstanceType<typeof DateTimeFilter>;
+    @Field(() => DateTimeFilter, {nullable:true})
+    createdAt?: InstanceType<typeof DateTimeFilter>;
+    @Field(() => DateTimeFilter, {nullable:true})
+    updatedAt?: InstanceType<typeof DateTimeFilter>;
+}
+
+@ObjectType()
+export class Investment {
+    @Field(() => ID, {nullable:false})
+    id!: number;
+    @Field(() => String, {nullable:false})
+    investmentId!: string;
+    @Field(() => String, {nullable:false})
+    name!: string;
+    @Field(() => String, {nullable:false})
+    type!: string;
+    @Field(() => Float, {nullable:false})
+    amount!: number;
+    @Field(() => String, {nullable:false})
+    expectedReturn!: string;
+    @Field(() => String, {nullable:false})
+    risk!: string;
+    @Field(() => Date, {nullable:false})
+    date!: Date;
+    @Field(() => Date, {nullable:false})
+    createdAt!: Date;
+    @Field(() => Date, {nullable:false})
+    updatedAt!: Date;
+}
+
+@ArgsType()
+export class UpdateManyInvestmentArgs {
+    @Field(() => InvestmentUpdateManyMutationInput, {nullable:false})
+    @Type(() => InvestmentUpdateManyMutationInput)
+    data!: InstanceType<typeof InvestmentUpdateManyMutationInput>;
+    @Field(() => InvestmentWhereInput, {nullable:true})
+    @Type(() => InvestmentWhereInput)
+    where?: InstanceType<typeof InvestmentWhereInput>;
+}
+
+@ArgsType()
+export class UpdateOneInvestmentArgs {
+    @Field(() => InvestmentUpdateInput, {nullable:false})
+    @Type(() => InvestmentUpdateInput)
+    data!: InstanceType<typeof InvestmentUpdateInput>;
+    @Field(() => InvestmentWhereUniqueInput, {nullable:false})
+    @Type(() => InvestmentWhereUniqueInput)
+    where!: Prisma.AtLeast<InvestmentWhereUniqueInput, 'id'>;
+}
+
+@ArgsType()
+export class UpsertOneInvestmentArgs {
+    @Field(() => InvestmentWhereUniqueInput, {nullable:false})
+    @Type(() => InvestmentWhereUniqueInput)
+    where!: Prisma.AtLeast<InvestmentWhereUniqueInput, 'id'>;
+    @Field(() => InvestmentCreateInput, {nullable:false})
+    @Type(() => InvestmentCreateInput)
+    create!: InstanceType<typeof InvestmentCreateInput>;
+    @Field(() => InvestmentUpdateInput, {nullable:false})
+    @Type(() => InvestmentUpdateInput)
+    update!: InstanceType<typeof InvestmentUpdateInput>;
 }
 
 @ObjectType()

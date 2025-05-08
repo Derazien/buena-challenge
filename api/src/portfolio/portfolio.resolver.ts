@@ -5,6 +5,7 @@ import { InvestmentOption } from './models/investment-option.model';
 import { AllocateFundsInput } from './dto/allocate-funds.input';
 import { InvestmentResult } from './models/investment-result.model';
 import { HistoricalReturn } from './models/historical-return.model';
+import { UserInvestmentsResponse } from './models/user-investment.model';
 
 @Resolver()
 export class PortfolioResolver {
@@ -38,5 +39,10 @@ export class PortfolioResolver {
       { date: '2023-02-01', value: 5.5 },
       { date: '2023-03-01', value: 5.7 },
     ];
+  }
+
+  @Query(() => UserInvestmentsResponse)
+  async userInvestments() {
+    return this.portfolioService.getUserInvestments();
   }
 } 

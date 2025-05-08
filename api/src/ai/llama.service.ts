@@ -11,7 +11,13 @@ export class LlamaService {
         this.openaiUrl = process.env.OPENAI_URL || 'https://api.openai.com/v1/chat/completions';
     }
 
-    async suggestInvestment(surplusCash: number, riskProfile: string, marketData: any): Promise<any> {
+    async suggestInvestment(surplusCash: number, riskProfile: string, marketData: any): Promise<any[]> {
+        // Check if API key is configured, if not return empty array
+        if (!this.openaiApiKey) {
+            console.warn('OpenAI API key not configured, skipping AI suggestions');
+            return [];
+        }
+
         const prompt = `
         You are a financial advisor specializing in real estate investment strategies. 
         Analyze the following information and provide personalized investment recommendations:
@@ -19,7 +25,7 @@ export class LlamaService {
         Current Market Conditions:
         - Euribor 3M: ${marketData.euribor3M}%
         - German CPI: ${marketData.germanCPI}%
-        - Market Trend: ${marketData.marketTrend}
+        - Market Trend: ${marketData.marketTrend || 'stable'}
         - Forecasted Yield: ${marketData.forecastedYield}%
 
         Client Profile:
@@ -31,24 +37,15 @@ export class LlamaService {
         {
             "recommendations": [
                 {
+                    "id": "unique-id-for-investment",
                     "name": "Investment Name",
                     "type": "Type (e.g., ETF, Bond, REIT, etc.)",
                     "expectedReturn": "Expected annual return percentage",
                     "risk": "Risk level (Low, Medium, High)",
                     "minimumInvestment": "Minimum amount needed to invest",
-                    "description": "Detailed description of the investment",
-                    "rationale": "Why this investment makes sense for the client",
-                    "timeHorizon": "Recommended investment duration",
-                    "liquidity": "How quickly can the investment be liquidated",
-                    "taxImplications": "Brief note on tax considerations"
+                    "description": "Detailed description of the investment"
                 }
-            ],
-            "overallStrategy": {
-                "recommendedAllocation": "Percentage of funds to invest",
-                "diversification": "How to spread the investment across options",
-                "riskManagement": "Strategies to manage risk",
-                "marketOutlook": "Current market analysis and future expectations"
-            }
+            ]
         }
 
         Focus on:
@@ -81,22 +78,22 @@ export class LlamaService {
             const jsonMatch = text.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 try {
-                    return JSON.parse(jsonMatch[0]);
+                    const parsed = JSON.parse(jsonMatch[0]);
+                    if (parsed.recommendations && Array.isArray(parsed.recommendations)) {
+                        return parsed.recommendations;
+                    }
+                    return [];
                 } catch (e) {
                     console.error('Failed to parse JSON response:', e);
-                    return this.getFallbackRecommendations(surplusCash, riskProfile);
+                    return [];
                 }
             } else {
                 console.error('No JSON found in response');
-                return this.getFallbackRecommendations(surplusCash, riskProfile);
+                return [];
             }
         } catch (error) {
             console.error('Error getting AI suggestions:', error);
-            const fallback = this.getFallbackRecommendations(surplusCash, riskProfile);
-            return {
-                ...fallback,
-                error: error?.response?.data || error?.message || String(error)
-            };
+            return [];
         }
     }
 

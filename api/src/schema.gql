@@ -8,6 +8,12 @@ input AllocateFundsInput {
   riskProfile: String!
 }
 
+type AllocationBreakdown {
+  amount: Float!
+  category: String!
+  percentage: Float!
+}
+
 type CashFlow {
   amount: Float!
   category: String!
@@ -117,6 +123,11 @@ type MonthlyIncomeStats {
   monthlyData: [MonthlyIncome!]!
 }
 
+type MonthlyPerformance {
+  income: Float!
+  month: String!
+}
+
 type Mutation {
   allocateFunds(input: AllocateFundsInput!): InvestmentResult!
   classifyTicket(description: String!): TicketClassification!
@@ -141,11 +152,19 @@ type OpenTicket {
 
 type PortfolioSummary {
   allocatedReservePercentage: Float!
+  allocationBreakdown: [AllocationBreakdown!]!
+  availableToInvest: Float!
+  availableToReinvest: Float!
   cagrProjection: Float!
   euribor3M: Float!
   forecastedYield: Float!
   germanCPI: Float!
+  monthlyGrowth: Float!
+  monthlyPerformance: [MonthlyPerformance!]!
   monthlyRentIn: Float!
+  properties: [PropertySummary!]!
+  reserveBalance: Float!
+  targetMonthlyRent: Float!
   threeYearProjection: [YearlyProjection!]!
 }
 
@@ -174,6 +193,14 @@ type Property {
   zipCode: String!
 }
 
+type PropertySummary {
+  id: Int!
+  location: String!
+  monthlyRent: Float!
+  name: String!
+  occupancyRate: Float!
+}
+
 type Query {
   dashboardStats: DashboardStats!
   historicalReturns: [HistoricalReturn!]!
@@ -183,6 +210,7 @@ type Query {
   property(id: Int!): Property!
   ticket(id: Int!): Ticket!
   tickets(filters: TicketFiltersInput): [Ticket!]!
+  userInvestments: UserInvestmentsResponse!
 }
 
 type Subscription {
@@ -267,6 +295,22 @@ input UpdateTicketInput {
   propertyId: Int
   status: String
   title: String
+}
+
+type UserInvestment {
+  amount: Float!
+  date: Timestamp!
+  expectedReturn: String!
+  id: Int!
+  investmentId: String!
+  name: String!
+  risk: String!
+  type: String!
+}
+
+type UserInvestmentsResponse {
+  investments: [UserInvestment!]!
+  totalInvested: Float!
 }
 
 type YearlyProjection {
