@@ -96,11 +96,21 @@ const config: Config = {
                     from: { height: "var(--radix-accordion-content-height)" },
                     to: { height: "0" },
                 },
+                "spin-slow": {
+                    "0%": { transform: "rotate(0deg)" },
+                    "100%": { transform: "rotate(360deg)" },
+                },
+                "spin-reverse": {
+                    "0%": { transform: "rotate(0deg)" },
+                    "100%": { transform: "rotate(-360deg)" },
+                },
             },
             animation: {
                 "accordion-down": "accordion-down 0.2s ease-out",
                 "accordion-up": "accordion-up 0.2s ease-out",
                 "caret-blink": "caret-blink 1.25s ease-out infinite",
+                "spin-slow": "spin-slow 3s linear infinite",
+                "spin-reverse": "spin-reverse 1.5s linear infinite",
             },
         },
     },

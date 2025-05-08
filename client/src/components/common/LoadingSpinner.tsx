@@ -19,19 +19,31 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         medium: 'h-8 w-8 border-2',
         large: 'h-12 w-12 border-3'
     };
+    
+    const outerSizeClasses = {
+        small: 'h-8 w-8 border-2',
+        medium: 'h-12 w-12 border-2',
+        large: 'h-16 w-16 border-3'
+    };
 
     const spinnerElement = (
         <div className="flex flex-col items-center justify-center">
-            <div
-                className={`${sizeClasses[size]} animate-spin rounded-full border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent`}
-            ></div>
-            {text && <p className="mt-4 text-gray-600">{text}</p>}
+            <div className="relative">
+                {/* Outer progress circle */}
+                <div className={`${outerSizeClasses[size]} rounded-full border-primary/30 border-dashed animate-spin-slow`}></div>
+                
+                {/* Inner spinner */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className={`${sizeClasses[size]} animate-spin-reverse rounded-full border-t-primary border-r-transparent border-b-transparent border-l-transparent`}></div>
+                </div>
+            </div>
+            {text && <p className="mt-4 text-muted-foreground">{text}</p>}
         </div>
     );
 
     if (fullPage) {
         return (
-            <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-75 z-50">
+            <div className="fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50">
                 {spinnerElement}
             </div>
         );

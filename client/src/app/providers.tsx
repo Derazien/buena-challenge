@@ -6,6 +6,7 @@ import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import { RetryLink } from '@apollo/client/link/retry';
 import { NotificationProvider } from '@/components/notifications/NotificationContext';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 // Create theme context
 type Theme = 'light' | 'dark';
@@ -163,7 +164,11 @@ export default function Providers({ children }: ProvidersProps) {
     }, []);
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return (
+            <div className="fixed inset-0 flex items-center justify-center bg-background">
+                <LoadingSpinner size="large" text="Loading application..." fullPage />
+            </div>
+        );
     }
 
     if (loadError) {

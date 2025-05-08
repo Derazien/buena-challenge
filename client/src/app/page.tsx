@@ -60,7 +60,7 @@ export default function Dashboard() {
               View Properties
             </Button>
           </Link>
-          <Link href="/reinvest">
+          <Link href="/investments">
             <Button>
               Reinvest
             </Button>
