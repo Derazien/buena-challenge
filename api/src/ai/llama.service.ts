@@ -5,10 +5,18 @@ import axios from 'axios';
 export class LlamaService {
     private readonly openaiApiKey: string;
     private readonly openaiUrl: string;
+    
+    // Commented out Llama model configuration
+    // private readonly llamaApiUrl: string;
+    // private readonly llamaModel: string;
 
     constructor() {
         this.openaiApiKey = process.env.OPENAI_API_KEY;
         this.openaiUrl = process.env.OPENAI_URL || 'https://api.openai.com/v1/chat/completions';
+        
+        // Commented out Llama model setup
+        // this.llamaApiUrl = process.env.LLAMA_API_URL || 'http://localhost:11434/api/generate';
+        // this.llamaModel = process.env.CUSTOM_TICKET_MODEL || 'buena-ticket-handler:8b';
     }
 
     async suggestInvestment(surplusCash: number, riskProfile: string, marketData: any): Promise<any[]> {
@@ -56,6 +64,7 @@ export class LlamaService {
         `;
 
         try {
+            // Using OpenAI API
             const response = await axios.post(
                 this.openaiUrl,
                 {
@@ -74,6 +83,27 @@ export class LlamaService {
                     }
                 }
             );
+            
+            // Commented out self-hosted Llama model implementation
+            /*
+            const response = await axios.post(
+                this.llamaApiUrl,
+                {
+                    model: this.llamaModel,
+                    prompt: prompt,
+                    temperature: 0.7,
+                    max_tokens: 1000,
+                    stream: false
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            const text = response.data.response;
+            */
+            
             const text = response.data.choices[0].message.content;
             const jsonMatch = text.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
@@ -358,4 +388,31 @@ export class LlamaService {
         
         return resolutions[Math.floor(Math.random() * resolutions.length)];
     }
+
+    // Commented out utility method for Llama
+    /*
+    private async callLlamaModel(prompt: string, temperature = 0.7, maxTokens = 1000): Promise<string> {
+        try {
+            const response = await axios.post(
+                this.llamaApiUrl,
+                {
+                    model: this.llamaModel,
+                    prompt: prompt,
+                    temperature: temperature,
+                    max_tokens: maxTokens,
+                    stream: false
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            return response.data.response;
+        } catch (error) {
+            console.error('Error calling Llama model:', error);
+            throw error;
+        }
+    }
+    */
 }
