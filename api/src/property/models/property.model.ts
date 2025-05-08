@@ -20,6 +20,42 @@ export class Property {
     @Field()
     zipCode: string;
 
+    @Field()
+    status: string;
+
+    @Field()
+    propertyType: string;
+
+    @Field(() => Float)
+    monthlyRent: number;
+
+    @Field(() => String, { nullable: true })
+    image?: string;
+
+    @Field(() => Int, { nullable: true })
+    bedrooms?: number;
+
+    @Field(() => Float, { nullable: true })
+    bathrooms?: number;
+
+    @Field(() => Int, { nullable: true })
+    sqft?: number;
+
+    @Field(() => Int, { nullable: true })
+    yearBuilt?: number;
+
+    @Field(() => Int, { nullable: true })
+    lastRenovated?: number;
+
+    @Field(() => [String], { nullable: true })
+    amenities?: string[];
+
+    @Field(() => Float, { nullable: true })
+    roi?: number;
+
+    @Field(() => Float, { nullable: true })
+    occupancyRate?: number;
+
     @Field(() => Date)
     createdAt: Date;
 

@@ -25,16 +25,28 @@ datasource db {
 }
 
 model Property {
-  id        Int        @id @default(autoincrement())
-  address   String
-  city      String
-  state     String
-  zipCode   String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  cashFlows CashFlow[]
-  tickets   Ticket[]
-  leases    Lease[]
+  id            Int        @id @default(autoincrement())
+  address       String
+  city          String
+  state         String
+  zipCode       String
+  status        String     // "OCCUPIED", "VACANT", "MAINTENANCE"
+  propertyType  String     // "APARTMENT", "HOUSE", "CONDO", "COMMERCIAL"
+  monthlyRent   Float
+  image         String
+  bedrooms      Int
+  bathrooms     Float
+  sqft          Int
+  yearBuilt     Int
+  lastRenovated Int?
+  amenities     String     // Stored as JSON string
+  roi           Float?
+  occupancyRate Float?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  cashFlows     CashFlow[]
+  tickets       Ticket[]
+  leases        Lease[]
 }
 
 model CashFlow {
@@ -51,18 +63,18 @@ model CashFlow {
 }
 
 model Lease {
-  id         Int      @id @default(autoincrement())
-  startDate  DateTime
-  endDate    DateTime
-  monthlyRent Float
-  tenantName String
-  tenantEmail String?
-  tenantPhone String?
-  isActive   Boolean  @default(true)
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  propertyId Int
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  startDate    DateTime
+  endDate      DateTime
+  monthlyRent  Float
+  tenantName   String
+  tenantEmail  String?
+  tenantPhone  String?
+  isActive     Boolean  @default(true)
+  property     Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId   Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Ticket {

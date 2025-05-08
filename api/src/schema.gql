@@ -23,8 +23,20 @@ type CashFlow {
 
 input CreatePropertyInput {
   address: String!
+  amenities: [String!]!
+  bathrooms: Float!
+  bedrooms: Int!
   city: String!
+  image: String!
+  lastRenovated: Int
+  monthlyRent: Float!
+  occupancyRate: Float!
+  propertyType: String!
+  roi: Float!
+  sqft: Int!
   state: String!
+  status: String!
+  yearBuilt: Int!
   zipCode: String!
 }
 
@@ -139,14 +151,26 @@ type PortfolioSummary {
 
 type Property {
   address: String!
+  amenities: [String!]
+  bathrooms: Float
+  bedrooms: Int
   cashFlows: [CashFlow!]
   city: String!
   createdAt: Timestamp!
   id: Int!
+  image: String
+  lastRenovated: Int
   leases: [Lease!]
+  monthlyRent: Float!
+  occupancyRate: Float
+  propertyType: String!
+  roi: Float
+  sqft: Int
   state: String!
+  status: String!
   tickets: [Ticket!]
   updatedAt: Timestamp!
+  yearBuilt: Int
   zipCode: String!
 }
 
@@ -218,9 +242,21 @@ type UpcomingRenewal {
 
 input UpdatePropertyInput {
   address: String
+  amenities: [String!]
+  bathrooms: Float
+  bedrooms: Int
   city: String
   id: Int!
+  image: String
+  lastRenovated: Int
+  monthlyRent: Float
+  occupancyRate: Float
+  propertyType: String
+  roi: Float
+  sqft: Int
   state: String
+  status: String
+  yearBuilt: Int
   zipCode: String
 }
 

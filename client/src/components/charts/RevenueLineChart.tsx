@@ -125,7 +125,7 @@ const RevenueLineChart = () => {
                 },
                 ticks: {
                     callback: function (value) {
-                        return '$' + Number(value).toLocaleString();
+                        return '€' + Number(value).toLocaleString();
                     },
                     color: '#64748B', // gray-500
                 }
@@ -167,7 +167,7 @@ const RevenueLineChart = () => {
                             label += ': ';
                         }
                         if (context.parsed.y !== null) {
-                            label += '$' + context.parsed.y.toLocaleString();
+                            label += '€' + context.parsed.y.toLocaleString();
                         }
                         return label;
                     }

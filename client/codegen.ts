@@ -2,7 +2,7 @@ import type { CodegenConfig } from '@graphql-codegen/cli';
 
 // Use the environment variable if set, otherwise fallback to localhost for local dev
 const schemaUrl =
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') + '/graphql' ||
+  process.env.NEXT_PUBLIC_GRAPHQL_HTTP_URL ||
   'http://localhost:5001/graphql';
 
 const config: CodegenConfig = {

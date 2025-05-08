@@ -13,40 +13,123 @@ async function main() {
     await prisma.property.deleteMany();
 
     // Create properties
-    const properties = await Promise.all([
-        prisma.property.create({
-            data: {
-                address: '123 Main St',
-                city: 'New York',
-                state: 'NY',
-                zipCode: '10001',
-            },
-        }),
-        prisma.property.create({
-            data: {
-                address: '456 Park Ave',
-                city: 'Los Angeles',
-                state: 'CA',
-                zipCode: '90001',
-            },
-        }),
-        prisma.property.create({
-            data: {
-                address: '789 Oak Dr',
-                city: 'Chicago',
-                state: 'IL',
-                zipCode: '60007',
-            },
-        }),
-        prisma.property.create({
-            data: {
-                address: '101 Market Street',
-                city: 'San Francisco',
-                state: 'CA',
-                zipCode: '94103',
-            },
-        }),
-    ]);
+    const properties = [
+        {
+            address: 'Kurfürstendamm 123',
+            city: 'Berlin',
+            state: 'Berlin',
+            zipCode: '10719',
+            status: 'OCCUPIED',
+            propertyType: 'APARTMENT',
+            monthlyRent: 2500,
+            image: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+            bedrooms: 2,
+            bathrooms: 2,
+            sqft: 1250,
+            yearBuilt: 2015,
+            lastRenovated: 2021,
+            amenities: JSON.stringify(['In-unit Laundry', 'Balcony', 'Stainless Steel Appliances', 'Hardwood Floors']),
+            roi: 7.2,
+            occupancyRate: 95,
+        },
+        {
+            address: 'Maximilianstraße 45',
+            city: 'Munich',
+            state: 'Bavaria',
+            zipCode: '80539',
+            status: 'VACANT',
+            propertyType: 'HOUSE',
+            monthlyRent: 3800,
+            image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+            bedrooms: 3,
+            bathrooms: 2.5,
+            sqft: 2100,
+            yearBuilt: 2008,
+            lastRenovated: 2020,
+            amenities: JSON.stringify(['Backyard', 'Garage', 'Central AC', 'Smart Home System']),
+            roi: 6.5,
+            occupancyRate: 92,
+        },
+        {
+            address: 'Hafenstraße 78',
+            city: 'Hamburg',
+            state: 'Hamburg',
+            zipCode: '20457',
+            status: 'MAINTENANCE',
+            propertyType: 'CONDO',
+            monthlyRent: 2200,
+            image: 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+            bedrooms: 1,
+            bathrooms: 1,
+            sqft: 850,
+            yearBuilt: 2012,
+            amenities: JSON.stringify(['Pool', 'Fitness Center', 'Concierge', 'Rooftop Deck']),
+            roi: 5.9,
+            occupancyRate: 88,
+        },
+        {
+            address: 'Königsallee 101',
+            city: 'Düsseldorf',
+            state: 'North Rhine-Westphalia',
+            zipCode: '40212',
+            status: 'OCCUPIED',
+            propertyType: 'COMMERCIAL',
+            monthlyRent: 6500,
+            image: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+            bedrooms: 0,
+            bathrooms: 2,
+            sqft: 3200,
+            yearBuilt: 2010,
+            lastRenovated: 2019,
+            amenities: JSON.stringify(['High Ceilings', 'Freight Elevator', 'Loading Dock', 'Meeting Rooms']),
+            roi: 8.3,
+            occupancyRate: 97,
+        },
+        {
+            address: 'Rheinpromenade 222',
+            city: 'Cologne',
+            state: 'North Rhine-Westphalia',
+            zipCode: '50667',
+            status: 'OCCUPIED',
+            propertyType: 'APARTMENT',
+            monthlyRent: 3200,
+            image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+            bedrooms: 2,
+            bathrooms: 2,
+            sqft: 1100,
+            yearBuilt: 2018,
+            amenities: JSON.stringify(['River View', 'Parking', 'Gym', 'Pet Friendly']),
+            roi: 6.8,
+            occupancyRate: 96,
+        },
+        {
+            address: 'Hauptstraße 555',
+            city: 'Frankfurt',
+            state: 'Hesse',
+            zipCode: '60313',
+            status: 'VACANT',
+            propertyType: 'HOUSE',
+            monthlyRent: 4500,
+            image: 'https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+            bedrooms: 4,
+            bathrooms: 3,
+            sqft: 2800,
+            yearBuilt: 2005,
+            lastRenovated: 2022,
+            amenities: JSON.stringify(['Garden', 'Home Office', 'Guest House', 'Landscaped Garden']),
+            roi: 7.5,
+            occupancyRate: 89,
+        },
+    ];
+
+    // Create properties and store their IDs
+    const createdProperties = [];
+    for (const property of properties) {
+        const createdProperty = await prisma.property.create({
+            data: property,
+        });
+        createdProperties.push(createdProperty);
+    }
 
     console.log('Created properties');
 
@@ -58,13 +141,13 @@ async function main() {
     leases.push(
         await prisma.lease.create({
             data: {
-                propertyId: properties[0].id,
+                propertyId: createdProperties[0].id,
                 startDate: add(now, { months: -6 }),
                 endDate: add(now, { months: 6 }),
                 monthlyRent: 2500,
-                tenantName: 'John Smith',
-                tenantEmail: 'john@example.com',
-                tenantPhone: '555-123-4567',
+                tenantName: 'Hans Schmidt',
+                tenantEmail: 'hans.schmidt@example.com',
+                tenantPhone: '+49 30 12345678',
                 isActive: true,
             },
         })
@@ -73,13 +156,13 @@ async function main() {
     leases.push(
         await prisma.lease.create({
             data: {
-                propertyId: properties[1].id,
+                propertyId: createdProperties[1].id,
                 startDate: add(now, { months: -3 }),
                 endDate: add(now, { months: 9 }),
                 monthlyRent: 3200,
-                tenantName: 'Sarah Johnson',
-                tenantEmail: 'sarah@example.com',
-                tenantPhone: '555-987-6543',
+                tenantName: 'Maria Weber',
+                tenantEmail: 'maria.weber@example.com',
+                tenantPhone: '+49 89 98765432',
                 isActive: true,
             },
         })
@@ -88,13 +171,13 @@ async function main() {
     leases.push(
         await prisma.lease.create({
             data: {
-                propertyId: properties[2].id,
+                propertyId: createdProperties[2].id,
                 startDate: add(now, { months: -12 }),
                 endDate: add(now, { days: 15 }),
                 monthlyRent: 1800,
-                tenantName: 'Michael Brown',
-                tenantEmail: 'michael@example.com',
-                tenantPhone: '555-567-8901',
+                tenantName: 'Thomas Müller',
+                tenantEmail: 'thomas.mueller@example.com',
+                tenantPhone: '+49 40 56789012',
                 isActive: true,
             },
         })
@@ -103,13 +186,13 @@ async function main() {
     leases.push(
         await prisma.lease.create({
             data: {
-                propertyId: properties[3].id,
+                propertyId: createdProperties[3].id,
                 startDate: add(now, { months: -11 }),
                 endDate: add(now, { days: 15 }), // Very soon to expire
                 monthlyRent: 3000,
-                tenantName: 'Emily Wilson',
-                tenantEmail: 'emily.wilson@example.com',
-                tenantPhone: '(415) 555-3456',
+                tenantName: 'Anna Fischer',
+                tenantEmail: 'anna.fischer@example.com',
+                tenantPhone: '+49 211 34567890',
                 isActive: true,
             },
         })
@@ -121,7 +204,7 @@ async function main() {
     const cashFlows = [];
 
     // Generate cash flows for each property
-    for (const property of properties) {
+    for (const property of createdProperties) {
         const propertyId = property.id;
         const lease = leases.find(l => l.propertyId === propertyId);
         const monthlyRent = lease?.monthlyRent || 2000;
@@ -203,9 +286,9 @@ async function main() {
     tickets.push(
         await prisma.ticket.create({
             data: {
-                propertyId: properties[0].id,
-                title: 'Water Leak in Bathroom',
-                description: 'Ceiling is leaking water in the main bathroom. Needs immediate attention.',
+                propertyId: createdProperties[0].id,
+                title: 'Wasserschaden im Badezimmer',
+                description: 'Decke im Hauptbad leckt Wasser. Benötigt sofortige Aufmerksamkeit.',
                 priority: 'HIGH',
                 status: 'OPEN',
             },
@@ -216,9 +299,9 @@ async function main() {
     tickets.push(
         await prisma.ticket.create({
             data: {
-                propertyId: properties[1].id,
-                title: 'Broken Dishwasher',
-                description: 'Dishwasher not draining properly. Please schedule a repair.',
+                propertyId: createdProperties[1].id,
+                title: 'Geschirrspüler defekt',
+                description: 'Geschirrspüler läuft nicht richtig ab. Bitte Reparatur vereinbaren.',
                 priority: 'MEDIUM',
                 status: 'OPEN',
             },
@@ -229,9 +312,9 @@ async function main() {
     tickets.push(
         await prisma.ticket.create({
             data: {
-                propertyId: properties[2].id,
-                title: 'Paint Touch-up Needed',
-                description: 'Some scuff marks on the living room wall need touch-up paint.',
+                propertyId: createdProperties[2].id,
+                title: 'Farbberührung erforderlich',
+                description: 'Einige Kratzer an der Wohnzimmerwand benötigen Farbberührung.',
                 priority: 'LOW',
                 status: 'OPEN',
             },
@@ -242,9 +325,9 @@ async function main() {
     tickets.push(
         await prisma.ticket.create({
             data: {
-                propertyId: properties[3].id,
-                title: 'Replace HVAC Filter',
-                description: 'Regular maintenance: Need to replace the HVAC filter.',
+                propertyId: createdProperties[3].id,
+                title: 'HVAC-Filter ersetzen',
+                description: 'Regelmäßige Wartung: HVAC-Filter muss ersetzt werden.',
                 priority: 'MEDIUM',
                 status: 'CLOSED',
             },
@@ -255,9 +338,9 @@ async function main() {
     tickets.push(
         await prisma.ticket.create({
             data: {
-                propertyId: properties[3].id,
-                title: 'No Hot Water',
-                description: 'Water heater may be broken. No hot water in the unit.',
+                propertyId: createdProperties[3].id,
+                title: 'Kein Warmwasser',
+                description: 'Warmwasserbereiter möglicherweise defekt. Kein Warmwasser in der Einheit.',
                 priority: 'URGENT',
                 status: 'OPEN',
             },

@@ -1,13 +1,10 @@
 'use client';
 
 import React, { ReactNode, useEffect, useState, createContext, useContext } from 'react';
-import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink, from, HttpLink, split } from '@apollo/client';
+import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink, from, HttpLink } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import { RetryLink } from '@apollo/client/link/retry';
-import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
-import { getMainDefinition } from '@apollo/client/utilities';
-import { createClient } from 'graphql-ws';
 import { NotificationProvider } from '@/components/notifications/NotificationContext';
 
 // Create theme context
@@ -62,7 +59,6 @@ export default function Providers({ children }: ProvidersProps) {
         try {
             // Client-side code
             const apiUrl = process.env.NEXT_PUBLIC_GRAPHQL_HTTP_URL || 'http://localhost:5001/graphql';
-            const wsUrl = process.env.NEXT_PUBLIC_GRAPHQL_WS_URL || 'ws://localhost:5001/graphql';
             const isDebug = process.env.NEXT_PUBLIC_DEBUG === 'true';
 
             // Error handling link
@@ -107,40 +103,6 @@ export default function Providers({ children }: ProvidersProps) {
                 credentials: 'include',
             });
 
-            // WebSocket link for subscriptions
-            const wsLink = typeof window !== 'undefined'
-                ? new GraphQLWsLink(
-                    createClient({
-                        url: wsUrl,
-                        connectionParams: {
-                            // Add authentication if needed
-                            authToken: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
-                        },
-                        retryAttempts: 5,
-                        connectionAckWaitTimeout: 10000,
-                        shouldRetry: (errOrCloseEvent) => {
-                            // Retry on network errors or if the server explicitly closed the connection
-                            return true;
-                        },
-                    })
-                )
-                : null;
-
-            // Split links based on operation type
-            const splitLink = typeof window !== 'undefined' && wsLink
-                ? split(
-                    ({ query }) => {
-                        const definition = getMainDefinition(query);
-                        return (
-                            definition.kind === 'OperationDefinition' &&
-                            definition.operation === 'subscription'
-                        );
-                    },
-                    wsLink,
-                    httpLink
-                )
-                : httpLink;
-
             // Auth link - adds authorization headers
             const authLink = setContext((_, { headers }) => {
                 // Get token from localStorage
@@ -161,7 +123,7 @@ export default function Providers({ children }: ProvidersProps) {
 
             // Initialize Apollo Client
             const apolloClient = new ApolloClient({
-                link: from([errorLink, retryLink, authLink, splitLink]),
+                link: from([errorLink, retryLink, authLink, httpLink]),
                 cache: new InMemoryCache({
                     typePolicies: {
                         Query: {
@@ -201,42 +163,24 @@ export default function Providers({ children }: ProvidersProps) {
     }, []);
 
     if (isLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-        );
+        return <div>Loading...</div>;
     }
 
     if (loadError) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen p-4">
-                <div className="text-red-500 mb-4 text-xl">⚠️ {loadError}</div>
-                <button
-                    onClick={() => window.location.reload()}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                >
-                    Reload Application
-                </button>
-            </div>
-        );
+        return <div className="text-red-500">{loadError}</div>;
     }
 
     if (!client) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="text-red-500">Failed to initialize the application.</div>
-            </div>
-        );
+        return <div>Failed to initialize Apollo client</div>;
     }
 
     return (
-        <ApolloProvider client={client}>
-            <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <ThemeContext.Provider value={{ theme, toggleTheme }}>
+            <ApolloProvider client={client}>
                 <NotificationProvider>
                     {children}
                 </NotificationProvider>
-            </ThemeContext.Provider>
-        </ApolloProvider>
+            </ApolloProvider>
+        </ThemeContext.Provider>
     );
 }

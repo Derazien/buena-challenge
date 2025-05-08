@@ -134,13 +134,8 @@ const OpenTicketsCard = () => {
 
             <div className="mt-6 grid grid-cols-2 gap-3">
                 <Link href="/tickets">
-                    <Button variant="outline" className="w-full">
-                        View All
-                    </Button>
-                </Link>
-                <Link href="/tickets?new=true">
                     <Button className="w-full">
-                        Create New
+                        View All
                     </Button>
                 </Link>
             </div>

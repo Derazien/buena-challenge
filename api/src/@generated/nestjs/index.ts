@@ -26,6 +26,18 @@ export enum PropertyScalarFieldEnum {
     city = "city",
     state = "state",
     zipCode = "zipCode",
+    status = "status",
+    propertyType = "propertyType",
+    monthlyRent = "monthlyRent",
+    image = "image",
+    bedrooms = "bedrooms",
+    bathrooms = "bathrooms",
+    sqft = "sqft",
+    yearBuilt = "yearBuilt",
+    lastRenovated = "lastRenovated",
+    amenities = "amenities",
+    roi = "roi",
+    occupancyRate = "occupancyRate",
     createdAt = "createdAt",
     updatedAt = "updatedAt"
 }
@@ -2655,18 +2667,66 @@ export class PropertyAggregateArgs {
 export class PropertyAvgAggregateInput {
     @Field(() => Boolean, {nullable:true})
     id?: true;
+    @Field(() => Boolean, {nullable:true})
+    monthlyRent?: true;
+    @Field(() => Boolean, {nullable:true})
+    bedrooms?: true;
+    @Field(() => Boolean, {nullable:true})
+    bathrooms?: true;
+    @Field(() => Boolean, {nullable:true})
+    sqft?: true;
+    @Field(() => Boolean, {nullable:true})
+    yearBuilt?: true;
+    @Field(() => Boolean, {nullable:true})
+    lastRenovated?: true;
+    @Field(() => Boolean, {nullable:true})
+    roi?: true;
+    @Field(() => Boolean, {nullable:true})
+    occupancyRate?: true;
 }
 
 @ObjectType()
 export class PropertyAvgAggregate {
     @Field(() => Float, {nullable:true})
     id?: number;
+    @Field(() => Float, {nullable:true})
+    monthlyRent?: number;
+    @Field(() => Float, {nullable:true})
+    bedrooms?: number;
+    @Field(() => Float, {nullable:true})
+    bathrooms?: number;
+    @Field(() => Float, {nullable:true})
+    sqft?: number;
+    @Field(() => Float, {nullable:true})
+    yearBuilt?: number;
+    @Field(() => Float, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
 }
 
 @InputType()
 export class PropertyAvgOrderByAggregateInput {
     @Field(() => SortOrder, {nullable:true})
     id?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    monthlyRent?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    bedrooms?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    bathrooms?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    sqft?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    yearBuilt?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    lastRenovated?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    roi?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    occupancyRate?: `${SortOrder}`;
 }
 
 @InputType()
@@ -2681,6 +2741,30 @@ export class PropertyCountAggregateInput {
     state?: true;
     @Field(() => Boolean, {nullable:true})
     zipCode?: true;
+    @Field(() => Boolean, {nullable:true})
+    status?: true;
+    @Field(() => Boolean, {nullable:true})
+    propertyType?: true;
+    @Field(() => Boolean, {nullable:true})
+    monthlyRent?: true;
+    @Field(() => Boolean, {nullable:true})
+    image?: true;
+    @Field(() => Boolean, {nullable:true})
+    bedrooms?: true;
+    @Field(() => Boolean, {nullable:true})
+    bathrooms?: true;
+    @Field(() => Boolean, {nullable:true})
+    sqft?: true;
+    @Field(() => Boolean, {nullable:true})
+    yearBuilt?: true;
+    @Field(() => Boolean, {nullable:true})
+    lastRenovated?: true;
+    @Field(() => Boolean, {nullable:true})
+    amenities?: true;
+    @Field(() => Boolean, {nullable:true})
+    roi?: true;
+    @Field(() => Boolean, {nullable:true})
+    occupancyRate?: true;
     @Field(() => Boolean, {nullable:true})
     createdAt?: true;
     @Field(() => Boolean, {nullable:true})
@@ -2702,6 +2786,30 @@ export class PropertyCountAggregate {
     @Field(() => Int, {nullable:false})
     zipCode!: number;
     @Field(() => Int, {nullable:false})
+    status!: number;
+    @Field(() => Int, {nullable:false})
+    propertyType!: number;
+    @Field(() => Int, {nullable:false})
+    monthlyRent!: number;
+    @Field(() => Int, {nullable:false})
+    image!: number;
+    @Field(() => Int, {nullable:false})
+    bedrooms!: number;
+    @Field(() => Int, {nullable:false})
+    bathrooms!: number;
+    @Field(() => Int, {nullable:false})
+    sqft!: number;
+    @Field(() => Int, {nullable:false})
+    yearBuilt!: number;
+    @Field(() => Int, {nullable:false})
+    lastRenovated!: number;
+    @Field(() => Int, {nullable:false})
+    amenities!: number;
+    @Field(() => Int, {nullable:false})
+    roi!: number;
+    @Field(() => Int, {nullable:false})
+    occupancyRate!: number;
+    @Field(() => Int, {nullable:false})
     createdAt!: number;
     @Field(() => Int, {nullable:false})
     updatedAt!: number;
@@ -2721,6 +2829,30 @@ export class PropertyCountOrderByAggregateInput {
     state?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
     zipCode?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    status?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    propertyType?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    monthlyRent?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    image?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    bedrooms?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    bathrooms?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    sqft?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    yearBuilt?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    lastRenovated?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    amenities?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    roi?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    occupancyRate?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
     createdAt?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
@@ -2816,6 +2948,30 @@ export class PropertyCreateWithoutCashFlowsInput {
     state!: string;
     @Field(() => String, {nullable:false})
     zipCode!: string;
+    @Field(() => String, {nullable:false})
+    status!: string;
+    @Field(() => String, {nullable:false})
+    propertyType!: string;
+    @Field(() => Float, {nullable:false})
+    monthlyRent!: number;
+    @Field(() => String, {nullable:false})
+    image!: string;
+    @Field(() => Int, {nullable:false})
+    bedrooms!: number;
+    @Field(() => Float, {nullable:false})
+    bathrooms!: number;
+    @Field(() => Int, {nullable:false})
+    sqft!: number;
+    @Field(() => Int, {nullable:false})
+    yearBuilt!: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:false})
+    amenities!: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -2836,6 +2992,30 @@ export class PropertyCreateWithoutLeasesInput {
     state!: string;
     @Field(() => String, {nullable:false})
     zipCode!: string;
+    @Field(() => String, {nullable:false})
+    status!: string;
+    @Field(() => String, {nullable:false})
+    propertyType!: string;
+    @Field(() => Float, {nullable:false})
+    monthlyRent!: number;
+    @Field(() => String, {nullable:false})
+    image!: string;
+    @Field(() => Int, {nullable:false})
+    bedrooms!: number;
+    @Field(() => Float, {nullable:false})
+    bathrooms!: number;
+    @Field(() => Int, {nullable:false})
+    sqft!: number;
+    @Field(() => Int, {nullable:false})
+    yearBuilt!: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:false})
+    amenities!: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -2856,6 +3036,30 @@ export class PropertyCreateWithoutTicketsInput {
     state!: string;
     @Field(() => String, {nullable:false})
     zipCode!: string;
+    @Field(() => String, {nullable:false})
+    status!: string;
+    @Field(() => String, {nullable:false})
+    propertyType!: string;
+    @Field(() => Float, {nullable:false})
+    monthlyRent!: number;
+    @Field(() => String, {nullable:false})
+    image!: string;
+    @Field(() => Int, {nullable:false})
+    bedrooms!: number;
+    @Field(() => Float, {nullable:false})
+    bathrooms!: number;
+    @Field(() => Int, {nullable:false})
+    sqft!: number;
+    @Field(() => Int, {nullable:false})
+    yearBuilt!: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:false})
+    amenities!: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -2876,6 +3080,30 @@ export class PropertyCreateInput {
     state!: string;
     @Field(() => String, {nullable:false})
     zipCode!: string;
+    @Field(() => String, {nullable:false})
+    status!: string;
+    @Field(() => String, {nullable:false})
+    propertyType!: string;
+    @Field(() => Float, {nullable:false})
+    monthlyRent!: number;
+    @Field(() => String, {nullable:false})
+    image!: string;
+    @Field(() => Int, {nullable:false})
+    bedrooms!: number;
+    @Field(() => Float, {nullable:false})
+    bathrooms!: number;
+    @Field(() => Int, {nullable:false})
+    sqft!: number;
+    @Field(() => Int, {nullable:false})
+    yearBuilt!: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:false})
+    amenities!: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -2927,6 +3155,30 @@ export class PropertyGroupBy {
     state!: string;
     @Field(() => String, {nullable:false})
     zipCode!: string;
+    @Field(() => String, {nullable:false})
+    status!: string;
+    @Field(() => String, {nullable:false})
+    propertyType!: string;
+    @Field(() => Float, {nullable:false})
+    monthlyRent!: number;
+    @Field(() => String, {nullable:false})
+    image!: string;
+    @Field(() => Int, {nullable:false})
+    bedrooms!: number;
+    @Field(() => Float, {nullable:false})
+    bathrooms!: number;
+    @Field(() => Int, {nullable:false})
+    sqft!: number;
+    @Field(() => Int, {nullable:false})
+    yearBuilt!: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:false})
+    amenities!: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:false})
     createdAt!: Date | string;
     @Field(() => Date, {nullable:false})
@@ -2956,6 +3208,30 @@ export class PropertyMaxAggregateInput {
     @Field(() => Boolean, {nullable:true})
     zipCode?: true;
     @Field(() => Boolean, {nullable:true})
+    status?: true;
+    @Field(() => Boolean, {nullable:true})
+    propertyType?: true;
+    @Field(() => Boolean, {nullable:true})
+    monthlyRent?: true;
+    @Field(() => Boolean, {nullable:true})
+    image?: true;
+    @Field(() => Boolean, {nullable:true})
+    bedrooms?: true;
+    @Field(() => Boolean, {nullable:true})
+    bathrooms?: true;
+    @Field(() => Boolean, {nullable:true})
+    sqft?: true;
+    @Field(() => Boolean, {nullable:true})
+    yearBuilt?: true;
+    @Field(() => Boolean, {nullable:true})
+    lastRenovated?: true;
+    @Field(() => Boolean, {nullable:true})
+    amenities?: true;
+    @Field(() => Boolean, {nullable:true})
+    roi?: true;
+    @Field(() => Boolean, {nullable:true})
+    occupancyRate?: true;
+    @Field(() => Boolean, {nullable:true})
     createdAt?: true;
     @Field(() => Boolean, {nullable:true})
     updatedAt?: true;
@@ -2973,6 +3249,30 @@ export class PropertyMaxAggregate {
     state?: string;
     @Field(() => String, {nullable:true})
     zipCode?: string;
+    @Field(() => String, {nullable:true})
+    status?: string;
+    @Field(() => String, {nullable:true})
+    propertyType?: string;
+    @Field(() => Float, {nullable:true})
+    monthlyRent?: number;
+    @Field(() => String, {nullable:true})
+    image?: string;
+    @Field(() => Int, {nullable:true})
+    bedrooms?: number;
+    @Field(() => Float, {nullable:true})
+    bathrooms?: number;
+    @Field(() => Int, {nullable:true})
+    sqft?: number;
+    @Field(() => Int, {nullable:true})
+    yearBuilt?: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:true})
+    amenities?: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -2992,6 +3292,30 @@ export class PropertyMaxOrderByAggregateInput {
     @Field(() => SortOrder, {nullable:true})
     zipCode?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
+    status?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    propertyType?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    monthlyRent?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    image?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    bedrooms?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    bathrooms?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    sqft?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    yearBuilt?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    lastRenovated?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    amenities?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    roi?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    occupancyRate?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
     createdAt?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
     updatedAt?: `${SortOrder}`;
@@ -3010,6 +3334,30 @@ export class PropertyMinAggregateInput {
     @Field(() => Boolean, {nullable:true})
     zipCode?: true;
     @Field(() => Boolean, {nullable:true})
+    status?: true;
+    @Field(() => Boolean, {nullable:true})
+    propertyType?: true;
+    @Field(() => Boolean, {nullable:true})
+    monthlyRent?: true;
+    @Field(() => Boolean, {nullable:true})
+    image?: true;
+    @Field(() => Boolean, {nullable:true})
+    bedrooms?: true;
+    @Field(() => Boolean, {nullable:true})
+    bathrooms?: true;
+    @Field(() => Boolean, {nullable:true})
+    sqft?: true;
+    @Field(() => Boolean, {nullable:true})
+    yearBuilt?: true;
+    @Field(() => Boolean, {nullable:true})
+    lastRenovated?: true;
+    @Field(() => Boolean, {nullable:true})
+    amenities?: true;
+    @Field(() => Boolean, {nullable:true})
+    roi?: true;
+    @Field(() => Boolean, {nullable:true})
+    occupancyRate?: true;
+    @Field(() => Boolean, {nullable:true})
     createdAt?: true;
     @Field(() => Boolean, {nullable:true})
     updatedAt?: true;
@@ -3027,6 +3375,30 @@ export class PropertyMinAggregate {
     state?: string;
     @Field(() => String, {nullable:true})
     zipCode?: string;
+    @Field(() => String, {nullable:true})
+    status?: string;
+    @Field(() => String, {nullable:true})
+    propertyType?: string;
+    @Field(() => Float, {nullable:true})
+    monthlyRent?: number;
+    @Field(() => String, {nullable:true})
+    image?: string;
+    @Field(() => Int, {nullable:true})
+    bedrooms?: number;
+    @Field(() => Float, {nullable:true})
+    bathrooms?: number;
+    @Field(() => Int, {nullable:true})
+    sqft?: number;
+    @Field(() => Int, {nullable:true})
+    yearBuilt?: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:true})
+    amenities?: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -3046,6 +3418,30 @@ export class PropertyMinOrderByAggregateInput {
     @Field(() => SortOrder, {nullable:true})
     zipCode?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
+    status?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    propertyType?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    monthlyRent?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    image?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    bedrooms?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    bathrooms?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    sqft?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    yearBuilt?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    lastRenovated?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    amenities?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    roi?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    occupancyRate?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
     createdAt?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
     updatedAt?: `${SortOrder}`;
@@ -3063,6 +3459,30 @@ export class PropertyOrderByWithAggregationInput {
     state?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
     zipCode?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    status?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    propertyType?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    monthlyRent?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    image?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    bedrooms?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    bathrooms?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    sqft?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    yearBuilt?: `${SortOrder}`;
+    @Field(() => SortOrderInput, {nullable:true})
+    lastRenovated?: InstanceType<typeof SortOrderInput>;
+    @Field(() => SortOrder, {nullable:true})
+    amenities?: `${SortOrder}`;
+    @Field(() => SortOrderInput, {nullable:true})
+    roi?: InstanceType<typeof SortOrderInput>;
+    @Field(() => SortOrderInput, {nullable:true})
+    occupancyRate?: InstanceType<typeof SortOrderInput>;
     @Field(() => SortOrder, {nullable:true})
     createdAt?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
@@ -3091,6 +3511,30 @@ export class PropertyOrderByWithRelationInput {
     state?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
     zipCode?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    status?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    propertyType?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    monthlyRent?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    image?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    bedrooms?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    bathrooms?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    sqft?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    yearBuilt?: `${SortOrder}`;
+    @Field(() => SortOrderInput, {nullable:true})
+    lastRenovated?: InstanceType<typeof SortOrderInput>;
+    @Field(() => SortOrder, {nullable:true})
+    amenities?: `${SortOrder}`;
+    @Field(() => SortOrderInput, {nullable:true})
+    roi?: InstanceType<typeof SortOrderInput>;
+    @Field(() => SortOrderInput, {nullable:true})
+    occupancyRate?: InstanceType<typeof SortOrderInput>;
     @Field(() => SortOrder, {nullable:true})
     createdAt?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
@@ -3129,6 +3573,30 @@ export class PropertyScalarWhereWithAggregatesInput {
     state?: InstanceType<typeof StringWithAggregatesFilter>;
     @Field(() => StringWithAggregatesFilter, {nullable:true})
     zipCode?: InstanceType<typeof StringWithAggregatesFilter>;
+    @Field(() => StringWithAggregatesFilter, {nullable:true})
+    status?: InstanceType<typeof StringWithAggregatesFilter>;
+    @Field(() => StringWithAggregatesFilter, {nullable:true})
+    propertyType?: InstanceType<typeof StringWithAggregatesFilter>;
+    @Field(() => FloatWithAggregatesFilter, {nullable:true})
+    monthlyRent?: InstanceType<typeof FloatWithAggregatesFilter>;
+    @Field(() => StringWithAggregatesFilter, {nullable:true})
+    image?: InstanceType<typeof StringWithAggregatesFilter>;
+    @Field(() => IntWithAggregatesFilter, {nullable:true})
+    bedrooms?: InstanceType<typeof IntWithAggregatesFilter>;
+    @Field(() => FloatWithAggregatesFilter, {nullable:true})
+    bathrooms?: InstanceType<typeof FloatWithAggregatesFilter>;
+    @Field(() => IntWithAggregatesFilter, {nullable:true})
+    sqft?: InstanceType<typeof IntWithAggregatesFilter>;
+    @Field(() => IntWithAggregatesFilter, {nullable:true})
+    yearBuilt?: InstanceType<typeof IntWithAggregatesFilter>;
+    @Field(() => IntWithAggregatesFilter, {nullable:true})
+    lastRenovated?: InstanceType<typeof IntWithAggregatesFilter>;
+    @Field(() => StringWithAggregatesFilter, {nullable:true})
+    amenities?: InstanceType<typeof StringWithAggregatesFilter>;
+    @Field(() => FloatWithAggregatesFilter, {nullable:true})
+    roi?: InstanceType<typeof FloatWithAggregatesFilter>;
+    @Field(() => FloatWithAggregatesFilter, {nullable:true})
+    occupancyRate?: InstanceType<typeof FloatWithAggregatesFilter>;
     @Field(() => DateTimeWithAggregatesFilter, {nullable:true})
     createdAt?: InstanceType<typeof DateTimeWithAggregatesFilter>;
     @Field(() => DateTimeWithAggregatesFilter, {nullable:true})
@@ -3139,18 +3607,66 @@ export class PropertyScalarWhereWithAggregatesInput {
 export class PropertySumAggregateInput {
     @Field(() => Boolean, {nullable:true})
     id?: true;
+    @Field(() => Boolean, {nullable:true})
+    monthlyRent?: true;
+    @Field(() => Boolean, {nullable:true})
+    bedrooms?: true;
+    @Field(() => Boolean, {nullable:true})
+    bathrooms?: true;
+    @Field(() => Boolean, {nullable:true})
+    sqft?: true;
+    @Field(() => Boolean, {nullable:true})
+    yearBuilt?: true;
+    @Field(() => Boolean, {nullable:true})
+    lastRenovated?: true;
+    @Field(() => Boolean, {nullable:true})
+    roi?: true;
+    @Field(() => Boolean, {nullable:true})
+    occupancyRate?: true;
 }
 
 @ObjectType()
 export class PropertySumAggregate {
     @Field(() => Int, {nullable:true})
     id?: number;
+    @Field(() => Float, {nullable:true})
+    monthlyRent?: number;
+    @Field(() => Int, {nullable:true})
+    bedrooms?: number;
+    @Field(() => Float, {nullable:true})
+    bathrooms?: number;
+    @Field(() => Int, {nullable:true})
+    sqft?: number;
+    @Field(() => Int, {nullable:true})
+    yearBuilt?: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
 }
 
 @InputType()
 export class PropertySumOrderByAggregateInput {
     @Field(() => SortOrder, {nullable:true})
     id?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    monthlyRent?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    bedrooms?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    bathrooms?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    sqft?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    yearBuilt?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    lastRenovated?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    roi?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    occupancyRate?: `${SortOrder}`;
 }
 
 @InputType()
@@ -3165,6 +3681,30 @@ export class PropertyUncheckedCreateWithoutCashFlowsInput {
     state!: string;
     @Field(() => String, {nullable:false})
     zipCode!: string;
+    @Field(() => String, {nullable:false})
+    status!: string;
+    @Field(() => String, {nullable:false})
+    propertyType!: string;
+    @Field(() => Float, {nullable:false})
+    monthlyRent!: number;
+    @Field(() => String, {nullable:false})
+    image!: string;
+    @Field(() => Int, {nullable:false})
+    bedrooms!: number;
+    @Field(() => Float, {nullable:false})
+    bathrooms!: number;
+    @Field(() => Int, {nullable:false})
+    sqft!: number;
+    @Field(() => Int, {nullable:false})
+    yearBuilt!: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:false})
+    amenities!: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -3187,6 +3727,30 @@ export class PropertyUncheckedCreateWithoutLeasesInput {
     state!: string;
     @Field(() => String, {nullable:false})
     zipCode!: string;
+    @Field(() => String, {nullable:false})
+    status!: string;
+    @Field(() => String, {nullable:false})
+    propertyType!: string;
+    @Field(() => Float, {nullable:false})
+    monthlyRent!: number;
+    @Field(() => String, {nullable:false})
+    image!: string;
+    @Field(() => Int, {nullable:false})
+    bedrooms!: number;
+    @Field(() => Float, {nullable:false})
+    bathrooms!: number;
+    @Field(() => Int, {nullable:false})
+    sqft!: number;
+    @Field(() => Int, {nullable:false})
+    yearBuilt!: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:false})
+    amenities!: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -3209,6 +3773,30 @@ export class PropertyUncheckedCreateWithoutTicketsInput {
     state!: string;
     @Field(() => String, {nullable:false})
     zipCode!: string;
+    @Field(() => String, {nullable:false})
+    status!: string;
+    @Field(() => String, {nullable:false})
+    propertyType!: string;
+    @Field(() => Float, {nullable:false})
+    monthlyRent!: number;
+    @Field(() => String, {nullable:false})
+    image!: string;
+    @Field(() => Int, {nullable:false})
+    bedrooms!: number;
+    @Field(() => Float, {nullable:false})
+    bathrooms!: number;
+    @Field(() => Int, {nullable:false})
+    sqft!: number;
+    @Field(() => Int, {nullable:false})
+    yearBuilt!: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:false})
+    amenities!: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -3231,6 +3819,30 @@ export class PropertyUncheckedCreateInput {
     state!: string;
     @Field(() => String, {nullable:false})
     zipCode!: string;
+    @Field(() => String, {nullable:false})
+    status!: string;
+    @Field(() => String, {nullable:false})
+    propertyType!: string;
+    @Field(() => Float, {nullable:false})
+    monthlyRent!: number;
+    @Field(() => String, {nullable:false})
+    image!: string;
+    @Field(() => Int, {nullable:false})
+    bedrooms!: number;
+    @Field(() => Float, {nullable:false})
+    bathrooms!: number;
+    @Field(() => Int, {nullable:false})
+    sqft!: number;
+    @Field(() => Int, {nullable:false})
+    yearBuilt!: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:false})
+    amenities!: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -3255,6 +3867,30 @@ export class PropertyUncheckedUpdateManyInput {
     state?: string;
     @Field(() => String, {nullable:true})
     zipCode?: string;
+    @Field(() => String, {nullable:true})
+    status?: string;
+    @Field(() => String, {nullable:true})
+    propertyType?: string;
+    @Field(() => Float, {nullable:true})
+    monthlyRent?: number;
+    @Field(() => String, {nullable:true})
+    image?: string;
+    @Field(() => Int, {nullable:true})
+    bedrooms?: number;
+    @Field(() => Float, {nullable:true})
+    bathrooms?: number;
+    @Field(() => Int, {nullable:true})
+    sqft?: number;
+    @Field(() => Int, {nullable:true})
+    yearBuilt?: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:true})
+    amenities?: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -3273,6 +3909,30 @@ export class PropertyUncheckedUpdateWithoutCashFlowsInput {
     state?: string;
     @Field(() => String, {nullable:true})
     zipCode?: string;
+    @Field(() => String, {nullable:true})
+    status?: string;
+    @Field(() => String, {nullable:true})
+    propertyType?: string;
+    @Field(() => Float, {nullable:true})
+    monthlyRent?: number;
+    @Field(() => String, {nullable:true})
+    image?: string;
+    @Field(() => Int, {nullable:true})
+    bedrooms?: number;
+    @Field(() => Float, {nullable:true})
+    bathrooms?: number;
+    @Field(() => Int, {nullable:true})
+    sqft?: number;
+    @Field(() => Int, {nullable:true})
+    yearBuilt?: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:true})
+    amenities?: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -3295,6 +3955,30 @@ export class PropertyUncheckedUpdateWithoutLeasesInput {
     state?: string;
     @Field(() => String, {nullable:true})
     zipCode?: string;
+    @Field(() => String, {nullable:true})
+    status?: string;
+    @Field(() => String, {nullable:true})
+    propertyType?: string;
+    @Field(() => Float, {nullable:true})
+    monthlyRent?: number;
+    @Field(() => String, {nullable:true})
+    image?: string;
+    @Field(() => Int, {nullable:true})
+    bedrooms?: number;
+    @Field(() => Float, {nullable:true})
+    bathrooms?: number;
+    @Field(() => Int, {nullable:true})
+    sqft?: number;
+    @Field(() => Int, {nullable:true})
+    yearBuilt?: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:true})
+    amenities?: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -3317,6 +4001,30 @@ export class PropertyUncheckedUpdateWithoutTicketsInput {
     state?: string;
     @Field(() => String, {nullable:true})
     zipCode?: string;
+    @Field(() => String, {nullable:true})
+    status?: string;
+    @Field(() => String, {nullable:true})
+    propertyType?: string;
+    @Field(() => Float, {nullable:true})
+    monthlyRent?: number;
+    @Field(() => String, {nullable:true})
+    image?: string;
+    @Field(() => Int, {nullable:true})
+    bedrooms?: number;
+    @Field(() => Float, {nullable:true})
+    bathrooms?: number;
+    @Field(() => Int, {nullable:true})
+    sqft?: number;
+    @Field(() => Int, {nullable:true})
+    yearBuilt?: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:true})
+    amenities?: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -3339,6 +4047,30 @@ export class PropertyUncheckedUpdateInput {
     state?: string;
     @Field(() => String, {nullable:true})
     zipCode?: string;
+    @Field(() => String, {nullable:true})
+    status?: string;
+    @Field(() => String, {nullable:true})
+    propertyType?: string;
+    @Field(() => Float, {nullable:true})
+    monthlyRent?: number;
+    @Field(() => String, {nullable:true})
+    image?: string;
+    @Field(() => Int, {nullable:true})
+    bedrooms?: number;
+    @Field(() => Float, {nullable:true})
+    bathrooms?: number;
+    @Field(() => Int, {nullable:true})
+    sqft?: number;
+    @Field(() => Int, {nullable:true})
+    yearBuilt?: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:true})
+    amenities?: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -3361,6 +4093,30 @@ export class PropertyUpdateManyMutationInput {
     state?: string;
     @Field(() => String, {nullable:true})
     zipCode?: string;
+    @Field(() => String, {nullable:true})
+    status?: string;
+    @Field(() => String, {nullable:true})
+    propertyType?: string;
+    @Field(() => Float, {nullable:true})
+    monthlyRent?: number;
+    @Field(() => String, {nullable:true})
+    image?: string;
+    @Field(() => Int, {nullable:true})
+    bedrooms?: number;
+    @Field(() => Float, {nullable:true})
+    bathrooms?: number;
+    @Field(() => Int, {nullable:true})
+    sqft?: number;
+    @Field(() => Int, {nullable:true})
+    yearBuilt?: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:true})
+    amenities?: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -3464,6 +4220,30 @@ export class PropertyUpdateWithoutCashFlowsInput {
     state?: string;
     @Field(() => String, {nullable:true})
     zipCode?: string;
+    @Field(() => String, {nullable:true})
+    status?: string;
+    @Field(() => String, {nullable:true})
+    propertyType?: string;
+    @Field(() => Float, {nullable:true})
+    monthlyRent?: number;
+    @Field(() => String, {nullable:true})
+    image?: string;
+    @Field(() => Int, {nullable:true})
+    bedrooms?: number;
+    @Field(() => Float, {nullable:true})
+    bathrooms?: number;
+    @Field(() => Int, {nullable:true})
+    sqft?: number;
+    @Field(() => Int, {nullable:true})
+    yearBuilt?: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:true})
+    amenities?: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -3484,6 +4264,30 @@ export class PropertyUpdateWithoutLeasesInput {
     state?: string;
     @Field(() => String, {nullable:true})
     zipCode?: string;
+    @Field(() => String, {nullable:true})
+    status?: string;
+    @Field(() => String, {nullable:true})
+    propertyType?: string;
+    @Field(() => Float, {nullable:true})
+    monthlyRent?: number;
+    @Field(() => String, {nullable:true})
+    image?: string;
+    @Field(() => Int, {nullable:true})
+    bedrooms?: number;
+    @Field(() => Float, {nullable:true})
+    bathrooms?: number;
+    @Field(() => Int, {nullable:true})
+    sqft?: number;
+    @Field(() => Int, {nullable:true})
+    yearBuilt?: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:true})
+    amenities?: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -3504,6 +4308,30 @@ export class PropertyUpdateWithoutTicketsInput {
     state?: string;
     @Field(() => String, {nullable:true})
     zipCode?: string;
+    @Field(() => String, {nullable:true})
+    status?: string;
+    @Field(() => String, {nullable:true})
+    propertyType?: string;
+    @Field(() => Float, {nullable:true})
+    monthlyRent?: number;
+    @Field(() => String, {nullable:true})
+    image?: string;
+    @Field(() => Int, {nullable:true})
+    bedrooms?: number;
+    @Field(() => Float, {nullable:true})
+    bathrooms?: number;
+    @Field(() => Int, {nullable:true})
+    sqft?: number;
+    @Field(() => Int, {nullable:true})
+    yearBuilt?: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:true})
+    amenities?: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -3524,6 +4352,30 @@ export class PropertyUpdateInput {
     state?: string;
     @Field(() => String, {nullable:true})
     zipCode?: string;
+    @Field(() => String, {nullable:true})
+    status?: string;
+    @Field(() => String, {nullable:true})
+    propertyType?: string;
+    @Field(() => Float, {nullable:true})
+    monthlyRent?: number;
+    @Field(() => String, {nullable:true})
+    image?: string;
+    @Field(() => Int, {nullable:true})
+    bedrooms?: number;
+    @Field(() => Float, {nullable:true})
+    bathrooms?: number;
+    @Field(() => Int, {nullable:true})
+    sqft?: number;
+    @Field(() => Int, {nullable:true})
+    yearBuilt?: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated?: number;
+    @Field(() => String, {nullable:true})
+    amenities?: string;
+    @Field(() => Float, {nullable:true})
+    roi?: number;
+    @Field(() => Float, {nullable:true})
+    occupancyRate?: number;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -3593,6 +4445,30 @@ export class PropertyWhereUniqueInput {
     state?: InstanceType<typeof StringFilter>;
     @Field(() => StringFilter, {nullable:true})
     zipCode?: InstanceType<typeof StringFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    status?: InstanceType<typeof StringFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    propertyType?: InstanceType<typeof StringFilter>;
+    @Field(() => FloatFilter, {nullable:true})
+    monthlyRent?: InstanceType<typeof FloatFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    image?: InstanceType<typeof StringFilter>;
+    @Field(() => IntFilter, {nullable:true})
+    bedrooms?: InstanceType<typeof IntFilter>;
+    @Field(() => FloatFilter, {nullable:true})
+    bathrooms?: InstanceType<typeof FloatFilter>;
+    @Field(() => IntFilter, {nullable:true})
+    sqft?: InstanceType<typeof IntFilter>;
+    @Field(() => IntFilter, {nullable:true})
+    yearBuilt?: InstanceType<typeof IntFilter>;
+    @Field(() => IntFilter, {nullable:true})
+    lastRenovated?: InstanceType<typeof IntFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    amenities?: InstanceType<typeof StringFilter>;
+    @Field(() => FloatFilter, {nullable:true})
+    roi?: InstanceType<typeof FloatFilter>;
+    @Field(() => FloatFilter, {nullable:true})
+    occupancyRate?: InstanceType<typeof FloatFilter>;
     @Field(() => DateTimeFilter, {nullable:true})
     createdAt?: InstanceType<typeof DateTimeFilter>;
     @Field(() => DateTimeFilter, {nullable:true})
@@ -3623,6 +4499,30 @@ export class PropertyWhereInput {
     state?: InstanceType<typeof StringFilter>;
     @Field(() => StringFilter, {nullable:true})
     zipCode?: InstanceType<typeof StringFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    status?: InstanceType<typeof StringFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    propertyType?: InstanceType<typeof StringFilter>;
+    @Field(() => FloatFilter, {nullable:true})
+    monthlyRent?: InstanceType<typeof FloatFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    image?: InstanceType<typeof StringFilter>;
+    @Field(() => IntFilter, {nullable:true})
+    bedrooms?: InstanceType<typeof IntFilter>;
+    @Field(() => FloatFilter, {nullable:true})
+    bathrooms?: InstanceType<typeof FloatFilter>;
+    @Field(() => IntFilter, {nullable:true})
+    sqft?: InstanceType<typeof IntFilter>;
+    @Field(() => IntFilter, {nullable:true})
+    yearBuilt?: InstanceType<typeof IntFilter>;
+    @Field(() => IntFilter, {nullable:true})
+    lastRenovated?: InstanceType<typeof IntFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    amenities?: InstanceType<typeof StringFilter>;
+    @Field(() => FloatFilter, {nullable:true})
+    roi?: InstanceType<typeof FloatFilter>;
+    @Field(() => FloatFilter, {nullable:true})
+    occupancyRate?: InstanceType<typeof FloatFilter>;
     @Field(() => DateTimeFilter, {nullable:true})
     createdAt?: InstanceType<typeof DateTimeFilter>;
     @Field(() => DateTimeFilter, {nullable:true})
@@ -3647,6 +4547,30 @@ export class Property {
     state!: string;
     @Field(() => String, {nullable:false})
     zipCode!: string;
+    @Field(() => String, {nullable:false})
+    status!: string;
+    @Field(() => String, {nullable:false})
+    propertyType!: string;
+    @Field(() => Float, {nullable:false})
+    monthlyRent!: number;
+    @Field(() => String, {nullable:false})
+    image!: string;
+    @Field(() => Int, {nullable:false})
+    bedrooms!: number;
+    @Field(() => Float, {nullable:false})
+    bathrooms!: number;
+    @Field(() => Int, {nullable:false})
+    sqft!: number;
+    @Field(() => Int, {nullable:false})
+    yearBuilt!: number;
+    @Field(() => Int, {nullable:true})
+    lastRenovated!: number | null;
+    @Field(() => String, {nullable:false})
+    amenities!: string;
+    @Field(() => Float, {nullable:true})
+    roi!: number | null;
+    @Field(() => Float, {nullable:true})
+    occupancyRate!: number | null;
     @Field(() => Date, {nullable:false})
     createdAt!: Date;
     @Field(() => Date, {nullable:false})

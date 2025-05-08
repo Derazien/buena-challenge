@@ -113,14 +113,6 @@ const UpcomingLeasesCard = () => {
                     </div>
                 )}
             </div>
-
-            <div className="mt-6">
-                <Link href="/leases">
-                    <Button variant="outline" className="w-full">
-                        Manage Leases
-                    </Button>
-                </Link>
-            </div>
         </AnimatedCard>
     );
 };

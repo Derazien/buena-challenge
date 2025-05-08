@@ -8,6 +8,18 @@ export const GET_PROPERTIES = gql`
       city
       state
       zipCode
+      status
+      propertyType
+      monthlyRent
+      image
+      bedrooms
+      bathrooms
+      sqft
+      yearBuilt
+      lastRenovated
+      amenities
+      roi
+      occupancyRate
       leases {
         id
         startDate
@@ -43,6 +55,18 @@ export const GET_PROPERTY = gql`
       city
       state
       zipCode
+      status
+      propertyType
+      monthlyRent
+      image
+      bedrooms
+      bathrooms
+      sqft
+      yearBuilt
+      lastRenovated
+      amenities
+      roi
+      occupancyRate
       leases {
         id
         startDate

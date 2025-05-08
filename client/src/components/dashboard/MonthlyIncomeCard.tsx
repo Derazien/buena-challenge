@@ -5,105 +5,85 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import AnimatedCard from '@/components/common/AnimatedCard';
 import AnimatedText from '@/components/common/AnimatedText';
+import { useQuery } from '@apollo/client';
+import { GET_DASHBOARD_STATS } from '@/graphql/queries';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import ErrorDisplay from '@/components/common/ErrorDisplay';
 
 const MonthlyIncomeCard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('month');
+  const { loading, error, data } = useQuery(GET_DASHBOARD_STATS);
 
-  // Sample data - in a real app, this would come from an API
-  const monthlyIncome = {
-    current: 4250,
-    previous: 3950,
-    percentageChange: 7.59
-  };
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
-  // Sample monthly data points
-  const monthlyData = [
-    { month: 'Jan', value: 3850 },
-    { month: 'Feb', value: 3900 },
-    { month: 'Mar', value: 3950 },
-    { month: 'Apr', value: 4100 },
-    { month: 'May', value: 4200 },
-    { month: 'Jun', value: 4250 }
-  ];
+  if (error) {
+    return <ErrorDisplay error={error.message} />;
+  }
+
+  const monthlyIncome = data?.dashboardStats?.monthlyIncome;
+  const monthlyData = monthlyIncome?.monthlyData || [];
 
   return (
-    <AnimatedCard className="p-5" hoverEffect="lift" delay={0.1} once={false}>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-medium text-foreground">
-          <AnimatedText
-            text="Monthly Income"
-            animation="slide-up"
-            type="word"
-            once={false}
-          />
-        </h2>
-        <div className="flex space-x-2">
-          <button
-            onClick={() => setSelectedPeriod('month')}
-            className={`px-3 py-1 text-xs rounded-md ${selectedPeriod === 'month'
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted text-muted-foreground'
-              }`}
-          >
-            Month
-          </button>
-          <button
-            onClick={() => setSelectedPeriod('year')}
-            className={`px-3 py-1 text-xs rounded-md ${selectedPeriod === 'year'
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted text-muted-foreground'
-              }`}
-          >
-            Year
-          </button>
-        </div>
-      </div>
-
-      <div className="mb-4">
-        <div className="flex items-end space-x-2">
-          <AnimatedText
-            text={`$${monthlyIncome.current}`}
-            className="text-2xl font-bold text-foreground"
-            animation="bounce"
-            delay={0.2}
-            once={false}
-          />
-          <div className={`text-xs px-1.5 py-0.5 rounded-full ${monthlyIncome.percentageChange >= 0
-            ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-            : 'bg-destructive/15 text-destructive'}`}>
-            {monthlyIncome.percentageChange >= 0 ? '+' : ''}{monthlyIncome.percentageChange}%
+    <AnimatedCard>
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Monthly Income</h2>
+          <div className="flex space-x-2">
+            <Button
+              className={`px-3 py-1 text-xs rounded-md ${selectedPeriod === 'month'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground'
+                }`}
+              onClick={() => setSelectedPeriod('month')}
+            >
+              Month
+            </Button>
+            <Button
+              className={`px-3 py-1 text-xs rounded-md ${selectedPeriod === 'year'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground'
+                }`}
+              onClick={() => setSelectedPeriod('year')}
+            >
+              Year
+            </Button>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground mt-1">Compared to ${monthlyIncome.previous} last period</p>
-      </div>
 
-      {/* Simple bar chart with animations */}
-      <div className="h-32 mt-4 flex items-end space-x-1">
-        {monthlyData.map((item, index) => {
-          const maxValue = Math.max(...monthlyData.map(d => d.value));
-          const height = `${(item.value / maxValue) * 100}%`;
-          const isLatest = index === monthlyData.length - 1;
+        <div className="space-y-4">
+          <div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Current Month</p>
+            <AnimatedText
+              text={`€${monthlyIncome?.currentIncome || 0}`}
+              className="text-3xl font-bold text-gray-900 dark:text-white"
+            />
+          </div>
 
-          return (
-            <div key={index} className="flex-1 flex flex-col items-center">
-              <div
-                className={`w-full rounded-t-sm ${isLatest ? 'bg-primary' : 'bg-primary/40'}`}
-                style={{
-                  height,
-                  transition: 'height 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                  transitionDelay: `${index * 0.1}s`
-                }}
-              />
-              <span className="text-xs mt-1 text-muted-foreground">
-                {item.month}
-              </span>
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Monthly Change</p>
+              <p className={`text-lg font-semibold ${monthlyIncome?.monthlyChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {monthlyIncome?.monthlyChange >= 0 ? '+' : ''}{monthlyIncome?.monthlyChange.toFixed(1)}%
+              </p>
             </div>
-          );
-        })}
-      </div>
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Net Income</p>
+              <AnimatedText
+                text={`€${monthlyIncome?.currentNet || 0}`}
+                className="text-lg font-semibold text-gray-900 dark:text-white"
+              />
+            </div>
+          </div>
 
-      <div className="mt-4">
-        <Button className="w-full">Manage Income</Button>
+          <div className="h-48">
+            {/* Add a chart component here to visualize the monthlyData */}
+            <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
+              Chart visualization coming soon
+            </div>
+          </div>
+        </div>
       </div>
     </AnimatedCard>
   );

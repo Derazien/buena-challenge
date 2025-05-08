@@ -6,10 +6,26 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Image from 'next/image';
+import { useQuery } from '@apollo/client';
+import { GET_PROPERTIES } from '@/graphql/queries';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import ErrorDisplay from '@/components/common/ErrorDisplay';
+import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
+import { useEffect } from 'react';
+
+const PropertyModel3D = dynamic(() => import('@/components/portfolio/PropertyModel3D'), {
+    ssr: false,
+    loading: () => (
+        <div className="flex items-center justify-center h-full w-full min-h-[400px]">
+            <div className="animate-pulse text-lg text-center">Loading 3D Model...</div>
+        </div>
+    ),
+});
 
 // Define the type for properties
-type Property = {
-    id: number;
+interface Property {
+    id: string;
     address: string;
     city: string;
     state: string;
@@ -17,209 +33,89 @@ type Property = {
     status: 'OCCUPIED' | 'VACANT' | 'MAINTENANCE';
     propertyType: 'APARTMENT' | 'HOUSE' | 'CONDO' | 'COMMERCIAL';
     monthlyRent: number;
-    image: string;
-    bedrooms: number;
-    bathrooms: number;
-    sqft: number;
-    yearBuilt: number;
-    lastRenovated?: number;
-    amenities: string[];
-    roi: number; // Return on Investment percentage
-    occupancyRate: number; // Historical occupancy rate percentage
-};
-
-// Mock data for properties with more professional details
-const MOCK_PROPERTIES: Property[] = [
-    {
-        id: 1,
-        address: 'Kurfürstendamm 234',
-        city: 'Berlin',
-        state: 'Berlin',
-        zipCode: '10719',
-        status: 'OCCUPIED',
-        propertyType: 'APARTMENT',
-        monthlyRent: 2800,
-        image: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-        bedrooms: 2,
-        bathrooms: 1,
-        sqft: 950,
-        yearBuilt: 2012,
-        lastRenovated: 2020,
-        amenities: ['Balcony', 'Built-in Kitchen', 'Underfloor Heating', 'Elevator'],
-        roi: 5.8,
-        occupancyRate: 96,
-    },
-    {
-        id: 2,
-        address: 'Rue de Rivoli 42',
-        city: 'Paris',
-        state: 'Île-de-France',
-        zipCode: '75004',
-        status: 'VACANT',
-        propertyType: 'APARTMENT',
-        monthlyRent: 3200,
-        image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-        bedrooms: 3,
-        bathrooms: 2,
-        sqft: 1100,
-        yearBuilt: 1890,
-        lastRenovated: 2019,
-        amenities: ['Parquet Flooring', 'Historic Building', 'City View', 'Concierge'],
-        roi: 4.7,
-        occupancyRate: 91,
-    },
-    {
-        id: 3,
-        address: 'Via del Corso 112',
-        city: 'Rome',
-        state: 'Lazio',
-        zipCode: '00186',
-        status: 'MAINTENANCE',
-        propertyType: 'CONDO',
-        monthlyRent: 2400,
-        image: 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-        bedrooms: 1,
-        bathrooms: 1,
-        sqft: 750,
-        yearBuilt: 1925,
-        amenities: ['Terrace', 'Air Conditioning', 'Historic District', 'Security'],
-        roi: 4.2,
-        occupancyRate: 88,
-    },
-    {
-        id: 4,
-        address: 'Gran Vía 67',
-        city: 'Madrid',
-        state: 'Community of Madrid',
-        zipCode: '28013',
-        status: 'OCCUPIED',
-        propertyType: 'COMMERCIAL',
-        monthlyRent: 6800,
-        image: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-        bedrooms: 0,
-        bathrooms: 2,
-        sqft: 2800,
-        yearBuilt: 1920,
-        lastRenovated: 2018,
-        amenities: ['High Ceilings', 'Showroom Space', 'Metro Access', 'Climate Control'],
-        roi: 6.5,
-        occupancyRate: 94,
-    },
-    {
-        id: 5,
-        address: 'Strandvägen 17',
-        city: 'Stockholm',
-        state: 'Stockholm County',
-        zipCode: '11456',
-        status: 'OCCUPIED',
-        propertyType: 'APARTMENT',
-        monthlyRent: 3500,
-        image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-        bedrooms: 2,
-        bathrooms: 1,
-        sqft: 900,
-        yearBuilt: 2005,
-        amenities: ['Water View', 'Sauna', 'Heated Floors', 'Bike Storage'],
-        roi: 5.2,
-        occupancyRate: 97,
-    },
-    {
-        id: 6,
-        address: 'Rua Augusta 128',
-        city: 'Lisbon',
-        state: 'Lisbon District',
-        zipCode: '1100-053',
-        status: 'VACANT',
-        propertyType: 'HOUSE',
-        monthlyRent: 4100,
-        image: 'https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-        bedrooms: 4,
-        bathrooms: 3,
-        sqft: 2200,
-        yearBuilt: 1932,
-        lastRenovated: 2021,
-        amenities: ['Garden', 'Patio', 'Azulejo Tiles', 'Original Features'],
-        roi: 5.8,
-        occupancyRate: 89,
-    },
-];
+    image?: string;
+    bedrooms?: number;
+    bathrooms?: number;
+    sqft?: number;
+    yearBuilt?: number;
+    amenities?: string[];
+    roi?: number;
+    occupancyRate?: number;
+}
 
 export default function PropertiesPage() {
-    const [properties] = useState<Property[]>(MOCK_PROPERTIES);
+    const router = useRouter();
+    const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [typeFilter, setTypeFilter] = useState('all');
-    const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState('address');
-    const [sortOrder, setSortOrder] = useState('asc');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
 
-    // Filter and sort properties
-    const filteredProperties = properties
-        .filter(property => {
-            // Status filter
-            if (statusFilter !== 'all' && property.status !== statusFilter) {
-                return false;
-            }
+    const { loading, error, data } = useQuery(GET_PROPERTIES);
 
-            // Type filter
-            if (typeFilter !== 'all' && property.propertyType !== typeFilter) {
-                return false;
-            }
+    if (loading) {
+        return <LoadingSpinner />;
+    }
 
-            // Search query
-            if (searchQuery) {
-                const query = searchQuery.toLowerCase();
-                return (
-                    property.address.toLowerCase().includes(query) ||
-                    property.city.toLowerCase().includes(query) ||
-                    property.state.toLowerCase().includes(query) ||
-                    property.zipCode.toLowerCase().includes(query)
-                );
-            }
+    if (error) {
+        return <ErrorDisplay error={error.message} />;
+    }
 
-            return true;
-        })
-        .sort((a, b) => {
-            // Sort properties
-            let compareA, compareB;
+    const properties: Property[] = data?.properties || [];
 
-            switch (sortBy) {
-                case 'address':
-                    compareA = a.address;
-                    compareB = b.address;
-                    break;
-                case 'rent':
-                    compareA = a.monthlyRent;
-                    compareB = b.monthlyRent;
-                    break;
-                case 'roi':
-                    compareA = a.roi;
-                    compareB = b.roi;
-                    break;
-                case 'sqft':
-                    compareA = a.sqft;
-                    compareB = b.sqft;
-                    break;
-                default:
-                    compareA = a.address;
-                    compareB = b.address;
-            }
+    // Filter properties
+    const filteredProperties = properties.filter((property: Property) => {
+        const matchesSearch = property.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            property.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            property.zipCode.includes(searchQuery);
 
-            if (sortOrder === 'asc') {
-                return compareA > compareB ? 1 : -1;
-            } else {
-                return compareA < compareB ? 1 : -1;
-            }
-        });
+        const matchesStatus = statusFilter === 'all' || property.status === statusFilter;
+        const matchesType = typeFilter === 'all' || property.propertyType === typeFilter;
+
+        return matchesSearch && matchesStatus && matchesType;
+    });
+
+    // Sort properties
+    const sortedProperties = [...filteredProperties].sort((a: Property, b: Property) => {
+        let comparison = 0;
+        switch (sortBy) {
+            case 'address':
+                comparison = a.address.localeCompare(b.address);
+                break;
+            case 'monthlyRent':
+                comparison = a.monthlyRent - b.monthlyRent;
+                break;
+            case 'roi':
+                comparison = (a.roi || 0) - (b.roi || 0);
+                break;
+            case 'sqft':
+                comparison = (a.sqft || 0) - (b.sqft || 0);
+                break;
+            default:
+                comparison = 0;
+        }
+        return sortOrder === 'asc' ? comparison : -comparison;
+    });
 
     // Helper functions
-    const getStatusVariant = (status: Property['status']) => {
-        switch (status) {
-            case 'OCCUPIED': return 'success';
-            case 'VACANT': return 'info';
-            case 'MAINTENANCE': return 'warning';
-            default: return 'default';
-        }
+    const getTotalProperties = () => properties.length;
+
+    const getTotalMonthlyIncome = () => {
+        return properties.reduce((sum: number, property: Property) => sum + property.monthlyRent, 0);
+    };
+
+    const getAverageOccupancyRate = () => {
+        const propertiesWithOccupancy = properties.filter((p: Property) => p.occupancyRate !== undefined);
+        if (propertiesWithOccupancy.length === 0) return 0;
+        const sum = propertiesWithOccupancy.reduce((acc: number, p: Property) => acc + (p.occupancyRate || 0), 0);
+        return sum / propertiesWithOccupancy.length;
+    };
+
+    const getAverageRoi = () => {
+        return properties.reduce((sum: number, property: Property) => sum + (property.roi || 0), 0) / properties.length;
     };
 
     const getPropertyTypeLabel = (type: Property['propertyType']) => {
@@ -232,66 +128,38 @@ export default function PropertiesPage() {
         }
     };
 
-    const getTotalMonthlyIncome = () => {
-        return properties
-            .filter(property => property.status === 'OCCUPIED')
-            .reduce((total, property) => total + property.monthlyRent, 0);
-    };
-
-    const getAverageRoi = () => {
-        return properties.reduce((sum, property) => sum + property.roi, 0) / properties.length;
-    };
-
-    const getAverageOccupancyRate = () => {
-        return properties.reduce((sum, property) => sum + property.occupancyRate, 0) / properties.length;
-    };
-
-    const toggleSort = (field: string) => {
-        if (sortBy === field) {
-            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-        } else {
-            setSortBy(field);
-            setSortOrder('asc');
+    // Helper to map propertyType to allowed values for PropertyModel3D
+    const get3DModelType = (type: Property['propertyType']): 'building' | 'apartment' | 'house' | undefined => {
+        switch (type) {
+            case 'APARTMENT': return 'apartment';
+            case 'HOUSE': return 'house';
+            case 'CONDO': return 'building'; // Map CONDO to 'building' for demo
+            case 'COMMERCIAL': return 'building'; // Map COMMERCIAL to 'building' for demo
+            default: return 'building';
         }
+    };
+
+    // Property Income Overview Table
+    const handleRowClick = (property: Property) => {
+        setSelectedProperty(property);
+        setModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setModalOpen(false);
+        setSelectedProperty(null);
     };
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
                 <div>
-                    <Link href="/" className="text-blue-600 hover:underline flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-                        </svg>
-                        Back to Dashboard
-                    </Link>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">Property Portfolio</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Properties</h1>
+                    <p className="text-gray-500 dark:text-gray-400">Manage your real estate portfolio</p>
                 </div>
-
-                <Button variant="default">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                    </svg>
-                    Add Property
-                </Button>
             </div>
 
-            {/* Analytics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <Card className="p-6">
-                    <div className="flex items-center">
-                        <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900 mr-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500 dark:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Total Properties</p>
-                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{properties.length}</h3>
-                        </div>
-                    </div>
-                </Card>
-
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <Card className="p-6">
                     <div className="flex items-center">
                         <div className="p-3 rounded-full bg-green-100 dark:bg-green-900 mr-4">
@@ -302,6 +170,20 @@ export default function PropertiesPage() {
                         <div>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Monthly Income</p>
                             <h3 className="text-2xl font-bold text-gray-900 dark:text-white">€{getTotalMonthlyIncome().toLocaleString()}</h3>
+                        </div>
+                    </div>
+                </Card>
+
+                <Card className="p-6">
+                    <div className="flex items-center">
+                        <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900 mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500 dark:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Total Properties</p>
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{getTotalProperties()}</h3>
                         </div>
                     </div>
                 </Card>
@@ -322,60 +204,43 @@ export default function PropertiesPage() {
 
                 <Card className="p-6">
                     <div className="flex items-center">
-                        <div className="p-3 rounded-full bg-amber-100 dark:bg-amber-900 mr-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-amber-500 dark:text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        <div className="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900 mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-500 dark:text-yellow-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
                         <div>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Occupancy Rate</p>
-                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{getAverageOccupancyRate().toFixed(0)}%</h3>
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{getAverageOccupancyRate().toFixed(1)}%</h3>
                         </div>
                     </div>
                 </Card>
             </div>
 
-            {/* Search and Filters */}
             <Card className="p-6 mb-8">
-                <div className="flex flex-wrap gap-4 mb-6">
-                    <div className="flex-1 min-w-[280px]">
-                        <label htmlFor="search" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search Properties</label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-                                </svg>
-                            </div>
-                            <input
-                                id="search"
-                                type="text"
-                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                                placeholder="Search by address, city, or zip code"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
+                <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex-1">
+                        <input
+                            type="text"
+                            placeholder="Search properties..."
+                            className="block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
                     </div>
-
-                    <div>
-                        <label htmlFor="status-filter" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                    <div className="flex gap-4">
                         <select
-                            id="status-filter"
                             className="block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
                         >
-                            <option value="all">All Statuses</option>
+                            <option value="all">All Status</option>
                             <option value="OCCUPIED">Occupied</option>
                             <option value="VACANT">Vacant</option>
                             <option value="MAINTENANCE">Maintenance</option>
                         </select>
-                    </div>
 
-                    <div>
-                        <label htmlFor="type-filter" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Property Type</label>
                         <select
-                            id="type-filter"
                             className="block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                             value={typeFilter}
                             onChange={(e) => setTypeFilter(e.target.value)}
@@ -386,271 +251,188 @@ export default function PropertiesPage() {
                             <option value="CONDO">Condo</option>
                             <option value="COMMERCIAL">Commercial</option>
                         </select>
-                    </div>
 
-                    <div>
-                        <label htmlFor="sort-by" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sort By</label>
                         <select
-                            id="sort-by"
                             className="block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                             value={sortBy}
-                            onChange={(e) => toggleSort(e.target.value)}
+                            onChange={(e) => setSortBy(e.target.value)}
                         >
                             <option value="address">Address</option>
-                            <option value="rent">Monthly Rent</option>
+                            <option value="monthlyRent">Monthly Rent</option>
                             <option value="roi">ROI</option>
-                            <option value="sqft">Square Footage</option>
+                            <option value="sqft">Square Feet</option>
                         </select>
-                    </div>
 
-                    <div>
-                        <label htmlFor="sort-order" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Order</label>
                         <select
-                            id="sort-order"
                             className="block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                             value={sortOrder}
-                            onChange={(e) => setSortOrder(e.target.value)}
+                            onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
                         >
                             <option value="asc">Ascending</option>
                             <option value="desc">Descending</option>
                         </select>
-                    </div>
-                </div>
 
-                <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                        Showing {filteredProperties.length} of {properties.length} properties
-                    </div>
-                    <div className="flex space-x-2">
-                        <button
-                            onClick={() => setViewMode('grid')}
-                            className={`p-2 rounded-md ${viewMode === 'grid' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                            </svg>
-                        </button>
-                        <button
-                            onClick={() => setViewMode('list')}
-                            className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                            </svg>
-                        </button>
+                        <div className="flex items-center space-x-2">
+                            <button
+                                onClick={() => setViewMode('grid')}
+                                className={`p-2 rounded-md ${viewMode === 'grid' ? 'bg-blue-100 dark:bg-blue-900' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                                </svg>
+                            </button>
+                            <button
+                                onClick={() => setViewMode('list')}
+                                className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-blue-100 dark:bg-blue-900' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </Card>
 
-            {/* Property Cards */}
+            {/* Modal for 3D Model and Property Details */}
+            {modalOpen && selectedProperty && (
+                <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" onClick={closeModal}>
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden w-full max-w-3xl shadow-2xl flex flex-col" onClick={e => e.stopPropagation()}>
+                        <div className="flex justify-between items-center p-4 border-b dark:border-gray-700">
+                            <h3 className="text-lg font-bold">3D Model & Property Details</h3>
+                            <button onClick={closeModal} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                        <div className="flex flex-col md:flex-row">
+                            <div className="flex-1 min-h-[350px] bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                                <PropertyModel3D
+                                    propertyType={get3DModelType(selectedProperty.propertyType)}
+                                    colorScheme="german"
+                                    height={350}
+                                    width={400}
+                                    className="w-full h-full"
+                                />
+                            </div>
+                            <div className="flex-1 p-6 space-y-2">
+                                <div className="font-semibold text-lg mb-2">{selectedProperty.address}</div>
+                                <div className="text-gray-500 mb-1">{selectedProperty.city}, {selectedProperty.state} {selectedProperty.zipCode}</div>
+                                <div className="mb-1">Monthly Rent: <span className="font-medium">€{selectedProperty.monthlyRent.toLocaleString()}</span></div>
+                                <div className="mb-1">Occupancy Rate: <span className="font-medium">{selectedProperty.occupancyRate?.toFixed(1)}%</span></div>
+                                <div className="mb-1">Status: <span className="font-medium">{selectedProperty.status}</span></div>
+                                <div className="mb-1">Type: <span className="font-medium">{getPropertyTypeLabel(selectedProperty.propertyType)}</span></div>
+                                <div className="mb-1">Bedrooms: <span className="font-medium">{selectedProperty.bedrooms}</span></div>
+                                <div className="mb-1">Bathrooms: <span className="font-medium">{selectedProperty.bathrooms}</span></div>
+                                <div className="mb-1">Square Feet: <span className="font-medium">{selectedProperty.sqft?.toLocaleString()}</span></div>
+                                <div className="mb-1">Year Built: <span className="font-medium">{selectedProperty.yearBuilt}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredProperties.map((property) => (
-                        <Card key={property.id} className="overflow-hidden flex flex-col h-full">
-                            <div className="h-48 -mx-6 -mt-6 mb-4 overflow-hidden relative">
-                                <Image
-                                    src={property.image}
-                                    alt={property.address}
-                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                                    width={500}
-                                    height={300}
-                                />
-                                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/50 to-transparent opacity-60"></div>
-                                <Badge
-                                    variant={getStatusVariant(property.status)}
-                                    className="absolute top-3 right-3"
-                                >
-                                    {property.status}
-                                </Badge>
-                                <Badge
-                                    variant="secondary"
-                                    className="absolute top-3 left-3"
-                                >
-                                    {getPropertyTypeLabel(property.propertyType)}
-                                </Badge>
-                            </div>
-
-                            <div className="flex-1 p-1">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1 line-clamp-1">{property.address}</h3>
-                                <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">
-                                    {property.city}, {property.state} {property.zipCode}
-                                </p>
-
-                                <div className="flex flex-wrap items-center gap-4 mb-4 text-sm">
-                                    <div className="flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                                        </svg>
-                                        <span className="text-gray-700 dark:text-gray-300">{property.sqft} sqft</span>
-                                    </div>
-                                    {property.bedrooms > 0 && (
-                                        <div className="flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                                            </svg>
-                                            <span className="text-gray-700 dark:text-gray-300">{property.bedrooms} bed{property.bedrooms !== 1 ? 's' : ''}</span>
-                                        </div>
-                                    )}
-                                    <div className="flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                        <span className="text-gray-700 dark:text-gray-300">{property.yearBuilt}</span>
-                                    </div>
+                    {sortedProperties.map((property: Property) => (
+                        <div
+                            key={property.id}
+                            className="cursor-pointer hover:shadow-lg transition-shadow h-full"
+                            onClick={() => handleRowClick(property)}
+                        >
+                            <Card className="h-full">
+                                <div className="relative h-48 mb-4">
+                                    <Image
+                                        src={property.image || '/images/placeholder.jpg'}
+                                        alt={property.address}
+                                        fill
+                                        className="object-cover rounded-t-lg"
+                                    />
                                 </div>
-
-                                {property.amenities.length > 0 && (
-                                    <div className="mb-4">
-                                        <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-2">Amenities</h4>
-                                        <div className="flex flex-wrap gap-2">
-                                            {property.amenities.slice(0, 3).map((amenity, index) => (
-                                                <span key={index} className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded text-xs">
-                                                    {amenity}
-                                                </span>
-                                            ))}
-                                            {property.amenities.length > 3 && (
-                                                <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded text-xs">
-                                                    +{property.amenities.length - 3} more
-                                                </span>
-                                            )}
-                                        </div>
+                                <div className="p-4">
+                                    <h2 className="text-xl font-semibold mb-2">{property.address}</h2>
+                                    <p className="text-gray-600 mb-4">
+                                        {property.city}, {property.state} {property.zipCode}
+                                    </p>
+                                    <div className="flex gap-2 mb-4">
+                                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                            {property.status}
+                                        </Badge>
+                                        <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300">
+                                            {getPropertyTypeLabel(property.propertyType)}
+                                        </Badge>
                                     </div>
-                                )}
-
-                                <div className="flex justify-between items-center">
-                                    <div>
-                                        <div className="text-gray-500 dark:text-gray-400 text-xs">Monthly Rent</div>
-                                        <div className="flex items-baseline mb-1">
-                                            <span className="text-lg font-bold">€{property.monthlyRent.toLocaleString()}</span>
-                                            <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">/month</span>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <p className="text-sm text-gray-500">Monthly Rent</p>
+                                            <p className="font-semibold">€{property.monthlyRent.toLocaleString()}</p>
                                         </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="text-gray-500 dark:text-gray-400 text-xs">ROI</div>
-                                        <div className="font-semibold text-green-600 dark:text-green-400">
-                                            {property.roi}%
+                                        <div>
+                                            <p className="text-sm text-gray-500">ROI</p>
+                                            <p className="font-semibold">{property.roi?.toFixed(1)}%</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Occupancy Rate</p>
+                                            <p className="font-semibold">{property.occupancyRate?.toFixed(1)}%</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Square Feet</p>
+                                            <p className="font-semibold">{property.sqft?.toLocaleString() || 'N/A'}</p>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div className="flex justify-between mt-5 pt-5 border-t border-gray-200 dark:border-gray-700">
-                                <Link href={`/properties/${property.id}`} className="flex-1 mr-2">
-                                    <Button variant="outline" size="sm" className="w-full">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                        Details
-                                    </Button>
-                                </Link>
-                                <Link href={`/properties/${property.id}/edit`} className="flex-1 ml-2">
-                                    <Button variant="outline" size="sm" className="w-full">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                        Edit
-                                    </Button>
-                                </Link>
-                            </div>
-                        </Card>
+                            </Card>
+                        </div>
                     ))}
                 </div>
             ) : (
-                <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                    {filteredProperties.map((property) => (
-                        <Card key={property.id} className="overflow-hidden mb-4 p-0">
-                            <div className="flex flex-col md:flex-row">
-                                <div className="md:w-1/4 h-48 md:h-auto relative">
-                                    <Image
-                                        src={property.image}
-                                        alt={property.address}
-                                        className="w-full h-full object-cover"
-                                        width={300}
-                                        height={200}
-                                    />
-                                    <Badge
-                                        variant={getStatusVariant(property.status)}
-                                        className="absolute top-3 right-3"
-                                    >
-                                        {property.status}
-                                    </Badge>
-                                </div>
-
-                                <div className="flex-1 p-6">
-                                    <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
-                                        <div>
-                                            <div className="flex items-center mb-2">
-                                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mr-3">{property.address}</h3>
-                                                <Badge variant="secondary">
-                                                    {getPropertyTypeLabel(property.propertyType)}
-                                                </Badge>
-                                            </div>
-                                            <p className="text-gray-500 dark:text-gray-400 text-sm">
-                                                {property.city}, {property.state} {property.zipCode}
-                                            </p>
+                <div className="space-y-4">
+                    {sortedProperties.map((property: Property) => (
+                        <div
+                            key={property.id}
+                            className="cursor-pointer"
+                            onClick={() => handleRowClick(property)}
+                        >
+                            <Card className="p-6">
+                                <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
+                                    <div>
+                                        <div className="flex items-center mb-2">
+                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mr-3">{property.address}</h3>
+                                            <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300">
+                                                {getPropertyTypeLabel(property.propertyType)}
+                                            </Badge>
                                         </div>
-                                        <div className="mt-3 md:mt-0 md:text-right">
-                                            <div className="text-gray-500 dark:text-gray-400 text-xs">Monthly Rent</div>
-                                            <div className="font-medium">€{property.monthlyRent.toLocaleString()}</div>
-                                        </div>
+                                        <p className="text-gray-500 dark:text-gray-400 text-sm">
+                                            {property.city}, {property.state} {property.zipCode}
+                                        </p>
                                     </div>
-
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                                        <div>
-                                            <div className="text-xs text-gray-500 dark:text-gray-400">Square Feet</div>
-                                            <div className="font-medium text-gray-900 dark:text-white">{property.sqft.toLocaleString()}</div>
-                                        </div>
-                                        <div>
-                                            <div className="text-xs text-gray-500 dark:text-gray-400">Beds / Baths</div>
-                                            <div className="font-medium text-gray-900 dark:text-white">
-                                                {property.bedrooms} / {property.bathrooms}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="text-xs text-gray-500 dark:text-gray-400">Year Built</div>
-                                            <div className="font-medium text-gray-900 dark:text-white">
-                                                {property.yearBuilt}
-                                                {property.lastRenovated && ` (Renov. ${property.lastRenovated})`}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="text-xs text-gray-500 dark:text-gray-400">ROI</div>
-                                            <div className="font-medium text-green-600 dark:text-green-400">{property.roi}%</div>
-                                        </div>
-                                    </div>
-
-                                    {property.amenities.length > 0 && (
-                                        <div className="mb-4">
-                                            <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Amenities</div>
-                                            <div className="flex flex-wrap gap-2">
-                                                {property.amenities.map((amenity, index) => (
-                                                    <span key={index} className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded text-xs">
-                                                        {amenity}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <div className="flex flex-wrap gap-3 mt-4">
-                                        <Link href={`/properties/${property.id}`}>
-                                            <Button variant="default" size="sm">
-                                                View Details
-                                            </Button>
-                                        </Link>
-                                        <Link href={`/properties/${property.id}/edit`}>
-                                            <Button variant="outline" size="sm">
-                                                Edit Property
-                                            </Button>
-                                        </Link>
-                                        <Button variant="outline" size="sm">
-                                            Manage Leases
-                                        </Button>
+                                    <div className="mt-3 md:mt-0 md:text-right">
+                                        <div className="text-gray-500 dark:text-gray-400 text-xs">Monthly Rent</div>
+                                        <div className="font-medium">€{property.monthlyRent.toLocaleString()}</div>
                                     </div>
                                 </div>
-                            </div>
-                        </Card>
+
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                    <div>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">Status</p>
+                                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                            {property.status}
+                                        </Badge>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">ROI</p>
+                                        <p className="font-semibold">{property.roi?.toFixed(1)}%</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">Occupancy Rate</p>
+                                        <p className="font-semibold">{property.occupancyRate?.toFixed(1)}%</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">Square Feet</p>
+                                        <p className="font-semibold">{property.sqft?.toLocaleString() || 'N/A'}</p>
+                                    </div>
+                                </div>
+                            </Card>
+                        </div>
                     ))}
                 </div>
             )}

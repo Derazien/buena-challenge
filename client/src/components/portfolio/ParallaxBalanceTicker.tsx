@@ -21,7 +21,7 @@ const AnimatedNumber = ({ value }: { value: number }) => {
 
   return (
     <animated.span>
-      {number.to((n: number) => `$${n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`)}
+      {number.to((n: number) => `€${n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`)}
     </animated.span>
   );
 };
