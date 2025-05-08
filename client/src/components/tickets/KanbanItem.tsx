@@ -5,6 +5,8 @@ import { Ticket } from '@/types/api/tickets.types';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import Badge from '@/components/ui/Badge';
+import { formatDate } from '@/lib/format';
+import { getPriorityVariant, getStatusVariant } from './ticket-utils';
 
 type KanbanItemProps = {
   ticket: Ticket;
@@ -37,22 +39,20 @@ const KanbanItem: React.FC<KanbanItemProps> = ({
     opacity: isDragging ? 0.4 : 1,
   };
 
-  const getStatusBadgeVariant = (status: string) => {
+  const formattedDate = formatDate(ticket.createdAt);
+
+  const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'in_progress_by_ai':
-        return 'info';
-      case 'under_review':
-        return 'secondary';
-      case 'pending_approval':
-        return 'destructive';
-      case 'completed':
-        return 'success';
+        return 'bg-indigo-500';
+      case 'needs_manual_review':
+        return 'bg-amber-500';
+      case 'resolved':
+        return 'bg-green-500';
       default:
-        return 'default';
+        return 'bg-gray-500';
     }
   };
-
-  const formattedDate = format(new Date(ticket.createdAt), 'MMM d, yyyy');
 
   return (
     <motion.div
@@ -68,6 +68,7 @@ const KanbanItem: React.FC<KanbanItemProps> = ({
           : 'hover:shadow-md hover:border-border/80'}
         transition-all duration-200 touch-manipulation
         bg-gradient-to-r from-card to-background/80
+        ${ticket.status === 'in_progress_by_ai' ? 'relative overflow-hidden' : ''}
       `}
       onClick={(e) => {
         if (!isDragging) {
@@ -79,8 +80,31 @@ const KanbanItem: React.FC<KanbanItemProps> = ({
       {...attributes}
       {...listeners}
     >
-      <div className="flex justify-between items-start mb-3">
-        <h4 className="font-medium text-foreground truncate max-w-[85%]">{ticket.title}</h4>
+      {ticket.status === 'in_progress_by_ai' && (
+        <motion.div 
+          className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 z-0" 
+          animate={{ 
+            x: ['0%', '100%', '0%'],
+          }}
+          transition={{ 
+            repeat: Infinity, 
+            duration: 3,
+            ease: "linear"
+          }}
+        />
+      )}
+      
+      <div className="flex justify-between items-start mb-3 relative z-10">
+        <h4 className="font-medium text-foreground truncate max-w-[85%] flex items-center">
+          {ticket.status === 'in_progress_by_ai' && (
+            <svg className="animate-spin h-3 w-3 mr-2 text-primary inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          )}
+          {ticket.title}
+        </h4>
+        <div className={`w-2 h-2 rounded-full ${getStatusColor(ticket.status)}`}></div>
       </div>
 
       {!isDragging && (
@@ -89,17 +113,19 @@ const KanbanItem: React.FC<KanbanItemProps> = ({
             {ticket.description}
           </p>
 
-          <div className="flex justify-between items-center mt-3">
-            <Badge variant={getStatusBadgeVariant(ticket.status)}>
-              {ticket.status.toLowerCase().replace(/_/g, ' ')}
-            </Badge>
-          </div>
-
-          <div className="text-xs text-muted-foreground mt-2 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-            </svg>
-            {formattedDate}
+          <div className="flex justify-between items-center mt-3 relative z-10">
+            <div className="flex items-center space-x-2">
+              <span className="text-xs text-muted-foreground">{formattedDate}</span>
+              <Badge variant={getPriorityVariant(ticket.priority)} className="text-[10px] px-1 py-0">
+                {ticket.priority}
+              </Badge>
+            </div>
+            
+            {ticket.metadata?.aiProcessed && (
+              <Badge variant="outline" className="text-[10px] px-1 py-0">
+                AI
+              </Badge>
+            )}
           </div>
         </>
       )}

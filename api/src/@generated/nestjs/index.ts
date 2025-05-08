@@ -16,6 +16,7 @@ export enum TicketScalarFieldEnum {
     priority = "priority",
     status = "status",
     propertyId = "propertyId",
+    metadata = "metadata",
     createdAt = "createdAt",
     updatedAt = "updatedAt"
 }
@@ -5593,6 +5594,8 @@ export class TicketCountAggregateInput {
     @Field(() => Boolean, {nullable:true})
     propertyId?: true;
     @Field(() => Boolean, {nullable:true})
+    metadata?: true;
+    @Field(() => Boolean, {nullable:true})
     createdAt?: true;
     @Field(() => Boolean, {nullable:true})
     updatedAt?: true;
@@ -5615,6 +5618,8 @@ export class TicketCountAggregate {
     @Field(() => Int, {nullable:false})
     propertyId!: number;
     @Field(() => Int, {nullable:false})
+    metadata!: number;
+    @Field(() => Int, {nullable:false})
     createdAt!: number;
     @Field(() => Int, {nullable:false})
     updatedAt!: number;
@@ -5636,6 +5641,8 @@ export class TicketCountOrderByAggregateInput {
     status?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
     propertyId?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    metadata?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
     createdAt?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
@@ -5675,6 +5682,8 @@ export class TicketCreateWithoutPropertyInput {
     priority!: string;
     @Field(() => String, {nullable:false})
     status!: string;
+    @Field(() => String, {nullable:true})
+    metadata?: string;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -5691,6 +5700,8 @@ export class TicketCreateInput {
     priority!: string;
     @Field(() => String, {nullable:false})
     status!: string;
+    @Field(() => String, {nullable:true})
+    metadata?: string;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -5740,6 +5751,8 @@ export class TicketGroupBy {
     status!: string;
     @Field(() => Int, {nullable:false})
     propertyId!: number;
+    @Field(() => String, {nullable:true})
+    metadata?: string;
     @Field(() => Date, {nullable:false})
     createdAt!: Date | string;
     @Field(() => Date, {nullable:false})
@@ -5781,6 +5794,8 @@ export class TicketMaxAggregateInput {
     @Field(() => Boolean, {nullable:true})
     propertyId?: true;
     @Field(() => Boolean, {nullable:true})
+    metadata?: true;
+    @Field(() => Boolean, {nullable:true})
     createdAt?: true;
     @Field(() => Boolean, {nullable:true})
     updatedAt?: true;
@@ -5800,6 +5815,8 @@ export class TicketMaxAggregate {
     status?: string;
     @Field(() => Int, {nullable:true})
     propertyId?: number;
+    @Field(() => String, {nullable:true})
+    metadata?: string;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -5821,6 +5838,8 @@ export class TicketMaxOrderByAggregateInput {
     @Field(() => SortOrder, {nullable:true})
     propertyId?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
+    metadata?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
     createdAt?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
     updatedAt?: `${SortOrder}`;
@@ -5841,6 +5860,8 @@ export class TicketMinAggregateInput {
     @Field(() => Boolean, {nullable:true})
     propertyId?: true;
     @Field(() => Boolean, {nullable:true})
+    metadata?: true;
+    @Field(() => Boolean, {nullable:true})
     createdAt?: true;
     @Field(() => Boolean, {nullable:true})
     updatedAt?: true;
@@ -5860,6 +5881,8 @@ export class TicketMinAggregate {
     status?: string;
     @Field(() => Int, {nullable:true})
     propertyId?: number;
+    @Field(() => String, {nullable:true})
+    metadata?: string;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -5880,6 +5903,8 @@ export class TicketMinOrderByAggregateInput {
     status?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
     propertyId?: `${SortOrder}`;
+    @Field(() => SortOrder, {nullable:true})
+    metadata?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
     createdAt?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
@@ -5906,6 +5931,8 @@ export class TicketOrderByWithAggregationInput {
     status?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
     propertyId?: `${SortOrder}`;
+    @Field(() => SortOrderInput, {nullable:true})
+    metadata?: InstanceType<typeof SortOrderInput>;
     @Field(() => SortOrder, {nullable:true})
     createdAt?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
@@ -5936,6 +5963,8 @@ export class TicketOrderByWithRelationInput {
     status?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
     propertyId?: `${SortOrder}`;
+    @Field(() => SortOrderInput, {nullable:true})
+    metadata?: InstanceType<typeof SortOrderInput>;
     @Field(() => SortOrder, {nullable:true})
     createdAt?: `${SortOrder}`;
     @Field(() => SortOrder, {nullable:true})
@@ -5964,6 +5993,8 @@ export class TicketScalarWhereWithAggregatesInput {
     status?: InstanceType<typeof StringWithAggregatesFilter>;
     @Field(() => IntWithAggregatesFilter, {nullable:true})
     propertyId?: InstanceType<typeof IntWithAggregatesFilter>;
+    @Field(() => StringWithAggregatesFilter, {nullable:true})
+    metadata?: InstanceType<typeof StringWithAggregatesFilter>;
     @Field(() => DateTimeWithAggregatesFilter, {nullable:true})
     createdAt?: InstanceType<typeof DateTimeWithAggregatesFilter>;
     @Field(() => DateTimeWithAggregatesFilter, {nullable:true})
@@ -5990,6 +6021,8 @@ export class TicketScalarWhereInput {
     status?: InstanceType<typeof StringFilter>;
     @Field(() => IntFilter, {nullable:true})
     propertyId?: InstanceType<typeof IntFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    metadata?: InstanceType<typeof StringFilter>;
     @Field(() => DateTimeFilter, {nullable:true})
     createdAt?: InstanceType<typeof DateTimeFilter>;
     @Field(() => DateTimeFilter, {nullable:true})
@@ -6045,6 +6078,8 @@ export class TicketUncheckedCreateWithoutPropertyInput {
     priority!: string;
     @Field(() => String, {nullable:false})
     status!: string;
+    @Field(() => String, {nullable:true})
+    metadata?: string;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -6065,6 +6100,8 @@ export class TicketUncheckedCreateInput {
     status!: string;
     @Field(() => Int, {nullable:false})
     propertyId!: number;
+    @Field(() => String, {nullable:true})
+    metadata?: string;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -6117,6 +6154,8 @@ export class TicketUncheckedUpdateManyWithoutPropertyInput {
     priority?: string;
     @Field(() => String, {nullable:true})
     status?: string;
+    @Field(() => String, {nullable:true})
+    metadata?: string;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -6137,6 +6176,8 @@ export class TicketUncheckedUpdateManyInput {
     status?: string;
     @Field(() => Int, {nullable:true})
     propertyId?: number;
+    @Field(() => String, {nullable:true})
+    metadata?: string;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -6155,6 +6196,8 @@ export class TicketUncheckedUpdateWithoutPropertyInput {
     priority?: string;
     @Field(() => String, {nullable:true})
     status?: string;
+    @Field(() => String, {nullable:true})
+    metadata?: string;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -6175,6 +6218,8 @@ export class TicketUncheckedUpdateInput {
     status?: string;
     @Field(() => Int, {nullable:true})
     propertyId?: number;
+    @Field(() => String, {nullable:true})
+    metadata?: string;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -6191,6 +6236,8 @@ export class TicketUpdateManyMutationInput {
     priority?: string;
     @Field(() => String, {nullable:true})
     status?: string;
+    @Field(() => String, {nullable:true})
+    metadata?: string;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -6261,6 +6308,8 @@ export class TicketUpdateWithoutPropertyInput {
     priority?: string;
     @Field(() => String, {nullable:true})
     status?: string;
+    @Field(() => String, {nullable:true})
+    metadata?: string;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -6277,6 +6326,8 @@ export class TicketUpdateInput {
     priority?: string;
     @Field(() => String, {nullable:true})
     status?: string;
+    @Field(() => String, {nullable:true})
+    metadata?: string;
     @Field(() => Date, {nullable:true})
     createdAt?: Date | string;
     @Field(() => Date, {nullable:true})
@@ -6318,6 +6369,8 @@ export class TicketWhereUniqueInput {
     status?: InstanceType<typeof StringFilter>;
     @Field(() => IntFilter, {nullable:true})
     propertyId?: InstanceType<typeof IntFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    metadata?: InstanceType<typeof StringFilter>;
     @Field(() => DateTimeFilter, {nullable:true})
     createdAt?: InstanceType<typeof DateTimeFilter>;
     @Field(() => DateTimeFilter, {nullable:true})
@@ -6346,6 +6399,8 @@ export class TicketWhereInput {
     status?: InstanceType<typeof StringFilter>;
     @Field(() => IntFilter, {nullable:true})
     propertyId?: InstanceType<typeof IntFilter>;
+    @Field(() => StringFilter, {nullable:true})
+    metadata?: InstanceType<typeof StringFilter>;
     @Field(() => DateTimeFilter, {nullable:true})
     createdAt?: InstanceType<typeof DateTimeFilter>;
     @Field(() => DateTimeFilter, {nullable:true})
@@ -6368,6 +6423,8 @@ export class Ticket {
     status!: string;
     @Field(() => Int, {nullable:false})
     propertyId!: number;
+    @Field(() => String, {nullable:true})
+    metadata!: string | null;
     @Field(() => Date, {nullable:false})
     createdAt!: Date;
     @Field(() => Date, {nullable:false})

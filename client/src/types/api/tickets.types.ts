@@ -1,7 +1,7 @@
 import { Property } from './property.types';
 
 export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent';
-export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'in_progress_by_ai' | 'under_review' | 'pending_approval' | 'completed';
+export type TicketStatus = 'in_progress_by_ai' | 'needs_manual_review' | 'resolved';
 
 export interface TicketAttachment {
     filename: string;
@@ -14,9 +14,17 @@ export interface TicketMetadata {
     contactPhone?: string;
     contactEmail?: string;
     estimatedCost?: string;
-    dueDate?: string;
+    dueDate?: Date;
     notes?: string;
     useAI?: boolean;
+    generatedByAI?: boolean;
+    actionRequired?: string;
+    aiProcessed?: boolean;
+    aiResolution?: string;
+    aiActionTaken?: string;
+    aiNotes?: string;
+    aiProcessingTime?: string;
+    manualReviewReason?: string;
     attachments?: TicketAttachment[];
 }
 

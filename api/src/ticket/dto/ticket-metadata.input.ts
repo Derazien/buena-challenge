@@ -1,8 +1,7 @@
-import { ObjectType, Field, Int, GraphQLISODateTime } from '@nestjs/graphql';
-import { Property } from '../../property/models/property.model';
+import { InputType, Field, GraphQLISODateTime } from '@nestjs/graphql';
 
-@ObjectType()
-export class TicketMetadata {
+@InputType()
+export class TicketMetadataInput {
     @Field({ nullable: true })
     contactPhone?: string;
 
@@ -41,40 +40,4 @@ export class TicketMetadata {
 
     @Field({ nullable: true })
     aiProcessingTime?: string;
-}
-
-@ObjectType()
-export class Ticket {
-    @Field(() => Int)
-    id: number;
-
-    @Field()
-    title: string;
-
-    @Field()
-    description: string;
-
-    @Field()
-    priority: string;
-
-    @Field()
-    status: string;
-
-    @Field(() => Int)
-    propertyId: number;
-
-    @Field(() => Property)
-    property: Property;
-
-    @Field()
-    propertyAddress: string;
-
-    @Field(() => TicketMetadata, { nullable: true })
-    metadata?: TicketMetadata;
-
-    @Field(() => Date)
-    createdAt: Date;
-
-    @Field(() => Date)
-    updatedAt: Date;
-}
+} 

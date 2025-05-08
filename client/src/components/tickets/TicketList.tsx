@@ -5,6 +5,17 @@ import Card from '@/components/ui/Card';
 import { motion } from 'framer-motion';
 import AnimatedText from '@/components/common/AnimatedText';
 import AnimatedCard from '@/components/common/AnimatedCard';
+import {
+    Table,
+    TableHeader,
+    TableRow,
+    TableHead,
+    TableBody,
+    TableCell
+} from '@/components/ui/table';
+import Badge from '@/components/ui/Badge';
+import { getPriorityVariant, getStatusVariant } from '@/components/tickets/ticket-utils';
+import { formatDate } from '@/lib/format';
 
 type TicketListProps = {
   tickets: Ticket[];
@@ -70,68 +81,139 @@ const TicketList: React.FC<TicketListProps> = ({ tickets, onViewTicket, onEditTi
     );
   }
 
+  const getAIStatusBadge = (ticket: Ticket) => {
+    if (!ticket.metadata) return null;
+    
+    if (ticket.status === 'in_progress_by_ai') {
+      return (
+        <Badge variant="destructive" className="flex items-center gap-1 animate-pulse">
+          <svg className="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          AI Processing
+        </Badge>
+      );
+    }
+    
+    if (ticket.metadata.aiProcessed) {
+      return <Badge variant="success">AI Processed</Badge>;
+    }
+    
+    if (ticket.metadata.useAI) {
+      return <Badge variant="secondary">AI Enabled</Badge>;
+    }
+    
+    return null;
+  };
+
+  const getTicketInfo = (ticket: Ticket) => {
+    if (!ticket.metadata) return null;
+
+    if (ticket.status === 'needs_manual_review' && ticket.metadata.manualReviewReason) {
+      return (
+        <div className="text-xs text-amber-600 mt-1">
+          <span className="font-semibold">Needs Review:</span> {ticket.metadata.manualReviewReason}
+        </div>
+      );
+    }
+    
+    if (ticket.status === 'resolved' && ticket.metadata.aiResolution) {
+      return (
+        <div className="text-xs text-emerald-600 mt-1">
+          <span className="font-semibold">Resolution:</span> {ticket.metadata.aiResolution}
+        </div>
+      );
+    }
+    
+    return null;
+  };
+
   return (
-    <div className="space-y-4">
-      {tickets.map((ticket, index) => (
-        <motion.div
-          key={ticket.id}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.05 }}
-          whileHover={{ y: -2 }}
-        >
-          <AnimatedCard
-            className="hover:shadow-md transition-all"
-            hoverEffect="none"
-            once={false}
-            delay={index * 0.05}
-          >
-            <div className="p-5">
-              <div className="flex justify-between">
-                <div className="flex-1 cursor-pointer" onClick={() => onViewTicket(ticket)}>
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-lg font-medium text-foreground">{ticket.title}</h3>
-                    <div className="flex gap-2">
-                      <span className={`px-2 py-0.5 text-xs rounded-full ${getStatusColor(ticket.status)}`}>
-                        {ticket.status.toLowerCase().replace('_', ' ')}
-                      </span>
-                      <span className={`px-2 py-0.5 text-xs rounded-full ${getPriorityColor(ticket.priority)}`}>
-                        {ticket.priority}
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{ticket.description}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs flex items-center text-muted-foreground">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+    <div className="rounded-md border overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Priority</TableHead>
+            <TableHead>Property</TableHead>
+            <TableHead>Created</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {tickets.map((ticket) => (
+            <TableRow
+              key={ticket.id}
+              onClick={() => onViewTicket(ticket)}
+              className={`cursor-pointer hover:bg-muted/50 ${
+                ticket.status === 'in_progress_by_ai' ? 'relative overflow-hidden' : ''
+              }`}
+            >
+              {ticket.status === 'in_progress_by_ai' && (
+                <motion.div 
+                  className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 z-0" 
+                  animate={{ 
+                    x: ['0%', '100%', '0%'],
+                  }}
+                  transition={{ 
+                    repeat: Infinity, 
+                    duration: 3,
+                    ease: "linear"
+                  }}
+                />
+              )}
+              <TableCell className="font-medium relative z-10">
+                <div className="flex flex-col">
+                  <div className="flex items-center">
+                    {ticket.status === 'in_progress_by_ai' && (
+                      <svg className="animate-spin h-3 w-3 mr-2 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      {ticket.propertyAddress || 'No property assigned'}
-                    </span>
-                    <span className="text-xs text-muted-foreground flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                      </svg>
-                      {ticket.createdAt ? format(new Date(ticket.createdAt), 'MMM d, yyyy') : ''}
-                    </span>
+                    )}
+                    <span>{ticket.title}</span>
                   </div>
+                  <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                    {ticket.description}
+                  </span>
+                  {ticket.metadata?.generatedByAI && (
+                    <Badge variant="outline" className="mt-1 w-fit">Generated by AI</Badge>
+                  )}
+                  {getTicketInfo(ticket)}
                 </div>
-                <div className="ml-4 flex flex-col">
-                  <button
-                    onClick={() => onEditTicket(ticket)}
-                    className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg>
-                  </button>
+              </TableCell>
+              <TableCell className="relative z-10">
+                <div className="flex flex-col gap-1">
+                  <Badge variant={getStatusVariant(ticket.status)}>
+                    {ticket.status === 'in_progress_by_ai' ? (
+                      <span className="flex items-center">
+                        <svg className="animate-spin -ml-0.5 mr-1 h-2 w-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        {ticket.status.replace(/_/g, ' ')}
+                      </span>
+                    ) : (
+                      ticket.status.replace(/_/g, ' ')
+                    )}
+                  </Badge>
+                  {getAIStatusBadge(ticket)}
                 </div>
-              </div>
-            </div>
-          </AnimatedCard>
-        </motion.div>
-      ))}
+              </TableCell>
+              <TableCell className="relative z-10">
+                <Badge variant={getPriorityVariant(ticket.priority)}>
+                  {ticket.priority}
+                </Badge>
+              </TableCell>
+              <TableCell className="relative z-10">{ticket.propertyAddress}</TableCell>
+              <TableCell className="text-muted-foreground relative z-10">
+                {formatDate(ticket.createdAt)}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 };

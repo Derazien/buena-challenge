@@ -55,6 +55,13 @@ export class TicketResolver {
         return this.aiService.classifyTicket(description);
     }
 
+    @Mutation(() => Ticket)
+    async generateTestTicket(@Args('propertyId', { type: () => Int }) propertyId: number) {
+        const ticket = await this.ticketService.generateTestTicket(propertyId);
+        pubSub.publish('ticketCreated', { ticketCreated: ticket });
+        return ticket;
+    }
+
     @Subscription(() => Ticket)
     ticketCreated() {
         return pubSub.asyncIterator('ticketCreated');

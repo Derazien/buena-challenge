@@ -189,6 +189,30 @@ export const GET_UPCOMING_LEASES = gql`
   }
 `;
 
+export const GET_MANUAL_REVIEW_TICKETS = gql`
+  query GetManualReviewTickets {
+    tickets(filters: { status: "needs_manual_review" }) {
+      id
+      title
+      description
+      priority
+      status
+      propertyId
+      propertyAddress
+      createdAt
+      updatedAt
+      metadata {
+        contactPhone
+        contactEmail
+        estimatedCost
+        dueDate
+        notes
+        useAI
+      }
+    }
+  }
+`;
+
 export const TICKET_UPDATED_SUBSCRIPTION = gql`
   subscription OnTicketUpdated {
     ticketUpdated {

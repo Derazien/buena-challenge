@@ -82,9 +82,10 @@ model Ticket {
   title       String
   description String
   priority    String   // "LOW", "MEDIUM", "HIGH", "URGENT"
-  status      String   // "IN_PROGRESS_BY_AI", "UNDER_REVIEW", "PENDING_APPROVAL", "COMPLETED"
+  status      String   // "OPEN", "IN_PROGRESS_BY_AI", "NEEDS_MANUAL_REVIEW", "RESOLVED"
   property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   propertyId  Int
+  metadata    String?  // Stored as JSON string
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

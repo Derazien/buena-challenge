@@ -28,6 +28,7 @@ import Button from '@/components/ui/Button';
 type KanbanBoardProps = {
   onViewTicket: (ticket: Ticket) => void;
   tickets: Ticket[];
+  onStatusChange?: (ticketId: number, newStatus: TicketStatus) => Promise<void>;
 };
 
 // Sort function for tickets based on criteria
@@ -38,14 +39,13 @@ const sortTickets = (tickets: Ticket[]) => {
   });
 };
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, tickets }) => {
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, tickets, onStatusChange }) => {
   const { loading, error, updateTicket } = useTickets();
   const { addNotification } = useNotification();
 
   const [inProgressByAiTickets, setInProgressByAiTickets] = useState<Ticket[]>([]);
-  const [underReviewTickets, setUnderReviewTickets] = useState<Ticket[]>([]);
-  const [pendingApprovalTickets, setPendingApprovalTickets] = useState<Ticket[]>([]);
-  const [completedTickets, setCompletedTickets] = useState<Ticket[]>([]);
+  const [needsManualReviewTickets, setNeedsManualReviewTickets] = useState<Ticket[]>([]);
+  const [resolvedTickets, setResolvedTickets] = useState<Ticket[]>([]);
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [activeColumn, setActiveColumn] = useState<string | null>(null);
@@ -69,14 +69,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, tickets }) => {
         const normalized = status.toLowerCase().replace(/\s+/g, '_');
         switch (normalized) {
           case 'in_progress_by_ai':
-          case 'in_progress':
             return 'in_progress_by_ai';
-          case 'under_review':
-            return 'under_review';
-          case 'pending_approval':
-            return 'pending_approval';
-          case 'completed':
-            return 'completed';
+          case 'needs_manual_review':
+            return 'needs_manual_review';
+          case 'resolved':
+            return 'resolved';
           default:
             return 'in_progress_by_ai'; // Default status
         }
@@ -86,28 +83,23 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, tickets }) => {
       const inProgress = tickets.filter(ticket =>
         normalizeStatus(ticket.status) === 'in_progress_by_ai'
       );
-      const underReview = tickets.filter(ticket =>
-        normalizeStatus(ticket.status) === 'under_review'
+      const needsManualReview = tickets.filter(ticket =>
+        normalizeStatus(ticket.status) === 'needs_manual_review'
       );
-      const pendingApproval = tickets.filter(ticket =>
-        normalizeStatus(ticket.status) === 'pending_approval'
-      );
-      const completed = tickets.filter(ticket =>
-        normalizeStatus(ticket.status) === 'completed'
+      const resolved = tickets.filter(ticket =>
+        normalizeStatus(ticket.status) === 'resolved'
       );
 
       // Update state with filtered tickets
       setInProgressByAiTickets(inProgress);
-      setUnderReviewTickets(underReview);
-      setPendingApprovalTickets(pendingApproval);
-      setCompletedTickets(completed);
+      setNeedsManualReviewTickets(needsManualReview);
+      setResolvedTickets(resolved);
 
       // Log for debugging
       console.log('Tickets organized:', {
         inProgress: inProgress.length,
-        underReview: underReview.length,
-        pendingApproval: pendingApproval.length,
-        completed: completed.length,
+        needsManualReview: needsManualReview.length,
+        resolved: resolved.length,
         total: tickets.length,
         allTickets: tickets.map(t => ({ id: t.id, status: t.status, normalized: normalizeStatus(t.status) }))
       });
@@ -122,15 +114,13 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, tickets }) => {
       try {
         // Sort tickets in each column
         const sortedInProgressByAi = sortTickets(inProgressByAiTickets);
-        const sortedUnderReview = sortTickets(underReviewTickets);
-        const sortedPendingApproval = sortTickets(pendingApprovalTickets);
-        const sortedCompleted = sortTickets(completedTickets);
+        const sortedNeedsManualReview = sortTickets(needsManualReviewTickets);
+        const sortedResolved = sortTickets(resolvedTickets);
 
         // Update state
         setInProgressByAiTickets(sortedInProgressByAi);
-        setUnderReviewTickets(sortedUnderReview);
-        setPendingApprovalTickets(sortedPendingApproval);
-        setCompletedTickets(sortedCompleted);
+        setNeedsManualReviewTickets(sortedNeedsManualReview);
+        setResolvedTickets(sortedResolved);
 
         addNotification({
           type: 'success',
@@ -159,12 +149,10 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, tickets }) => {
       // Determine which column the ticket belongs to based on status
       if (ticket.status.toLowerCase() === 'in_progress_by_ai') {
         setActiveColumn('in_progress_by_ai');
-      } else if (ticket.status.toLowerCase() === 'under_review') {
-        setActiveColumn('under_review');
-      } else if (ticket.status.toLowerCase() === 'pending_approval') {
-        setActiveColumn('pending_approval');
-      } else if (ticket.status.toLowerCase() === 'completed') {
-        setActiveColumn('completed');
+      } else if (ticket.status.toLowerCase() === 'needs_manual_review') {
+        setActiveColumn('needs_manual_review');
+      } else if (ticket.status.toLowerCase() === 'resolved') {
+        setActiveColumn('resolved');
       }
     }
   };
@@ -228,14 +216,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, tickets }) => {
       case 'in_progress_by_ai':
         newStatus = 'in_progress_by_ai';
         break;
-      case 'under_review':
-        newStatus = 'under_review';
+      case 'needs_manual_review':
+        newStatus = 'needs_manual_review';
         break;
-      case 'pending_approval':
-        newStatus = 'pending_approval';
-        break;
-      case 'completed':
-        newStatus = 'completed';
+      case 'resolved':
+        newStatus = 'resolved';
         break;
       default:
         return;
@@ -273,15 +258,14 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, tickets }) => {
     if (!tickets) return;
 
     setInProgressByAiTickets(tickets.filter(ticket => ticket.status.toLowerCase() === 'in_progress_by_ai'));
-    setUnderReviewTickets(tickets.filter(ticket => ticket.status.toLowerCase() === 'under_review'));
-    setPendingApprovalTickets(tickets.filter(ticket => ticket.status.toLowerCase() === 'pending_approval'));
-    setCompletedTickets(tickets.filter(ticket => ticket.status.toLowerCase() === 'completed'));
+    setNeedsManualReviewTickets(tickets.filter(ticket => ticket.status.toLowerCase() === 'needs_manual_review'));
+    setResolvedTickets(tickets.filter(ticket => ticket.status.toLowerCase() === 'resolved'));
   };
 
   // Update local state before API call for immediate UI feedback
   const updateLocalTickets = (ticketId: number, newStatus: TicketStatus) => {
     // Find the ticket in all columns
-    const ticket = [...inProgressByAiTickets, ...underReviewTickets, ...pendingApprovalTickets, ...completedTickets]
+    const ticket = [...inProgressByAiTickets, ...needsManualReviewTickets, ...resolvedTickets]
       .find(t => t.id === ticketId);
 
     if (!ticket) return;
@@ -291,23 +275,19 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, tickets }) => {
 
     // Remove from all columns
     setInProgressByAiTickets(prev => prev.filter(t => t.id !== ticketId));
-    setUnderReviewTickets(prev => prev.filter(t => t.id !== ticketId));
-    setPendingApprovalTickets(prev => prev.filter(t => t.id !== ticketId));
-    setCompletedTickets(prev => prev.filter(t => t.id !== ticketId));
+    setNeedsManualReviewTickets(prev => prev.filter(t => t.id !== ticketId));
+    setResolvedTickets(prev => prev.filter(t => t.id !== ticketId));
 
     // Add to the correct column
     switch (newStatus) {
       case 'in_progress_by_ai':
         setInProgressByAiTickets(prev => [...prev, updatedTicket]);
         break;
-      case 'under_review':
-        setUnderReviewTickets(prev => [...prev, updatedTicket]);
+      case 'needs_manual_review':
+        setNeedsManualReviewTickets(prev => [...prev, updatedTicket]);
         break;
-      case 'pending_approval':
-        setPendingApprovalTickets(prev => [...prev, updatedTicket]);
-        break;
-      case 'completed':
-        setCompletedTickets(prev => [...prev, updatedTicket]);
+      case 'resolved':
+        setResolvedTickets(prev => [...prev, updatedTicket]);
         break;
     }
   };
@@ -328,21 +308,27 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, tickets }) => {
 
   // Handle status change function
   const handleStatusChange = async (ticketId: number, newStatus: string) => {
-    const ticket = tickets.find(t => t.id === ticketId);
-    if (!ticket) return;
-
     try {
-      await updateTicket({
-        id: ticketId,
-        status: newStatus as TicketStatus
-      });
-
-      // Update the local state
-      refreshTicketsByStatus();
-
+      // Normalize the status value
+      const normalizedStatus = newStatus.toLowerCase() as TicketStatus;
+      
+      if (onStatusChange) {
+        // Use the provided onStatusChange prop
+        await onStatusChange(ticketId, normalizedStatus);
+      } else {
+        // Use the hook's updateTicket function as fallback
+        await updateTicket({
+          id: ticketId,
+          status: normalizedStatus
+        });
+      }
+      
+      // Local state update
+      updateLocalTickets(ticketId, normalizedStatus);
+      
       addNotification({
         type: 'success',
-        message: `Ticket status updated to ${newStatus.replace(/_/g, ' ')}`
+        message: `Ticket moved to ${formatStatusName(newStatus)}`
       });
     } catch (error) {
       console.error('Error updating ticket status:', error);
@@ -365,11 +351,9 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, tickets }) => {
     switch (status.toLowerCase()) {
       case 'in_progress_by_ai':
         return 'bg-indigo-500';
-      case 'under_review':
+      case 'needs_manual_review':
         return 'bg-purple-500';
-      case 'pending_approval':
-        return 'bg-red-500';
-      case 'completed':
+      case 'resolved':
         return 'bg-green-500';
       default:
         return 'bg-gray-500';
@@ -407,25 +391,18 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, tickets }) => {
               </svg>
               In Progress by AI
             </Badge>
-            <Badge variant="secondary" className="flex items-center gap-1 py-1 px-3">
+            <Badge variant="warning" className="flex items-center gap-1 py-1 px-3">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                 <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
               </svg>
-              Under Review
-            </Badge>
-            <Badge variant="danger" className="flex items-center gap-1 py-1 px-3">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-              </svg>
-              Pending Approval
+              Needs Manual Review
             </Badge>
             <Badge variant="success" className="flex items-center gap-1 py-1 px-3">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03z" clipRule="evenodd" />
               </svg>
-              Completed
+              Resolved
             </Badge>
           </div>
         </div>
@@ -480,7 +457,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, tickets }) => {
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 h-[calc(100vh-240px)] min-h-[500px]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[calc(100vh-240px)] min-h-[500px]">
           <KanbanColumn
             title="In Progress by AI"
             columnId="in_progress_by_ai"
@@ -492,9 +469,9 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, tickets }) => {
           />
 
           <KanbanColumn
-            title="Under Review"
-            columnId="under_review"
-            tickets={underReviewTickets}
+            title="Needs Manual Review"
+            columnId="needs_manual_review"
+            tickets={needsManualReviewTickets}
             onViewTicket={onViewTicket}
             icon={
               <div className="w-3 h-3 rounded-full bg-purple-500 mr-2"></div>
@@ -502,19 +479,9 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ onViewTicket, tickets }) => {
           />
 
           <KanbanColumn
-            title="Pending Approval"
-            columnId="pending_approval"
-            tickets={pendingApprovalTickets}
-            onViewTicket={onViewTicket}
-            icon={
-              <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
-            }
-          />
-
-          <KanbanColumn
-            title="Completed"
-            columnId="completed"
-            tickets={completedTickets}
+            title="Resolved"
+            columnId="resolved"
+            tickets={resolvedTickets}
             onViewTicket={onViewTicket}
             icon={
               <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>

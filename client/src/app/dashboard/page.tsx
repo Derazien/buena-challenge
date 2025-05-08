@@ -58,7 +58,7 @@ export default function Dashboard() {
                 View Properties
               </Button>
             </Link>
-            <Link href="/reinvest">
+            <Link href="/investments">
               <Button className="shadow-sm">
                 Reinvest
               </Button>

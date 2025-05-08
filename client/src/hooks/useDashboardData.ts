@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client';
-import { GET_DASHBOARD_STATS } from '@/graphql/queries';
+import { GET_DASHBOARD_STATS, GET_MANUAL_REVIEW_TICKETS } from '@/graphql/queries';
 import { differenceInMonths, parseISO } from 'date-fns';
 import {
     DashboardStats,
@@ -66,18 +66,15 @@ export function useMonthlyIncome() {
 }
 
 export function useOpenTickets() {
-    const { loading, error, data } = useQuery(GET_DASHBOARD_STATS);
-
-    const ticketStats = data?.dashboardStats?.ticketStats || {
-        openTickets: [],
-        totalCount: 0
-    };
+    const { loading, error, data } = useQuery(GET_MANUAL_REVIEW_TICKETS, {
+        fetchPolicy: 'network-only'
+    });
 
     return {
         loading,
         error,
-        openTickets: ticketStats.openTickets as OpenTicket[] || [],
-        ticketCount: ticketStats.totalCount || 0
+        openTickets: data?.tickets || [],
+        ticketCount: data?.tickets?.length || 0
     };
 }
 

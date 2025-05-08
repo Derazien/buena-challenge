@@ -1,4 +1,5 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
+import { TicketMetadataInput } from './ticket-metadata.input';
 
 @InputType()
 export class CreateTicketInput {
@@ -16,4 +17,7 @@ export class CreateTicketInput {
 
     @Field(() => Int)
     propertyId: number;
+    
+    @Field(() => TicketMetadataInput, { nullable: true })
+    metadata?: TicketMetadataInput;
 }

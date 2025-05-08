@@ -282,67 +282,101 @@ async function main() {
     // Create tickets with different priorities and statuses
     const tickets = [];
 
-    // Urgent ticket - open
+    // High priority - needs_manual_review
     tickets.push(
         await prisma.ticket.create({
             data: {
                 propertyId: createdProperties[0].id,
-                title: 'Wasserschaden im Badezimmer',
-                description: 'Decke im Hauptbad leckt Wasser. Benötigt sofortige Aufmerksamkeit.',
+                title: 'Water damage in bathroom',
+                description: 'Ceiling in main bathroom is leaking water. Needs immediate attention.',
                 priority: 'HIGH',
-                status: 'OPEN',
+                status: 'needs_manual_review',
+                metadata: JSON.stringify({
+                    aiProcessed: true,
+                    manualReviewReason: 'This issue requires on-site inspection by a plumber to assess damage extent.',
+                    useAI: true,
+                    generatedByAI: false
+                })
             },
         })
     );
 
-    // Medium priority - open
+    // Medium priority - needs_manual_review
     tickets.push(
         await prisma.ticket.create({
             data: {
                 propertyId: createdProperties[1].id,
-                title: 'Geschirrspüler defekt',
-                description: 'Geschirrspüler läuft nicht richtig ab. Bitte Reparatur vereinbaren.',
+                title: 'Dishwasher not draining',
+                description: 'Dishwasher is not draining properly. Please schedule a repair.',
                 priority: 'MEDIUM',
-                status: 'OPEN',
+                status: 'needs_manual_review',
+                metadata: JSON.stringify({
+                    aiProcessed: true,
+                    manualReviewReason: 'AI could not determine if this is a simple clog or mechanical failure.',
+                    useAI: true,
+                    generatedByAI: false
+                })
             },
         })
     );
 
-    // Low priority - open
+    // Low priority - resolved
     tickets.push(
         await prisma.ticket.create({
             data: {
                 propertyId: createdProperties[2].id,
-                title: 'Farbberührung erforderlich',
-                description: 'Einige Kratzer an der Wohnzimmerwand benötigen Farbberührung.',
+                title: 'Touch-up paint needed',
+                description: 'Some scratches on the living room wall need paint touch-up.',
                 priority: 'LOW',
-                status: 'OPEN',
+                status: 'resolved',
+                metadata: JSON.stringify({
+                    aiProcessed: true,
+                    aiResolution: 'Maintenance team has been scheduled to apply touch-up paint.',
+                    aiActionTaken: 'Added to maintenance schedule for next week',
+                    aiNotes: 'Resident will be home on Tuesday for the repair.',
+                    useAI: true,
+                    generatedByAI: false
+                })
             },
         })
     );
 
-    // Closed ticket
+    // Medium priority - resolved
     tickets.push(
         await prisma.ticket.create({
             data: {
                 propertyId: createdProperties[3].id,
-                title: 'HVAC-Filter ersetzen',
-                description: 'Regelmäßige Wartung: HVAC-Filter muss ersetzt werden.',
+                title: 'HVAC filter replacement',
+                description: 'Regular maintenance: HVAC filter needs to be replaced.',
                 priority: 'MEDIUM',
-                status: 'CLOSED',
+                status: 'resolved',
+                metadata: JSON.stringify({
+                    aiProcessed: true,
+                    aiResolution: 'Maintenance completed the filter replacement.',
+                    aiActionTaken: 'Filter replaced and system tested',
+                    aiNotes: 'Recommended 3-month replacement schedule added to calendar.',
+                    useAI: true,
+                    generatedByAI: false
+                })
             },
         })
     );
 
-    // Urgent ticket - open
+    // Urgent priority - needs_manual_review
     tickets.push(
         await prisma.ticket.create({
             data: {
                 propertyId: createdProperties[3].id,
-                title: 'Kein Warmwasser',
-                description: 'Warmwasserbereiter möglicherweise defekt. Kein Warmwasser in der Einheit.',
+                title: 'No hot water',
+                description: 'Water heater possibly broken. No hot water in the unit.',
                 priority: 'URGENT',
-                status: 'OPEN',
+                status: 'needs_manual_review',
+                metadata: JSON.stringify({
+                    aiProcessed: true,
+                    manualReviewReason: 'Critical issue requiring immediate professional assessment.',
+                    useAI: true,
+                    generatedByAI: false
+                })
             },
         })
     );

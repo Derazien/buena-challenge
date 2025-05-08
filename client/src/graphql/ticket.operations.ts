@@ -10,6 +10,21 @@ export const TICKET_FRAGMENT = gql`
     status
     propertyId
     propertyAddress
+    metadata {
+      contactPhone
+      contactEmail
+      estimatedCost
+      dueDate
+      notes
+      useAI
+      generatedByAI
+      actionRequired
+      aiProcessed
+      aiResolution
+      aiActionTaken
+      aiNotes
+      aiProcessingTime
+    }
     createdAt
     updatedAt
   }
@@ -66,9 +81,19 @@ export const DELETE_TICKET = gql`
 `;
 
 // Subscription for ticket updates
-export const TICKET_UPDATED = gql`
+export const TICKET_UPDATED_SUBSCRIPTION = gql`
   subscription TicketUpdated {
     ticketUpdated {
+      ...TicketFields
+    }
+  }
+  ${TICKET_FRAGMENT}
+`;
+
+// Subscription for new tickets
+export const TICKET_CREATED_SUBSCRIPTION = gql`
+  subscription TicketCreated {
+    ticketCreated {
       ...TicketFields
     }
   }
@@ -86,4 +111,14 @@ export const CLASSIFY_TICKET = gql`
       suggestedAction
     }
   }
+`;
+
+// Mutation to generate a test ticket
+export const GENERATE_TEST_TICKET = gql`
+  mutation GenerateTestTicket($propertyId: Int!) {
+    generateTestTicket(propertyId: $propertyId) {
+      ...TicketFields
+    }
+  }
+  ${TICKET_FRAGMENT}
 `; 
